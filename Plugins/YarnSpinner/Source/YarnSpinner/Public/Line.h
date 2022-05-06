@@ -10,7 +10,7 @@
  *
  */
 UCLASS(BlueprintType)
-class YARNSPINNERHARNESS_API ULine : public UObject
+class YARNSPINNER_API ULine : public UObject
 {
     GENERATED_BODY()
     

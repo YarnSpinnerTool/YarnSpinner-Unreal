@@ -7,7 +7,7 @@
 #include "DialogueRunner.generated.h"
 
 UCLASS()
-class YARNSPINNERHARNESS_API ADialogueRunner : public AActor
+class YARNSPINNER_API ADialogueRunner : public AActor
 {
     GENERATED_BODY()
     
