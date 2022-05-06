@@ -3,6 +3,7 @@
 
 #include "DialogueRunner.h"
 #include "Line.h"
+#include "StaticParty.h"
 
 // Sets default values
 ADialogueRunner::ADialogueRunner()
@@ -16,6 +17,8 @@ ADialogueRunner::ADialogueRunner()
 void ADialogueRunner::BeginPlay()
 {
     Super::BeginPlay();
+    
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("HelloFromStaticParty says %s"), *(StaticPartyMethods::GimmeSomeJSON())));
 }
 
 // Called every frame
