@@ -26,8 +26,7 @@ public class YarnSpinner : ModuleRules
 			new string[]
 			{
 				"Core",
-                "StaticParty",
-				// ... add other public dependencies that you statically link with here ...
+                // ... add other public dependencies that you statically link with here ...
 			}
 			);
 			

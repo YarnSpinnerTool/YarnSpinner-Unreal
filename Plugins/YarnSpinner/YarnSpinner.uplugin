@@ -19,6 +19,14 @@
 			"Name": "YarnSpinner",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "YarnSpinnerEditor",
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit",
+           "AdditionalDependencies": [
+                "Engine"
+            ]
 		}
 	]
 }

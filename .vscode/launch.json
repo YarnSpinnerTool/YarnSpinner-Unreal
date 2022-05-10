@@ -1,0 +1,104 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "YarnSpinnerHarness (Debug)",
+			"request": "launch",
+			"preLaunchTask": "YarnSpinnerHarness Mac Debug Build",
+			"program": "/Users/desplesda/Work/YarnSpinner-Unreal/Binaries/Mac/UE4-Mac-Debug.app/Contents/MacOS/UE4-Mac-Debug",
+			"args": [
+			],
+			"cwd": "/Users/Shared/Epic Games/UE_4.27",
+			"type": "lldb"
+		},
+		{
+			"name": "YarnSpinnerHarness (DebugGame)",
+			"request": "launch",
+			"preLaunchTask": "YarnSpinnerHarness Mac DebugGame Build",
+			"program": "/Users/desplesda/Work/YarnSpinner-Unreal/Binaries/Mac/UE4-Mac-DebugGame.app/Contents/MacOS/UE4-Mac-DebugGame",
+			"args": [
+			],
+			"cwd": "/Users/Shared/Epic Games/UE_4.27",
+			"type": "lldb"
+		},
+		{
+			"name": "YarnSpinnerHarness (Development)",
+			"request": "launch",
+			"preLaunchTask": "YarnSpinnerHarness Mac Development Build",
+			"program": "/Users/desplesda/Work/YarnSpinner-Unreal/Binaries/Mac/UE4.app/Contents/MacOS/UE4",
+			"args": [
+			],
+			"cwd": "/Users/Shared/Epic Games/UE_4.27",
+			"type": "lldb"
+		},
+		{
+			"name": "YarnSpinnerHarness (Shipping)",
+			"request": "launch",
+			"preLaunchTask": "YarnSpinnerHarness Mac Shipping Build",
+			"program": "/Users/desplesda/Work/YarnSpinner-Unreal/Binaries/Mac/UE4-Mac-Shipping.app/Contents/MacOS/UE4-Mac-Shipping",
+			"args": [
+			],
+			"cwd": "/Users/Shared/Epic Games/UE_4.27",
+			"type": "lldb"
+		},
+		{
+			"name": "YarnSpinnerHarness (Test)",
+			"request": "launch",
+			"preLaunchTask": "YarnSpinnerHarness Mac Test Build",
+			"program": "/Users/desplesda/Work/YarnSpinner-Unreal/Binaries/Mac/UE4-Mac-Test.app/Contents/MacOS/UE4-Mac-Test",
+			"args": [
+			],
+			"cwd": "/Users/Shared/Epic Games/UE_4.27",
+			"type": "lldb"
+		},
+		{
+			"name": "YarnSpinnerHarnessEditor (Debug)",
+			"request": "launch",
+			"preLaunchTask": "YarnSpinnerHarnessEditor Mac Debug Build",
+			"program": "/Users/Shared/Epic Games/UE_4.27/Engine/Binaries/Mac/UE4Editor-Mac-Debug.app/Contents/MacOS/UE4Editor-Mac-Debug",
+			"args": [
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject"
+			],
+			"cwd": "/Users/Shared/Epic Games/UE_4.27",
+			"type": "lldb"
+		},
+		{
+			"name": "YarnSpinnerHarnessEditor (DebugGame)",
+			"request": "launch",
+			"preLaunchTask": "YarnSpinnerHarnessEditor Mac DebugGame Build",
+			"program": "/Users/Shared/Epic Games/UE_4.27/Engine/Binaries/Mac/UE4Editor-Mac-DebugGame.app/Contents/MacOS/UE4Editor-Mac-DebugGame",
+			"args": [
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject"
+			],
+			"cwd": "/Users/Shared/Epic Games/UE_4.27",
+			"type": "lldb"
+		},
+		{
+			"name": "YarnSpinnerHarnessEditor (Development)",
+			"request": "launch",
+			"preLaunchTask": "YarnSpinnerHarnessEditor Mac Development Build",
+			"program": "/Users/Shared/Epic Games/UE_4.27/Engine/Binaries/Mac/UE4Editor.app/Contents/MacOS/UE4Editor",
+			"args": [
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject"
+			],
+			"cwd": "/Users/Shared/Epic Games/UE_4.27",
+			"type": "lldb"
+		},
+		{
+			"name": "Generate Project Files",
+			"type": "mono",
+			"request": "launch",
+			"program": "/Users/Shared/Epic Games/UE_4.27/Engine/Binaries/DotNET/UnrealBuildTool.exe",
+			"console": "internalConsole",
+			"args": [
+				"-projectfiles",
+				"-vscode",
+				"-project=/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-game",
+				"-engine"
+			],
+			"internalConsoleOptions": "openOnSessionStart",
+			"cwd": "/Users/Shared/Epic Games/UE_4.27"
+		}
+	]
+}

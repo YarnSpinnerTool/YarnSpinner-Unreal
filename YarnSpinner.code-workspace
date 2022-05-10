@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"name": "YarnSpinner",
+			"path": "."
+		},
+		{
+			"name": "UE4",
+			"path": "/Users/Shared/Epic Games/UE_4.27"
+		}
+	],
+	"settings": {
+		"typescript.tsc.autoDetect": "off",
+		"C_Cpp.intelliSenseEngine": "Tag Parser"
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-vscode.cpptools",
+			"ms-dotnettools.csharp",
+			"vadimcn.vscode-lldb",
+			"ms-vscode.mono-debug"
+		]
+	}
+}

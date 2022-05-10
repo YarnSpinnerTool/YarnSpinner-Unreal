@@ -8,7 +8,7 @@ public class YarnSpinnerHarness : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "StaticParty", "YarnSpinner" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "YarnSpinner" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

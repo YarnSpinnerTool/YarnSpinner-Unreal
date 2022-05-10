@@ -1,0 +1,720 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "YarnSpinnerHarness Mac Debug Build",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"Mac",
+				"Debug",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness Mac Debug Rebuild",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"Mac",
+				"Debug",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"dependsOn": [
+				"YarnSpinnerHarness Mac Debug Clean"
+			],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness Mac Debug Clean",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"Mac",
+				"Debug",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex",
+				"-clean"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness Mac DebugGame Build",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"Mac",
+				"DebugGame",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness Mac DebugGame Rebuild",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"Mac",
+				"DebugGame",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"dependsOn": [
+				"YarnSpinnerHarness Mac DebugGame Clean"
+			],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness Mac DebugGame Clean",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"Mac",
+				"DebugGame",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex",
+				"-clean"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness Mac Development Build",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"Mac",
+				"Development",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness Mac Development Rebuild",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"Mac",
+				"Development",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"dependsOn": [
+				"YarnSpinnerHarness Mac Development Clean"
+			],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness Mac Development Clean",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"Mac",
+				"Development",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex",
+				"-clean"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness Mac Shipping Build",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"Mac",
+				"Shipping",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness Mac Shipping Rebuild",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"Mac",
+				"Shipping",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"dependsOn": [
+				"YarnSpinnerHarness Mac Shipping Clean"
+			],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness Mac Shipping Clean",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"Mac",
+				"Shipping",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex",
+				"-clean"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness Mac Test Build",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"Mac",
+				"Test",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness Mac Test Rebuild",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"Mac",
+				"Test",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"dependsOn": [
+				"YarnSpinnerHarness Mac Test Clean"
+			],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness Mac Test Clean",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"Mac",
+				"Test",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex",
+				"-clean"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness IOS Debug Build",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"IOS",
+				"Debug",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness IOS Debug Rebuild",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"IOS",
+				"Debug",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"dependsOn": [
+				"YarnSpinnerHarness IOS Debug Clean"
+			],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness IOS Debug Clean",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"IOS",
+				"Debug",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex",
+				"-clean"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness IOS DebugGame Build",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"IOS",
+				"DebugGame",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness IOS DebugGame Rebuild",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"IOS",
+				"DebugGame",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"dependsOn": [
+				"YarnSpinnerHarness IOS DebugGame Clean"
+			],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness IOS DebugGame Clean",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"IOS",
+				"DebugGame",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex",
+				"-clean"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness IOS Development Build",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"IOS",
+				"Development",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness IOS Development Rebuild",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"IOS",
+				"Development",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"dependsOn": [
+				"YarnSpinnerHarness IOS Development Clean"
+			],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness IOS Development Clean",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"IOS",
+				"Development",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex",
+				"-clean"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness IOS Shipping Build",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"IOS",
+				"Shipping",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness IOS Shipping Rebuild",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"IOS",
+				"Shipping",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"dependsOn": [
+				"YarnSpinnerHarness IOS Shipping Clean"
+			],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness IOS Shipping Clean",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"IOS",
+				"Shipping",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex",
+				"-clean"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness IOS Test Build",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"IOS",
+				"Test",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness IOS Test Rebuild",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"IOS",
+				"Test",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"dependsOn": [
+				"YarnSpinnerHarness IOS Test Clean"
+			],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarness IOS Test Clean",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarness",
+				"IOS",
+				"Test",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex",
+				"-clean"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarnessEditor Mac Debug Build",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarnessEditor",
+				"Mac",
+				"Debug",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarnessEditor Mac Debug Rebuild",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarnessEditor",
+				"Mac",
+				"Debug",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"dependsOn": [
+				"YarnSpinnerHarnessEditor Mac Debug Clean"
+			],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarnessEditor Mac Debug Clean",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarnessEditor",
+				"Mac",
+				"Debug",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex",
+				"-clean"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarnessEditor Mac DebugGame Build",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarnessEditor",
+				"Mac",
+				"DebugGame",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarnessEditor Mac DebugGame Rebuild",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarnessEditor",
+				"Mac",
+				"DebugGame",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"dependsOn": [
+				"YarnSpinnerHarnessEditor Mac DebugGame Clean"
+			],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarnessEditor Mac DebugGame Clean",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarnessEditor",
+				"Mac",
+				"DebugGame",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex",
+				"-clean"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarnessEditor Mac Development Build",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarnessEditor",
+				"Mac",
+				"Development",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarnessEditor Mac Development Rebuild",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarnessEditor",
+				"Mac",
+				"Development",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"dependsOn": [
+				"YarnSpinnerHarnessEditor Mac Development Clean"
+			],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		},
+		{
+			"label": "YarnSpinnerHarnessEditor Mac Development Clean",
+			"group": "build",
+			"command": "Engine/Build/BatchFiles/Mac/Build.sh",
+			"args": [
+				"YarnSpinnerHarnessEditor",
+				"Mac",
+				"Development",
+				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
+				"-waitmutex",
+				"-clean"
+			],
+			"problemMatcher": ["$msCompile","$gcc"],
+			"type": "shell",
+			"options": {
+				"cwd": "/Users/Shared/Epic Games/UE_4.27"
+			}
+		}
+	]
+}

@@ -15,6 +15,12 @@ void FYarnSpinnerModule::ShutdownModule()
 	// we call this function before unloading the module.
 }
 
+bool FYarnSpinnerModule::SupportsDynamicReloading()
+{
+    return true;
+}
+
+
 #undef LOCTEXT_NAMESPACE
 	
 IMPLEMENT_MODULE(FYarnSpinnerModule, YarnSpinner)
