@@ -12,8 +12,8 @@
 UYarnAssetFactory::UYarnAssetFactory( const FObjectInitializer& ObjectInitializer )
     : Super(ObjectInitializer)
 {
-    Formats.Add(FString(TEXT("yarn;")) + NSLOCTEXT("UYarnAssetFactory", "FormatTxt", "Yarn File").ToString());
-    Formats.Add(FString(TEXT("yarnproject;")) + NSLOCTEXT("UYarnAssetFactory", "FormatTxt", "Yarn Project").ToString());
+    Formats.Add(FString(TEXT("yarnc;")) + NSLOCTEXT("UYarnAssetFactory", "FormatTxt", "Compiled Yarn File").ToString());
+    // Formats.Add(FString(TEXT("yarnproject;")) + NSLOCTEXT("UYarnAssetFactory", "FormatTxt", "Yarn Project").ToString());
     SupportedClass = UYarnAsset::StaticClass();
     bCreateNew = false;
     bEditorImport = true;
@@ -32,11 +32,11 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
     const TCHAR* fileName = *CurrentFilename;
 
     FString Result;
-    if (FFileHelper::LoadFileToString(Result, fileName)) {
-        TextAsset->Text = Result;
-    } else {
-        TextAsset->Text = FString("Failed to load!");
-    }
+	if (FFileHelper::LoadFileToArray(TextAsset->Data, fileName)) {
+		// TODO: report successfully loading the data
+	} else {
+		// TODO: report failing to load the data
+	}
 
     if (!CurrentFilename.IsEmpty())
     {
@@ -49,8 +49,9 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
 }
 
 bool UYarnAssetFactory::FactoryCanImport(const FString& Filename) {
-    return FPaths::GetExtension(Filename).Equals(TEXT("yarn"))
-        || FPaths::GetExtension(Filename).Equals(TEXT("yarnproject"));
+	return FPaths::GetExtension(Filename).Equals(TEXT("yarnc"));
+	// return FPaths::GetExtension(Filename).Equals(TEXT("yarn"))
+	//     || FPaths::GetExtension(Filename).Equals(TEXT("yarnproject"));
 }
 
 EReimportResult::Type UYarnAssetFactory::Reimport(UYarnAsset* TextAsset) {
@@ -100,7 +101,7 @@ bool UReimportYarnAssetFactory::CanReimport( UObject* Obj, TArray<FString>& OutF
 	{
 		DataTable->AssetImportData->ExtractFilenames(OutFilenames);
 		
-		// Always allow reimporting a text asset
+		// Always allow reimporting a yarn asset
 		return true;
 	}
 	return false;
