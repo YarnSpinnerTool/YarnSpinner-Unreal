@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "YarnAsset.h"
 #include "DialogueRunner.generated.h"
 
 UCLASS()
@@ -22,7 +23,7 @@ protected:
 public:
     // Called every frame
     virtual void Tick(float DeltaTime) override;
-    
+
     UFUNCTION(BlueprintNativeEvent, Category="Dialogue Runner")
     void OnDialogueStarted();
     
@@ -41,8 +42,11 @@ public:
     UFUNCTION(BlueprintCallable)
     void SelectOption(int optionID);
     
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Dialogue Runner")
+    UYarnAsset* yarnAsset;
+
 private:
-    UPROPERTY(VisibleInstanceOnly)
+    UPROPERTY(VisibleInstanceOnly, Category="Dialogue Runner")
     int32 currentContentIndex = 0;
     
     class ULine* GetFakeLine(int index);
