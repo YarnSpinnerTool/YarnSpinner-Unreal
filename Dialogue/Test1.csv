@@ -1,0 +1,8 @@
+id,text,file,node,lineNumber
+line:line1,A: Here's a line!,/Users/desplesda/Work/YarnSpinner-Unreal/Dialogue/Test1.yarn,Start,3
+line:line2,B: Here's another line!,/Users/desplesda/Work/YarnSpinner-Unreal/Dialogue/Test1.yarn,Start,4
+line:line3,Wow!,/Users/desplesda/Work/YarnSpinner-Unreal/Dialogue/Test1.yarn,Start,6
+line:line4,A: Right?,/Users/desplesda/Work/YarnSpinner-Unreal/Dialogue/Test1.yarn,Start,7
+line:line5,Cool!,/Users/desplesda/Work/YarnSpinner-Unreal/Dialogue/Test1.yarn,Start,8
+line:line6,B: Yeah!,/Users/desplesda/Work/YarnSpinner-Unreal/Dialogue/Test1.yarn,Start,9
+line:line7,A: All done!,/Users/desplesda/Work/YarnSpinner-Unreal/Dialogue/Test1.yarn,Start,13
