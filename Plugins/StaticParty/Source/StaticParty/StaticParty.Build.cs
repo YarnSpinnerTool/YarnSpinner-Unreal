@@ -17,13 +17,15 @@ public class StaticParty : ModuleRules
         PublicIncludePaths.Add(Path.Combine(protobufDir, "include"));
         
         PublicAdditionalLibraries.Add(Path.Combine(protobufDir, "lib", "libprotobuf.a"));
-        
-        if (Target.Platform == UnrealTargetPlatform.Mac)
-        {
-            // The protobuf header files use '#if _MSC_VER', but this will
-            // trigger -Wundef. Disable unidentified compiler directive warnings.
-            bEnableUndefinedIdentifierWarnings = false;
-        }
+
+		// The protobuf header files use '#if _MSC_VER', but this will
+		// trigger -Wundef. Disable unidentified compiler directive warnings.
+        bEnableUndefinedIdentifierWarnings = false;
+
+        // if (Target.Platform == UnrealTargetPlatform.Mac)
+        // {
+        //     bEnableUndefinedIdentifierWarnings = false;
+        // }
 		
 		PublicIncludePaths.AddRange(
 			new string[] {
