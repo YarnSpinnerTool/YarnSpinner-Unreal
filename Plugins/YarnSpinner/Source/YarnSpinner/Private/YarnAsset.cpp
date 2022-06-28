@@ -1,10 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "TextAsset.h"
+#include "YarnAsset.h"
 #include "EditorFramework/AssetImportData.h"
 
-void UTextAsset::PostInitProperties() {
+#if WITH_EDITORONLY_DATA
+void UYarnAsset::PostInitProperties() {
     if (!HasAnyFlags(RF_ClassDefaultObject))
 	{
 		AssetImportData = NewObject<UAssetImportData>(this, TEXT("AssetImportData"));
@@ -12,3 +13,4 @@ void UTextAsset::PostInitProperties() {
 
 	Super::PostInitProperties();
 }
+#endif

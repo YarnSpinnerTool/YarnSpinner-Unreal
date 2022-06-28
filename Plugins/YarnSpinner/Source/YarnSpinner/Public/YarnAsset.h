@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "TextAsset.generated.h"
+#include "YarnAsset.generated.h"
 
 /**
  * 
  */
 UCLASS(Blueprintable, AutoExpandCategories = "ImportOptions")
-class YARNSPINNER_API UTextAsset : public UObject
+class YARNSPINNER_API UYarnAsset : public UObject
 {
 	GENERATED_BODY()
     

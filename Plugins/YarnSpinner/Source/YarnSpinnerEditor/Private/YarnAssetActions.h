@@ -1,10 +1,10 @@
 #pragma once
 #include "AssetTypeActions_Base.h"
 
-class FTextAssetActions : public FAssetTypeActions_Base
+class FYarnAssetActions : public FAssetTypeActions_Base
 {
 public:
-    FTextAssetActions(EAssetTypeCategories::Type InAssetCategory);
+    FYarnAssetActions(EAssetTypeCategories::Type InAssetCategory);
 
     // IAssetTypeActions interface
     virtual FText GetName() const override;

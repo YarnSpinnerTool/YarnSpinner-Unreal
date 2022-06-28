@@ -4,12 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
-#include "TextAssetFactory.h"
+#include "YarnAssetFactory.h"
 #include "EditorReimportHandler.h"
-#include "ReimportTextAssetFactory.generated.h"
+#include "ReimportYarnAssetFactory.generated.h"
 
 UCLASS()
-class UNREALED_API UReimportTextAssetFactory : public UTextAssetFactory, public FReimportHandler
+class UNREALED_API UReimportYarnAssetFactory : public UYarnAssetFactory, public FReimportHandler
 {
 	GENERATED_UCLASS_BODY()
 

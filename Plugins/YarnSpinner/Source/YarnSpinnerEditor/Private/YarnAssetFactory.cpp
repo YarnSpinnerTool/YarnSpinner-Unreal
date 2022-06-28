@@ -1,31 +1,32 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "YarnAssetFactory.h"
+
 #include "Misc/FileHelper.h"
 #include "EditorFramework/AssetImportData.h"
 #include "Containers/UnrealString.h"
 
-#include "TextAssetFactory.h"
-#include "ReimportTextAssetFactory.h"
+#include "ReimportYarnAssetFactory.h"
 
-UTextAssetFactory::UTextAssetFactory( const FObjectInitializer& ObjectInitializer )
+UYarnAssetFactory::UYarnAssetFactory( const FObjectInitializer& ObjectInitializer )
     : Super(ObjectInitializer)
 {
-    Formats.Add(FString(TEXT("yarn;")) + NSLOCTEXT("UTextAssetFactory", "FormatTxt", "Yarn File").ToString());
-    Formats.Add(FString(TEXT("yarnproject;")) + NSLOCTEXT("UTextAssetFactory", "FormatTxt", "Yarn Project").ToString());
-    SupportedClass = UTextAsset::StaticClass();
+    Formats.Add(FString(TEXT("yarn;")) + NSLOCTEXT("UYarnAssetFactory", "FormatTxt", "Yarn File").ToString());
+    Formats.Add(FString(TEXT("yarnproject;")) + NSLOCTEXT("UYarnAssetFactory", "FormatTxt", "Yarn Project").ToString());
+    SupportedClass = UYarnAsset::StaticClass();
     bCreateNew = false;
     bEditorImport = true;
 }
 
-UObject* UTextAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, UObject* Context, const TCHAR* Type, const uint8*& Buffer, const uint8* BufferEnd, FFeedbackContext* Warn)
+UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, UObject* Context, const TCHAR* Type, const uint8*& Buffer, const uint8* BufferEnd, FFeedbackContext* Warn)
 {
 //    FEditorDelegates::OnAssetPreImport.Broadcast(this, InClass, InParent, InName, Type);
     
-    UTextAsset* TextAsset = nullptr;
+    UYarnAsset* TextAsset = nullptr;
     FString TextString;
 
-    TextAsset = NewObject<UTextAsset>(InParent, InClass, InName, Flags);
+    TextAsset = NewObject<UYarnAsset>(InParent, InClass, InName, Flags);
     // TextAsset->SourceFilePath = UAssetImportData::SanitizeImportFilename(CurrentFilename, TextAsset->GetOutermost());
 
     const TCHAR* fileName = *CurrentFilename;
@@ -47,12 +48,12 @@ UObject* UTextAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
     return TextAsset;
 }
 
-bool UTextAssetFactory::FactoryCanImport(const FString& Filename) {
+bool UYarnAssetFactory::FactoryCanImport(const FString& Filename) {
     return FPaths::GetExtension(Filename).Equals(TEXT("yarn"))
         || FPaths::GetExtension(Filename).Equals(TEXT("yarnproject"));
 }
 
-EReimportResult::Type UTextAssetFactory::Reimport(UTextAsset* TextAsset) {
+EReimportResult::Type UYarnAssetFactory::Reimport(UYarnAsset* TextAsset) {
     auto Path = TextAsset->AssetImportData->GetFirstFilename();
 
     
@@ -81,20 +82,20 @@ EReimportResult::Type UTextAssetFactory::Reimport(UTextAsset* TextAsset) {
 
 ///////////// Reimport
 
-UReimportTextAssetFactory::UReimportTextAssetFactory(const FObjectInitializer& ObjectInitializer)
+UReimportYarnAssetFactory::UReimportYarnAssetFactory(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	
 }
 
-bool UReimportTextAssetFactory::FactoryCanImport( const FString& Filename )
+bool UReimportYarnAssetFactory::FactoryCanImport( const FString& Filename )
 {
 	return true;
 }
 
-bool UReimportTextAssetFactory::CanReimport( UObject* Obj, TArray<FString>& OutFilenames )
+bool UReimportYarnAssetFactory::CanReimport( UObject* Obj, TArray<FString>& OutFilenames )
 {	
-	UTextAsset* DataTable = Cast<UTextAsset>(Obj);
+	UYarnAsset* DataTable = Cast<UYarnAsset>(Obj);
 	if (DataTable)
 	{
 		DataTable->AssetImportData->ExtractFilenames(OutFilenames);
@@ -105,27 +106,27 @@ bool UReimportTextAssetFactory::CanReimport( UObject* Obj, TArray<FString>& OutF
 	return false;
 }
 
-void UReimportTextAssetFactory::SetReimportPaths( UObject* Obj, const TArray<FString>& NewReimportPaths )
+void UReimportYarnAssetFactory::SetReimportPaths( UObject* Obj, const TArray<FString>& NewReimportPaths )
 {	
-	UTextAsset* DataTable = Cast<UTextAsset>(Obj);
+	UYarnAsset* DataTable = Cast<UYarnAsset>(Obj);
 	if (DataTable && ensure(NewReimportPaths.Num() == 1))
 	{
 		DataTable->AssetImportData->UpdateFilenameOnly(NewReimportPaths[0]);
 	}
 }
 
-EReimportResult::Type UReimportTextAssetFactory::Reimport( UObject* Obj )
+EReimportResult::Type UReimportYarnAssetFactory::Reimport( UObject* Obj )
 {	
 	EReimportResult::Type Result = EReimportResult::Failed;
-	if (UTextAsset* DataTable = Cast<UTextAsset>(Obj))
+	if (UYarnAsset* DataTable = Cast<UYarnAsset>(Obj))
 	{
         // Result = EReimportResult::Failed;
-        Result = UTextAssetFactory::Reimport(DataTable) ? EReimportResult::Succeeded : EReimportResult::Failed;
+        Result = UYarnAssetFactory::Reimport(DataTable) ? EReimportResult::Succeeded : EReimportResult::Failed;
     }
 	return Result;
 }
 
-int32 UReimportTextAssetFactory::GetPriority() const
+int32 UReimportYarnAssetFactory::GetPriority() const
 {
 	return ImportPriority;
 }

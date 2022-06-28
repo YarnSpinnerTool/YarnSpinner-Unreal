@@ -1,8 +1,9 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
+#include "YarnSpinnerEditor.h"
+
 #include "YarnSpinner.h"
 
-#include "YarnSpinnerEditor.h"
 #include "IYarnSpinnerModuleInterface.h"
 
 //IMPLEMENT_GAME_MODULE(FToolExampleEditor, ToolExampleEditor)
@@ -22,7 +23,7 @@ void FYarnSpinnerEditor::StartupModule()
         EAssetTypeCategories::Type ExampleCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Yarn")), FText::FromString("Yarn"));
         
         // register our custom asset with example category
-        TSharedPtr<IAssetTypeActions> Action = MakeShareable(new FTextAssetActions(ExampleCategory));
+        TSharedPtr<IAssetTypeActions> Action = MakeShareable(new FYarnAssetActions(ExampleCategory));
         AssetTools.RegisterAssetTypeActions(Action.ToSharedRef());
         
         // saved it here for unregister later

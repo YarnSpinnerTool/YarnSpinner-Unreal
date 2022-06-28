@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "Factories/Factory.h"
-#include "TextAsset.h"
+#include "YarnAsset.h"
 #include "EditorReimportHandler.h"
-#include "TextAssetFactory.generated.h"
+#include "YarnAssetFactory.generated.h"
 
 
 /**
  * 
  */
 UCLASS(hidecategories=Object)
-class UTextAssetFactory : public UFactory
+class UYarnAssetFactory : public UFactory
 {
     GENERATED_UCLASS_BODY()
     
@@ -33,5 +33,5 @@ public:
     
     virtual bool FactoryCanImport(const FString& Filename) override;
 
-    EReimportResult::Type Reimport(UTextAsset* TextAsset);
+    EReimportResult::Type Reimport(UYarnAsset* TextAsset);
 };
