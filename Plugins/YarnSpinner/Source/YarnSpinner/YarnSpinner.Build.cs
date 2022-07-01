@@ -1,12 +1,26 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
+using System.IO;
 
 public class YarnSpinner : ModuleRules
 {
 	public YarnSpinner(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+		var protobufDir = Path.Combine("$(ProjectDir)",
+            "Plugins",
+            "ThirdParty",
+            "protobuf_x64-osx");
+  
+        PublicIncludePaths.Add(Path.Combine(protobufDir, "include"));
+        
+        PublicAdditionalLibraries.Add(Path.Combine(protobufDir, "lib", "libprotobuf.a"));
+
+		// The protobuf header files use '#if _MSC_VER', but this will
+		// trigger -Wundef. Disable unidentified compiler directive warnings.
+        bEnableUndefinedIdentifierWarnings = false;
 		
 		PublicIncludePaths.AddRange(
 			new string[] {
