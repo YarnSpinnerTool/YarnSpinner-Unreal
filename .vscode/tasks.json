@@ -12,7 +12,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -29,7 +43,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"dependsOn": [
 				"YarnSpinnerHarness Mac Debug Clean"
 			],
@@ -50,7 +78,21 @@
 				"-waitmutex",
 				"-clean"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -67,7 +109,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -84,7 +140,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"dependsOn": [
 				"YarnSpinnerHarness Mac DebugGame Clean"
 			],
@@ -105,7 +175,21 @@
 				"-waitmutex",
 				"-clean"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -122,7 +206,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -139,7 +237,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"dependsOn": [
 				"YarnSpinnerHarness Mac Development Clean"
 			],
@@ -160,7 +272,21 @@
 				"-waitmutex",
 				"-clean"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -177,7 +303,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -194,7 +334,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"dependsOn": [
 				"YarnSpinnerHarness Mac Shipping Clean"
 			],
@@ -215,7 +369,21 @@
 				"-waitmutex",
 				"-clean"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -232,7 +400,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -249,7 +431,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"dependsOn": [
 				"YarnSpinnerHarness Mac Test Clean"
 			],
@@ -270,7 +466,21 @@
 				"-waitmutex",
 				"-clean"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -287,7 +497,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -304,7 +528,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"dependsOn": [
 				"YarnSpinnerHarness IOS Debug Clean"
 			],
@@ -325,7 +563,21 @@
 				"-waitmutex",
 				"-clean"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -342,7 +594,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -359,7 +625,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"dependsOn": [
 				"YarnSpinnerHarness IOS DebugGame Clean"
 			],
@@ -380,7 +660,21 @@
 				"-waitmutex",
 				"-clean"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -397,7 +691,22 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"fileLocation":"absolute",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\): Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -414,7 +723,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"dependsOn": [
 				"YarnSpinnerHarness IOS Development Clean"
 			],
@@ -435,7 +758,21 @@
 				"-waitmutex",
 				"-clean"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -452,7 +789,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -469,7 +820,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"dependsOn": [
 				"YarnSpinnerHarness IOS Shipping Clean"
 			],
@@ -490,7 +855,21 @@
 				"-waitmutex",
 				"-clean"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -507,7 +886,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -524,7 +917,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"dependsOn": [
 				"YarnSpinnerHarness IOS Test Clean"
 			],
@@ -545,7 +952,21 @@
 				"-waitmutex",
 				"-clean"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -562,7 +983,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -579,7 +1014,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"dependsOn": [
 				"YarnSpinnerHarnessEditor Mac Debug Clean"
 			],
@@ -600,7 +1049,21 @@
 				"-waitmutex",
 				"-clean"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -617,7 +1080,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -634,7 +1111,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"dependsOn": [
 				"YarnSpinnerHarnessEditor Mac DebugGame Clean"
 			],
@@ -655,7 +1146,21 @@
 				"-waitmutex",
 				"-clean"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -672,7 +1177,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
@@ -689,7 +1208,21 @@
 				"/Users/desplesda/Work/YarnSpinner-Unreal/YarnSpinner.uproject",
 				"-waitmutex"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"dependsOn": [
 				"YarnSpinnerHarnessEditor Mac Development Clean"
 			],
@@ -710,7 +1243,21 @@
 				"-waitmutex",
 				"-clean"
 			],
-			"problemMatcher": ["$msCompile","$gcc"],
+			"problemMatcher": [
+				"$msCompile",
+				"$gcc",
+				{
+					"owner": "cpp",
+					"pattern":[
+						{
+							"regexp": "^.*? LogCompile: (.*?)\\((\\d+)\\)\\: Error: (.*)$",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					]
+				}
+			],
 			"type": "shell",
 			"options": {
 				"cwd": "/Users/Shared/Epic Games/UE_4.27"
