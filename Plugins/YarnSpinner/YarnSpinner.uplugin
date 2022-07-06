@@ -24,9 +24,9 @@
 			"Name": "YarnSpinnerEditor",
 			"Type": "Editor",
 			"LoadingPhase": "PostEngineInit",
-           "AdditionalDependencies": [
-                "Engine"
-            ]
+			"AdditionalDependencies": [
+				"Engine"
+			]
 		}
 	]
 }

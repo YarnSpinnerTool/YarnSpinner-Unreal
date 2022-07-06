@@ -16,9 +16,9 @@ class YARNSPINNER_API UYarnAsset : public UObject
     
 public:
     
-    UPROPERTY()
+    UPROPERTY(VisibleAnywhere)
     TArray<uint8> Data;
-    
+
 #if WITH_EDITORONLY_DATA
     YARNSPINNER_API virtual void PostInitProperties() override;
 	

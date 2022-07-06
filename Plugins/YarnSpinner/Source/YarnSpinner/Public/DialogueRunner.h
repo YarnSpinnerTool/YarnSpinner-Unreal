@@ -5,10 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "YarnAsset.h"
+#include "YarnSpinnerCore/VirtualMachine.h"
+#include "YarnSpinnerCore/Library.h"
+#include "YarnSpinnerCore/Common.h"
 #include "DialogueRunner.generated.h"
 
 UCLASS()
-class YARNSPINNER_API ADialogueRunner : public AActor
+class YARNSPINNER_API ADialogueRunner : public AActor, public Yarn::ILogger, public Yarn::IVariableStorage
 {
     GENERATED_BODY()
     
@@ -17,9 +20,8 @@ public:
     ADialogueRunner();
 
 protected:
-    // Called when the game starts or when spawned
-    virtual void BeginPlay() override;
-
+    virtual void PreInitializeComponents() override;
+    
 public:
     // Called every frame
     virtual void Tick(float DeltaTime) override;
@@ -53,4 +55,20 @@ private:
     
     class ULine* MakeFakeLine(FName lineID);
 
+    TUniquePtr<Yarn::VirtualMachine> VirtualMachine;
+
+    TUniquePtr<Yarn::Library> Library;
+
+    // ILogger
+    virtual void Log(std::string message, Type severity = Type::INFO) override;
+
+    // IVariableStorage
+    virtual void SetValue(std::string name, bool value) override;
+    virtual void SetValue(std::string name, float value) override;
+    virtual void SetValue(std::string name, std::string value) override;
+
+    virtual bool HasValue(std::string name) override;
+    virtual Yarn::Value GetValue(std::string name) override;
+
+    virtual void ClearValue(std::string name) override;
 };

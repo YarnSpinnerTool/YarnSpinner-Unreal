@@ -8,6 +8,8 @@ public class YarnSpinnerEditor : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
+		OptimizeCode = CodeOptimization.Never;
+
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[] {
 				"AssetTools",

@@ -15,14 +15,18 @@ public class YarnSpinner : ModuleRules
             "protobuf_x64-osx");
   
         PublicIncludePaths.Add(Path.Combine(protobufDir, "include"));
+
+		PublicDefinitions.Add("GOOGLE_PROTOBUF_NO_RTTI=1");
         
         PublicAdditionalLibraries.Add(Path.Combine(protobufDir, "lib", "libprotobuf.a"));
 
 		// The protobuf header files use '#if _MSC_VER', but this will
 		// trigger -Wundef. Disable unidentified compiler directive warnings.
         bEnableUndefinedIdentifierWarnings = false;
-		
-		PublicIncludePaths.AddRange(
+
+        OptimizeCode = CodeOptimization.Never;
+
+        PublicIncludePaths.AddRange(
 			new string[] {
 				// ... add public include paths required here ...
 			}
