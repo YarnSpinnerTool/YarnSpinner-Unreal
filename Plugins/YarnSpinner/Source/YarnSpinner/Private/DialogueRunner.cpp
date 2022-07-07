@@ -3,6 +3,7 @@
 
 #include "DialogueRunner.h"
 #include "Line.h"
+#include "Option.h"
 #include "YarnSpinner.h"
 #include "YarnSpinnerCore/VirtualMachine.h"
 //#include "StaticParty.h"
@@ -43,20 +44,46 @@ void ADialogueRunner::PreInitializeComponents()
     this->VirtualMachine = TUniquePtr<Yarn::VirtualMachine>(new Yarn::VirtualMachine(program, *(this->Library), *this, *this));
 
     this->VirtualMachine->LineHandler = [this](Yarn::Line &line) {
+        UE_LOG(LogYarnSpinner, Log, TEXT("Received line %s"), UTF8_TO_TCHAR(line.LineID.c_str()));
+
         // Get the Yarn line struct, and make a ULine out of it to use
-        auto lineObject = NewObject<ULine>(this);
+        ULine* lineObject = NewObject<ULine>(this);
         lineObject->LineID = FName(line.LineID.c_str());
         OnRunLine(lineObject);
     };
 
     this->VirtualMachine->OptionsHandler = [this](Yarn::OptionSet &optionSet)
     {
-        UE_LOG(LogYarnSpinner, Log, TEXT("Received %i options (TODO: actually do stuff with them)"), optionSet.Options.size());
+        UE_LOG(LogYarnSpinner, Log, TEXT("Received %i options"), optionSet.Options.size());
+
+        // Build a TArray for every option in this OptionSet
+        TArray<UOption *> options;
+
+        for (auto option : optionSet.Options) {
+            UE_LOG(LogYarnSpinner, Log, TEXT("- %i: %s"), option.ID, UTF8_TO_TCHAR(option.Line.LineID.c_str()));
+
+            UOption *opt = NewObject<UOption>(this);
+            opt->OptionID = option.ID;
+
+            opt->Line = NewObject<ULine>(opt);
+            opt->Line->LineID = FName(option.Line.LineID.c_str());
+
+            opt->bIsAvailable = option.IsAvailable;
+
+            options.Add(opt);
+        }
+
+        OnRunOptions(options);
+        
     };
 
     this->VirtualMachine->CommandHandler = [this](Yarn::Command &command)
     {
-        UE_LOG(LogYarnSpinner, Log, TEXT("Received command \"%s\" (TODO: actually do stuff with it)"), UTF8_TO_TCHAR(command.Text.c_str()));
+        UE_LOG(LogYarnSpinner, Log, TEXT("Received command \"%s\""), UTF8_TO_TCHAR(command.Text.c_str()));
+
+        FString commandText = FString(UTF8_TO_TCHAR(command.Text.c_str()));
+
+        OnRunCommand(commandText);
     };
 
     this->VirtualMachine->NodeStartHandler = [this](std::string nodeName)
@@ -95,9 +122,19 @@ void ADialogueRunner::OnRunLine_Implementation(ULine* line) {
     // default = no-op
 }
 
+void ADialogueRunner::OnRunOptions_Implementation(const TArray<class UOption*>& options) {
+    // default = warn that we'll be stuck waiting for options
+
+    // UE_Log(LogYarnSpinner, Warning, TEXT("DialogueRunner received %i options, but OnRunOptions wasn't connected to anything. The dialogue runner is now stuck waiting for an option to be selected."), options.Num());
+
+}
+
+void ADialogueRunner::OnRunCommand_Implementation(const FString& command) {
+    // default = no-op
+}
+
 /** Starts running dialogue from the given node name. */
 void ADialogueRunner::StartDialogue(FName nodeName) {
-    currentContentIndex = 0;
 
     if (VirtualMachine.IsValid() == false) {
         UE_LOG(LogYarnSpinner, Error, TEXT("DialogueRunner can't start node %s, because it failed to load a Yarn asset."), *nodeName.ToString());

@@ -34,6 +34,12 @@ public:
     
     UFUNCTION(BlueprintNativeEvent, Category="Dialogue Runner")
     void OnRunLine(class ULine* line);
+
+    UFUNCTION(BlueprintNativeEvent, Category="Dialogue Runner")
+    void OnRunOptions(const TArray<class UOption*>& options);
+
+    UFUNCTION(BlueprintNativeEvent, Category="Dialogue Runner")
+    void OnRunCommand(const FString& command);
     
     UFUNCTION(BlueprintCallable)
     void StartDialogue(FName nodeName);
@@ -48,9 +54,6 @@ public:
     UYarnAsset* yarnAsset;
 
 private:
-    UPROPERTY(VisibleInstanceOnly, Category="Dialogue Runner")
-    int32 currentContentIndex = 0;
-    
     TUniquePtr<Yarn::VirtualMachine> VirtualMachine;
 
     TUniquePtr<Yarn::Library> Library;
