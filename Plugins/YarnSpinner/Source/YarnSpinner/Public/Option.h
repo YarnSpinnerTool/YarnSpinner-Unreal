@@ -18,6 +18,12 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	ULine *Line;
 
+	UPROPERTY(BlueprintReadOnly)
+	class ADialogueRunner *SourceDialogueRunner;
+
+	UFUNCTION(BlueprintCallable)
+    void SelectOption();
+
 	// Indicates whether the line condition on this option evaluated to true (or
 	// if no line condition was present.)
 	UPROPERTY(BlueprintReadWrite)

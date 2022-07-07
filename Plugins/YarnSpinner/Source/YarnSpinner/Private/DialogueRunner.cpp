@@ -70,6 +70,8 @@ void ADialogueRunner::PreInitializeComponents()
 
             opt->bIsAvailable = option.IsAvailable;
 
+            opt->SourceDialogueRunner = this;
+
             options.Add(opt);
         }
 
@@ -174,8 +176,18 @@ void ADialogueRunner::ContinueDialogue() {
 }
 
 /** Indicates to the dialogue runner that an option was selected. */
-void ADialogueRunner::SelectOption(int optionID) {
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Got option %d"), optionID));
+void ADialogueRunner::SelectOption(UOption* option) {
+
+    Yarn::VirtualMachine::ExecutionState state = this->VirtualMachine->GetCurrentExecutionState();    
+
+    if (state != Yarn::VirtualMachine::ExecutionState::WAITING_ON_OPTION_SELECTION) {
+        UE_LOG(LogYarnSpinner, Error, TEXT("Dialogue Runner received a call to SelectOption, but it wasn't expecting a selection!"));
+        return;
+    }
+
+    UE_LOG(LogYarnSpinner, Log, TEXT("Selected option %i (%s)"), option->OptionID, *option->Line->LineID.ToString());
+
+    this->VirtualMachine->SetSelectedOption(option->OptionID);
 
     ContinueDialogue();
 }

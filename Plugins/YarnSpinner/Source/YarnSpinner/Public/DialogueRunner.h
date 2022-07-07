@@ -48,7 +48,7 @@ public:
     void ContinueDialogue();
     
     UFUNCTION(BlueprintCallable)
-    void SelectOption(int optionID);
+    void SelectOption(UOption* option);
     
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Dialogue Runner")
     UYarnAsset* yarnAsset;

@@ -8,7 +8,7 @@ B: Here's another line! #line:line2
 -> Cool! #line:line5
     B: Yeah! #line:line6
 
-<<command woo>>
+// <<command woo>>
 
 A: All done! #line:line7
 ===
