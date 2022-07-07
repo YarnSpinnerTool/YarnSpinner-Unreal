@@ -17,5 +17,7 @@ class YARNSPINNER_API ULine : public UObject
 public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     FName LineID;
-    
+
+    UPROPERTY(BlueprintReadWrite)
+    FText DisplayText;
 };

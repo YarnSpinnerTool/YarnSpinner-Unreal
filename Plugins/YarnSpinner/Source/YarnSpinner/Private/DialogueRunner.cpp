@@ -21,7 +21,7 @@ void ADialogueRunner::PreInitializeComponents()
 
 
     if (!yarnAsset) {
-        UE_LOG(LogYarnSpinner, Log, TEXT("DialogueRunner can't initialize, because it doesn't have a Yarn Asset."));
+        UE_LOG(LogYarnSpinner, Error, TEXT("DialogueRunner can't initialize, because it doesn't have a Yarn Asset."));
         return;
     }
 
@@ -30,7 +30,7 @@ void ADialogueRunner::PreInitializeComponents()
     bool parseSuccess = program.ParsePartialFromArray(yarnAsset->Data.GetData(), yarnAsset->Data.Num());
 
     if (!parseSuccess) {
-        UE_LOG(LogYarnSpinner, Warning, TEXT("DialogueRunner can't initialize, because its Yarn Asset failed to parse."));
+        UE_LOG(LogYarnSpinner, Error, TEXT("DialogueRunner can't initialize, because its Yarn Asset failed to parse."));
         return;
     }
 
@@ -41,7 +41,39 @@ void ADialogueRunner::PreInitializeComponents()
     // configuring it to use our library, plus use this ADialogueRunner as the
     // logger and the variable storage
     this->VirtualMachine = TUniquePtr<Yarn::VirtualMachine>(new Yarn::VirtualMachine(program, *(this->Library), *this, *this));
-    
+
+    this->VirtualMachine->LineHandler = [this](Yarn::Line &line) {
+        // Get the Yarn line struct, and make a ULine out of it to use
+        auto lineObject = NewObject<ULine>(this);
+        lineObject->LineID = FName(line.LineID.c_str());
+        OnRunLine(lineObject);
+    };
+
+    this->VirtualMachine->OptionsHandler = [this](Yarn::OptionSet &optionSet)
+    {
+        UE_LOG(LogYarnSpinner, Log, TEXT("Received %i options (TODO: actually do stuff with them)"), optionSet.Options.size());
+    };
+
+    this->VirtualMachine->CommandHandler = [this](Yarn::Command &command)
+    {
+        UE_LOG(LogYarnSpinner, Log, TEXT("Received command \"%s\" (TODO: actually do stuff with it)"), UTF8_TO_TCHAR(command.Text.c_str()));
+    };
+
+    this->VirtualMachine->NodeStartHandler = [this](std::string nodeName)
+    {
+        UE_LOG(LogYarnSpinner, Log, TEXT("Received node start \"%s\""), UTF8_TO_TCHAR(nodeName.c_str()));
+    };
+
+    this->VirtualMachine->NodeCompleteHandler = [this](std::string nodeName)
+    {
+        UE_LOG(LogYarnSpinner, Log, TEXT("Received node complete \"%s\""), UTF8_TO_TCHAR(nodeName.c_str()));
+    };
+
+    this->VirtualMachine->DialogueCompleteHandler = [this]()
+    {
+        UE_LOG(LogYarnSpinner, Log, TEXT("Received dialogue complete"));
+        OnDialogueEnded();
+    };
 }
 
 // Called every frame
@@ -66,20 +98,41 @@ void ADialogueRunner::OnRunLine_Implementation(ULine* line) {
 /** Starts running dialogue from the given node name. */
 void ADialogueRunner::StartDialogue(FName nodeName) {
     currentContentIndex = 0;
-    OnDialogueStarted();
-    ContinueDialogue();
+
+    if (VirtualMachine.IsValid() == false) {
+        UE_LOG(LogYarnSpinner, Error, TEXT("DialogueRunner can't start node %s, because it failed to load a Yarn asset."), *nodeName.ToString());
+        return;
+    }
+
+    bool nodeSelected = VirtualMachine->SetNode(TCHAR_TO_UTF8(*nodeName.ToString()));
+
+    if (nodeSelected) {
+        OnDialogueStarted();
+        ContinueDialogue();
+    } else {
+        UE_LOG(LogYarnSpinner, Error, TEXT("DialogueRunner can't start node %s, because a node with that name was not found."), *nodeName.ToString());
+        return;
+
+    }
+
 }
 
 /** Continues running the current dialogue, producing either lines, options, commands, or a dialogue-end signal. */
 void ADialogueRunner::ContinueDialogue() {
-    ULine* line = GetFakeLine(currentContentIndex++);
-    
-    if (line) {
-        // We have a line to show! Deliver it.
-        OnRunLine(line);
-    } else {
-        // No more content!
-        OnDialogueEnded();
+
+    if (this->VirtualMachine->GetCurrentExecutionState() == Yarn::VirtualMachine::ExecutionState::ERROR) {
+        UE_LOG(LogYarnSpinner, Error, TEXT("VirtualMachine is in an error state, and cannot continue running."));
+        return;
+    }
+
+    this->VirtualMachine->Continue();
+
+    Yarn::VirtualMachine::ExecutionState state = this->VirtualMachine->GetCurrentExecutionState();
+
+    if (state == Yarn::VirtualMachine::ExecutionState::ERROR)
+    {
+        UE_LOG(LogYarnSpinner, Error, TEXT("VirtualMachine encountered an error."));
+        return;
     }
 }
 
@@ -90,55 +143,36 @@ void ADialogueRunner::SelectOption(int optionID) {
     ContinueDialogue();
 }
 
-// ---- FAKE CONTENT - REMOVE THESE ASAP
-
-ULine* ADialogueRunner::GetFakeLine(int index) {
-    switch (index) {
-        case 0:
-            return MakeFakeLine(FName(TEXT("This feels weird!")));
-        case 1:
-            return MakeFakeLine(FName(TEXT("The world doesn't seem right!")));
-        case 2:
-            return MakeFakeLine(FName(TEXT("It feels a bit... Unreal!")));
-        case 3:
-            return MakeFakeLine(FName(TEXT("Engine!")));
-        default:
-            return NULL;
-    }
-}
-
-ULine* ADialogueRunner::MakeFakeLine(FName lineID) {
-    auto line = NewObject<ULine>(this);
-    line->LineID = lineID;
-    return line;
-}
-
 void ADialogueRunner::Log(std::string message, Type severity) {
+
+    auto messageText = UTF8_TO_TCHAR(message.c_str());
 
     switch (severity) {
         case Type::INFO:
-            UE_LOG(LogYarnSpinner, Log, TEXT("YarnSpinner: %s"), message.c_str());
+            UE_LOG(LogYarnSpinner, Log, TEXT("YarnSpinner: %s"), messageText);
             break;
         case Type::WARNING:
-            UE_LOG(LogYarnSpinner, Warning, TEXT("YarnSpinner: %s"), message.c_str());
+            UE_LOG(LogYarnSpinner, Warning, TEXT("YarnSpinner: %s"), messageText);
             break;
         case Type::ERROR:
-            UE_LOG(LogYarnSpinner, Error, TEXT("YarnSpinner: %s"), message.c_str());
+            UE_LOG(LogYarnSpinner, Error, TEXT("YarnSpinner: %s"), messageText);
             break;
         }
 
 }
 
 void ADialogueRunner::SetValue(std::string name, bool value) {
-    UE_LOG(LogYarnSpinner, Error, TEXT("YarnSpinner: set %s to bool %i"), name.c_str(), value);
+    UE_LOG(LogYarnSpinner, Error, TEXT("YarnSpinner: set %s to bool %i"), UTF8_TO_TCHAR(name.c_str()), value);
 }
 
 void ADialogueRunner::SetValue(std::string name, float value) {
-    UE_LOG(LogYarnSpinner, Error, TEXT("YarnSpinner: set %s to float %f"), name.c_str(), value);
+    UE_LOG(LogYarnSpinner, Error, TEXT("YarnSpinner: set %s to float %f"), UTF8_TO_TCHAR(name.c_str()), value);
 }
 
 void ADialogueRunner::SetValue(std::string name, std::string value) {
-    UE_LOG(LogYarnSpinner, Error, TEXT("YarnSpinner: set %s to string \"%s\""), name.c_str(), value.c_str());
+    UE_LOG(LogYarnSpinner, Error, TEXT("YarnSpinner: set %s to string \"%s\""), 
+        UTF8_TO_TCHAR(name.c_str()), 
+        UTF8_TO_TCHAR(value.c_str()));
 }
 
 bool ADialogueRunner::HasValue(std::string name) {
@@ -146,11 +180,12 @@ bool ADialogueRunner::HasValue(std::string name) {
 }
 
 Yarn::Value ADialogueRunner::GetValue(std::string name) {
-    UE_LOG(LogYarnSpinner, Error, TEXT("YarnSpinner: get %s"), name.c_str());
+    UE_LOG(LogYarnSpinner, Error, TEXT("YarnSpinner: get %s"), UTF8_TO_TCHAR(name.c_str()));
 
     return Yarn::Value(0);
 }
 
 void ADialogueRunner::ClearValue(std::string name) {
+    UE_LOG(LogYarnSpinner, Error, TEXT("YarnSpinner: clear %s"), UTF8_TO_TCHAR(name.c_str()));
 
 }

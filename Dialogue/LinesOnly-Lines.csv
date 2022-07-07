@@ -1,0 +1,4 @@
+id,text,file,node,lineNumber
+line:linesOnlyLine1,"Hey, this came from the Dialogue Runner!",/Users/desplesda/Work/YarnSpinner-Unreal/Dialogue/LinesOnly.yarn,Start,3
+line:linesOnlyLine2,"Yarn Spinner for Unreal, baybeeeeeee",/Users/desplesda/Work/YarnSpinner-Unreal/Dialogue/LinesOnly.yarn,Start,4
+line:linesOnlyLine3,"Well, bye",/Users/desplesda/Work/YarnSpinner-Unreal/Dialogue/LinesOnly.yarn,Start,5

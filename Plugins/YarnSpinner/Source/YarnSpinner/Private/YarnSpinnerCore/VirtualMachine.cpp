@@ -5,7 +5,6 @@
 #include <string>
 #include <sstream>
 
-
 namespace Yarn
 {
 
@@ -86,8 +85,9 @@ namespace Yarn
 
         currentNode = program.nodes().at(nodeName);
 
-        // Clear the state
+        // Clear our State and return to the Stopped execution state
         state = State();
+        SetCurrentExecutionState(ExecutionState::STOPPED);
 
         state.currentNodeName = nodeName;
 

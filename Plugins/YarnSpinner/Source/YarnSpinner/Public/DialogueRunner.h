@@ -51,10 +51,6 @@ private:
     UPROPERTY(VisibleInstanceOnly, Category="Dialogue Runner")
     int32 currentContentIndex = 0;
     
-    class ULine* GetFakeLine(int index);
-    
-    class ULine* MakeFakeLine(FName lineID);
-
     TUniquePtr<Yarn::VirtualMachine> VirtualMachine;
 
     TUniquePtr<Yarn::Library> Library;
