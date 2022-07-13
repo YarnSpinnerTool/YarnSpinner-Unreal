@@ -121,18 +121,22 @@ void ADialogueRunner::OnDialogueEnded_Implementation() {
 }
 
 void ADialogueRunner::OnRunLine_Implementation(ULine* line) {
-    // default = no-op
+    // default = log and immediately continue
+    UE_LOG(LogYarnSpinner, Warning, TEXT("DialogueRunner received line with ID \"%s\". Implement OnRunLine to customise its behaviour."), *line->LineID.ToString());
+    ContinueDialogue();
 }
 
 void ADialogueRunner::OnRunOptions_Implementation(const TArray<class UOption*>& options) {
-    // default = warn that we'll be stuck waiting for options
+    // default = log and choose the first option
+    UE_LOG(LogYarnSpinner, Warning, TEXT("DialogueRunner received %i options. Choosing the first one by default. Implement OnRunOptions to customise its behaviour."), options.Num());
 
-    // UE_Log(LogYarnSpinner, Warning, TEXT("DialogueRunner received %i options, but OnRunOptions wasn't connected to anything. The dialogue runner is now stuck waiting for an option to be selected."), options.Num());
-
+    SelectOption(options[0]);
 }
 
 void ADialogueRunner::OnRunCommand_Implementation(const FString& command) {
     // default = no-op
+    UE_LOG(LogYarnSpinner, Warning, TEXT("DialogueRunner received command \"%s\". Implement OnRunCommand to customise its behaviour."), *command);
+    ContinueDialogue();
 }
 
 /** Starts running dialogue from the given node name. */
