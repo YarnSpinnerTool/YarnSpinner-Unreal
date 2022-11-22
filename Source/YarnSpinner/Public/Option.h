@@ -15,18 +15,18 @@ class YARNSPINNER_API UOption : public UObject
 	GENERATED_BODY()
 public:
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category="Yarn Spinner")
 	ULine *Line;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category="Yarn Spinner")
 	class ADialogueRunner *SourceDialogueRunner;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Yarn Spinner")
     void SelectOption();
 
 	// Indicates whether the line condition on this option evaluated to true (or
 	// if no line condition was present.)
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category="Yarn Spinner")
 	bool bIsAvailable;
 
 	int OptionID;

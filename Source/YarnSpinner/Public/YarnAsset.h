@@ -16,7 +16,7 @@ class YARNSPINNER_API UYarnAsset : public UObject
     
 public:
     
-    UPROPERTY(VisibleAnywhere)
+    UPROPERTY(VisibleAnywhere, Category="Yarn Spinner")
     TArray<uint8> Data;
 
 #if WITH_EDITORONLY_DATA

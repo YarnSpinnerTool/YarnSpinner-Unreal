@@ -41,13 +41,13 @@ public:
     UFUNCTION(BlueprintNativeEvent, Category="Dialogue Runner")
     void OnRunCommand(const FString& command);
     
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category="Dialogue Runner")
     void StartDialogue(FName nodeName);
     
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category="Dialogue Runner")
     void ContinueDialogue();
     
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category="Dialogue Runner")
     void SelectOption(UOption* option);
     
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Dialogue Runner")

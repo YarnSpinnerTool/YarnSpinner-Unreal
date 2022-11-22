@@ -13,11 +13,11 @@ UCLASS(BlueprintType)
 class YARNSPINNER_API ULine : public UObject
 {
     GENERATED_BODY()
-    
+
 public:
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Yarn Spinner")
     FName LineID;
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category="Yarn Spinner")
     FText DisplayText;
 };
