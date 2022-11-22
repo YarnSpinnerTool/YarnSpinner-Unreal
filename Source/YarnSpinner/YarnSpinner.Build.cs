@@ -9,11 +9,10 @@ public class YarnSpinner : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		var protobufDir = Path.Combine("$(ProjectDir)",
-            "Plugins",
+		var protobufDir = Path.Combine(PluginDirectory,
             "ThirdParty",
             "protobuf_x64-osx");
-  
+
         PublicIncludePaths.Add(Path.Combine(protobufDir, "include"));
 
 		PublicDefinitions.Add("GOOGLE_PROTOBUF_NO_RTTI=1");
