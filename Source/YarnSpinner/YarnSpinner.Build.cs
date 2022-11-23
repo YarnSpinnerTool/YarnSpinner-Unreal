@@ -17,7 +17,11 @@ public class YarnSpinner : ModuleRules
 
 		PublicDefinitions.Add("GOOGLE_PROTOBUF_NO_RTTI=1");
         
-        PublicAdditionalLibraries.Add(Path.Combine(protobufDir, "lib", "libprotobuf.a"));
+		if (Target.Platform == UnrealTargetPlatform.Mac) {
+			PublicAdditionalLibraries.Add(Path.Combine(protobufDir, "lib", "libprotobuf.a"));
+        } else {
+            throw new System.PlatformNotSupportedException($"Platform {Target.Platform} is not currently supported.");
+        }
 
 		// The protobuf header files use '#if _MSC_VER', but this will
 		// trigger -Wundef. Disable unidentified compiler directive warnings.
