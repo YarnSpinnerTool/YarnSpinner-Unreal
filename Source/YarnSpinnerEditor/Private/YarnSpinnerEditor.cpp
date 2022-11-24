@@ -6,6 +6,8 @@
 
 #include "IYarnSpinnerModuleInterface.h"
 
+DEFINE_LOG_CATEGORY(LogYarnSpinnerEditor);
+
 //IMPLEMENT_GAME_MODULE(FToolExampleEditor, ToolExampleEditor)
 
 void FYarnSpinnerEditor::AddModuleListeners()

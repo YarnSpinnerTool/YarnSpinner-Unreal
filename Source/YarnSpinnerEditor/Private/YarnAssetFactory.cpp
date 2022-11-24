@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "YarnAssetFactory.h"
 
 #include "Misc/FileHelper.h"
@@ -9,10 +8,20 @@
 
 #include "ReimportYarnAssetFactory.h"
 
+#include "yarn_spinner.pb.h"
+#include "compiler_output.pb.h"
+
+#include <google/protobuf/util/json_util.h>
+#include <google/protobuf/util/type_resolver_util.h>
+
+google::protobuf::Message &from_json(google::protobuf::Message &msg,
+								const std::string &json);
+
 UYarnAssetFactory::UYarnAssetFactory( const FObjectInitializer& ObjectInitializer )
     : Super(ObjectInitializer)
 {
-    Formats.Add(FString(TEXT("yarnc;")) + NSLOCTEXT("UYarnAssetFactory", "FormatTxt", "Compiled Yarn File").ToString());
+    Formats.Add(FString(TEXT("yarn;")) + NSLOCTEXT("UYarnAssetFactory", "FormatTxt", "Yarn File").ToString());
+    // Formats.Add(FString(TEXT("yarnc;")) + NSLOCTEXT("UYarnAssetFactory", "FormatTxt", "Compiled Yarn File").ToString());
     // Formats.Add(FString(TEXT("yarnproject;")) + NSLOCTEXT("UYarnAssetFactory", "FormatTxt", "Yarn Project").ToString());
     SupportedClass = UYarnAsset::StaticClass();
     bCreateNew = false;
@@ -31,15 +40,65 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
 
     const TCHAR* fileName = *CurrentFilename;
 
-    FString Result;
-	if (FFileHelper::LoadFileToArray(TextAsset->Data, fileName)) {
-		// TODO: report successfully loading the data
-	} else {
-		// TODO: report failing to load the data
+	Yarn::CompilerOutput compilerOutput = UYarnAssetFactory::GetCompiledDataForScript(fileName);
+
+	if (!compilerOutput.IsInitialized())
+	{
+		UE_LOG(LogYarnSpinnerEditor, Error, TEXT("Failed to get results from the compiler. Stopping import."));
+		return nullptr;
 	}
 
-    if (!CurrentFilename.IsEmpty())
-    {
+	bool anyErrors = false;
+	for (auto diagnostic : compilerOutput.diagnostics())
+	{
+		if (diagnostic.severity() == Yarn::Diagnostic_Severity::Diagnostic_Severity_Error)
+		{
+			UE_LOG(LogYarnSpinnerEditor, Error, TEXT("Error: %s:%i %s"),
+				   UTF8_TO_TCHAR(diagnostic.filename().c_str()),
+				   diagnostic.range().start().line(),
+				   UTF8_TO_TCHAR(diagnostic.message().c_str()));
+			anyErrors = true;
+		}
+		else if (diagnostic.severity() == Yarn::Diagnostic_Severity::Diagnostic_Severity_Warning)
+		{
+			UE_LOG(LogYarnSpinnerEditor, Warning, TEXT("Warning: %s:%i %s"),
+				   UTF8_TO_TCHAR(diagnostic.filename().c_str()),
+				   diagnostic.range().start().line(),
+				   UTF8_TO_TCHAR(diagnostic.message().c_str()));
+		}
+		else if (diagnostic.severity() == Yarn::Diagnostic_Severity::Diagnostic_Severity_Info)
+		{
+			UE_LOG(LogYarnSpinnerEditor, Log, TEXT("%s:%i %s"),
+				   UTF8_TO_TCHAR(diagnostic.filename().c_str()),
+				   diagnostic.range().start().line(),
+				   UTF8_TO_TCHAR(diagnostic.message().c_str()));
+		}
+	}
+
+	if (anyErrors || !compilerOutput.program().IsInitialized())
+	{
+		UE_LOG(LogYarnSpinnerEditor, Error, TEXT("File contains errors; stopping import."));
+		return nullptr;
+	}
+	
+	// Now convert that into binary wire format for saving
+	std::string data = compilerOutput.program().SerializeAsString();
+
+	// Finally, convert THAT into a TArray of bytes and we're done!
+	TArray<uint8> output = TArray<uint8>((const uint8*)data.c_str(), data.size());
+
+	TextAsset->Data = output;
+
+	// FString Result;
+	// if (FFileHelper::LoadFileToArray(TextAsset->Data, fileName)) {
+	// 	// TODO: report successfully loading the data
+	// } else {
+	// 	// TODO: report failing to load the data
+	// }
+
+	// Record where this asset came from so we know how to update it
+	if (!CurrentFilename.IsEmpty())
+	{
         TextAsset->AssetImportData->Update(CurrentFilename);
     }
     
@@ -49,8 +108,8 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
 }
 
 bool UYarnAssetFactory::FactoryCanImport(const FString& Filename) {
-	return FPaths::GetExtension(Filename).Equals(TEXT("yarnc"));
-	// return FPaths::GetExtension(Filename).Equals(TEXT("yarn"))
+	// return FPaths::GetExtension(Filename).Equals(TEXT("yarnc"));
+	return FPaths::GetExtension(Filename).Equals(TEXT("yarn"));
 	//     || FPaths::GetExtension(Filename).Equals(TEXT("yarnproject"));
 }
 
@@ -79,6 +138,48 @@ EReimportResult::Type UYarnAssetFactory::Reimport(UYarnAsset* TextAsset) {
 		}
 	}
 	return EReimportResult::Failed;
+}
+
+Yarn::CompilerOutput UYarnAssetFactory::GetCompiledDataForScript(const TCHAR* InFilePath) {
+	FString yscPath = FPaths::Combine(FPaths::ProjectPluginsDir(), FString(YSC_PATH));
+
+	FString stdOut;
+	FString stdErr;
+
+	int32 returnCode;
+
+	FString params;
+
+	params.Append(TEXT("compile "));
+	params.Append(TEXT("--stdout "));
+	params.Append(InFilePath);
+
+	// Run ysc to get our compilation result
+	UE_LOG(LogYarnSpinnerEditor, Log, TEXT("Calling ysc with %s"), *params);
+	FPlatformProcess::ExecProcess(*yscPath, *params, &returnCode, &stdOut, &stdErr);
+
+	UE_LOG(LogYarnSpinnerEditor, Log, TEXT("ysc returned %i; stdout:\n%s\nstderr:%s\n"), returnCode, *stdOut, *stdErr);
+
+	Yarn::CompilerOutput compilerOutput;
+
+	if (returnCode != 0) {
+		UE_LOG(LogYarnSpinnerEditor, Error, TEXT("Error compiling Yarn script: %s"), *stdErr);
+		return compilerOutput;
+	}
+
+	// Convert stdout from an FString to a std::string
+	std::string json(TCHAR_TO_UTF8(*stdOut));
+
+	// Parse the incoming JSON into a Program message (to check that it's valid)
+	auto status = google::protobuf::util::JsonStringToMessage(json, &compilerOutput);
+
+	if (!status.ok()) {
+		// Whoa, we failed to parse a CompilerOutput struct from the compiler.
+		UE_LOG(LogYarnSpinnerEditor, Error, TEXT("Error importing result from ysc: %s"), status.ToString().c_str());
+		return compilerOutput;
+	}
+
+	return compilerOutput;
 }
 
 ///////////// Reimport

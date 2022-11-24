@@ -2,10 +2,16 @@
 
 #pragma once
 
+#include "YarnSpinnerEditor.h"
+
+
 #include "CoreMinimal.h"
 #include "Factories/Factory.h"
 #include "YarnAsset.h"
 #include "EditorReimportHandler.h"
+
+#include "compiler_output.pb.h"
+
 #include "YarnAssetFactory.generated.h"
 
 
@@ -34,4 +40,6 @@ public:
     virtual bool FactoryCanImport(const FString& Filename) override;
 
     EReimportResult::Type Reimport(UYarnAsset* TextAsset);
+
+    static Yarn::CompilerOutput GetCompiledDataForScript(const TCHAR *InFilePath);
 };

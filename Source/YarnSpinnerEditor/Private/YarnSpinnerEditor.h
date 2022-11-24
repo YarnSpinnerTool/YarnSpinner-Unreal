@@ -8,6 +8,8 @@
 #include "IAssetTypeActions.h"
 #include "IYarnSpinnerModuleInterface.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogYarnSpinnerEditor, Log, All);
+
 class FYarnSpinnerEditor : public IYarnSpinnerModuleInterface
 {
 public:

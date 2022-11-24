@@ -1,6 +1,7 @@
 // Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
+using System.IO;
 
 public class YarnSpinnerEditor : ModuleRules
 {
@@ -9,6 +10,28 @@ public class YarnSpinnerEditor : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		OptimizeCode = CodeOptimization.Never;
+
+		var protobufDir = Path.Combine(PluginDirectory,
+            "ThirdParty",
+            "protobuf_x64-osx");
+
+        // PrivateIncludePaths.Add(Path.Combine(protobufDir, "include"));
+
+		// PublicDefinitions.Add("GOOGLE_PROTOBUF_NO_RTTI=1");
+
+		// // The protobuf header files use '#if _MSC_VER', but this will
+		// // trigger -Wundef. Disable unidentified compiler directive warnings.
+        bEnableUndefinedIdentifierWarnings = false;
+
+        var yscPath = Path.Combine("YarnSpinner/Tools/osx-x64/ysc");
+
+        PublicDefinitions.Add($"YSC_PATH=TEXT(\"{yscPath}\")");
+
+		if (Target.Platform == UnrealTargetPlatform.Mac) {
+			PublicAdditionalLibraries.Add(Path.Combine(protobufDir, "lib", "libprotobufd.a"));
+        } else {
+            throw new System.PlatformNotSupportedException($"Platform {Target.Platform} is not currently supported.");
+        }
 
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[] {
