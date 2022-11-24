@@ -37,7 +37,7 @@
 #include <google/protobuf/unknown_field_set.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
-#define PROTOBUF_INTERNAL_EXPORT_yarn_5fspinner_2eproto
+#define PROTOBUF_INTERNAL_EXPORT_yarn_5fspinner_2eproto YARNSPINNER_API
 PROTOBUF_NAMESPACE_OPEN
 namespace internal {
 class AnyMetadata;
@@ -45,7 +45,7 @@ class AnyMetadata;
 PROTOBUF_NAMESPACE_CLOSE
 
 // Internal implementation detail -- do not use these members.
-struct TableStruct_yarn_5fspinner_2eproto {
+struct YARNSPINNER_API TableStruct_yarn_5fspinner_2eproto {
   static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTableField entries[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
@@ -56,38 +56,38 @@ struct TableStruct_yarn_5fspinner_2eproto {
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
   static const uint32_t offsets[];
 };
-extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_yarn_5fspinner_2eproto;
+YARNSPINNER_API extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_yarn_5fspinner_2eproto;
 namespace Yarn {
 class Instruction;
 struct InstructionDefaultTypeInternal;
-extern InstructionDefaultTypeInternal _Instruction_default_instance_;
+YARNSPINNER_API extern InstructionDefaultTypeInternal _Instruction_default_instance_;
 class Node;
 struct NodeDefaultTypeInternal;
-extern NodeDefaultTypeInternal _Node_default_instance_;
+YARNSPINNER_API extern NodeDefaultTypeInternal _Node_default_instance_;
 class Node_LabelsEntry_DoNotUse;
 struct Node_LabelsEntry_DoNotUseDefaultTypeInternal;
-extern Node_LabelsEntry_DoNotUseDefaultTypeInternal _Node_LabelsEntry_DoNotUse_default_instance_;
+YARNSPINNER_API extern Node_LabelsEntry_DoNotUseDefaultTypeInternal _Node_LabelsEntry_DoNotUse_default_instance_;
 class Operand;
 struct OperandDefaultTypeInternal;
-extern OperandDefaultTypeInternal _Operand_default_instance_;
+YARNSPINNER_API extern OperandDefaultTypeInternal _Operand_default_instance_;
 class Program;
 struct ProgramDefaultTypeInternal;
-extern ProgramDefaultTypeInternal _Program_default_instance_;
+YARNSPINNER_API extern ProgramDefaultTypeInternal _Program_default_instance_;
 class Program_InitialValuesEntry_DoNotUse;
 struct Program_InitialValuesEntry_DoNotUseDefaultTypeInternal;
-extern Program_InitialValuesEntry_DoNotUseDefaultTypeInternal _Program_InitialValuesEntry_DoNotUse_default_instance_;
+YARNSPINNER_API extern Program_InitialValuesEntry_DoNotUseDefaultTypeInternal _Program_InitialValuesEntry_DoNotUse_default_instance_;
 class Program_NodesEntry_DoNotUse;
 struct Program_NodesEntry_DoNotUseDefaultTypeInternal;
-extern Program_NodesEntry_DoNotUseDefaultTypeInternal _Program_NodesEntry_DoNotUse_default_instance_;
+YARNSPINNER_API extern Program_NodesEntry_DoNotUseDefaultTypeInternal _Program_NodesEntry_DoNotUse_default_instance_;
 }  // namespace Yarn
 PROTOBUF_NAMESPACE_OPEN
-template<> ::Yarn::Instruction* Arena::CreateMaybeMessage<::Yarn::Instruction>(Arena*);
-template<> ::Yarn::Node* Arena::CreateMaybeMessage<::Yarn::Node>(Arena*);
-template<> ::Yarn::Node_LabelsEntry_DoNotUse* Arena::CreateMaybeMessage<::Yarn::Node_LabelsEntry_DoNotUse>(Arena*);
-template<> ::Yarn::Operand* Arena::CreateMaybeMessage<::Yarn::Operand>(Arena*);
-template<> ::Yarn::Program* Arena::CreateMaybeMessage<::Yarn::Program>(Arena*);
-template<> ::Yarn::Program_InitialValuesEntry_DoNotUse* Arena::CreateMaybeMessage<::Yarn::Program_InitialValuesEntry_DoNotUse>(Arena*);
-template<> ::Yarn::Program_NodesEntry_DoNotUse* Arena::CreateMaybeMessage<::Yarn::Program_NodesEntry_DoNotUse>(Arena*);
+template<> YARNSPINNER_API ::Yarn::Instruction* Arena::CreateMaybeMessage<::Yarn::Instruction>(Arena*);
+template<> YARNSPINNER_API ::Yarn::Node* Arena::CreateMaybeMessage<::Yarn::Node>(Arena*);
+template<> YARNSPINNER_API ::Yarn::Node_LabelsEntry_DoNotUse* Arena::CreateMaybeMessage<::Yarn::Node_LabelsEntry_DoNotUse>(Arena*);
+template<> YARNSPINNER_API ::Yarn::Operand* Arena::CreateMaybeMessage<::Yarn::Operand>(Arena*);
+template<> YARNSPINNER_API ::Yarn::Program* Arena::CreateMaybeMessage<::Yarn::Program>(Arena*);
+template<> YARNSPINNER_API ::Yarn::Program_InitialValuesEntry_DoNotUse* Arena::CreateMaybeMessage<::Yarn::Program_InitialValuesEntry_DoNotUse>(Arena*);
+template<> YARNSPINNER_API ::Yarn::Program_NodesEntry_DoNotUse* Arena::CreateMaybeMessage<::Yarn::Program_NodesEntry_DoNotUse>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace Yarn {
 
@@ -112,12 +112,12 @@ enum Instruction_OpCode : int {
   Instruction_OpCode_Instruction_OpCode_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   Instruction_OpCode_Instruction_OpCode_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
-bool Instruction_OpCode_IsValid(int value);
+YARNSPINNER_API bool Instruction_OpCode_IsValid(int value);
 constexpr Instruction_OpCode Instruction_OpCode_OpCode_MIN = Instruction_OpCode_JUMP_TO;
 constexpr Instruction_OpCode Instruction_OpCode_OpCode_MAX = Instruction_OpCode_RUN_NODE;
 constexpr int Instruction_OpCode_OpCode_ARRAYSIZE = Instruction_OpCode_OpCode_MAX + 1;
 
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Instruction_OpCode_descriptor();
+YARNSPINNER_API const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Instruction_OpCode_descriptor();
 template<typename T>
 inline const std::string& Instruction_OpCode_Name(T enum_t_value) {
   static_assert(::std::is_same<T, Instruction_OpCode>::value ||
@@ -183,7 +183,7 @@ public:
 
 // -------------------------------------------------------------------
 
-class Program final :
+class YARNSPINNER_API Program final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Yarn.Program) */ {
  public:
   inline Program() : Program(nullptr) {}
@@ -406,7 +406,7 @@ public:
 
 // -------------------------------------------------------------------
 
-class Node final :
+class YARNSPINNER_API Node final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Yarn.Node) */ {
  public:
   inline Node() : Node(nullptr) {}
@@ -643,7 +643,7 @@ class Node final :
 };
 // -------------------------------------------------------------------
 
-class Instruction final :
+class YARNSPINNER_API Instruction final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Yarn.Instruction) */ {
  public:
   inline Instruction() : Instruction(nullptr) {}
@@ -869,7 +869,7 @@ class Instruction final :
 };
 // -------------------------------------------------------------------
 
-class Operand final :
+class YARNSPINNER_API Operand final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Yarn.Operand) */ {
  public:
   inline Operand() : Operand(nullptr) {}
