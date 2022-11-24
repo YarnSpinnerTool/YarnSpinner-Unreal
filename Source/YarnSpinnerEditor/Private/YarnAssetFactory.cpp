@@ -81,13 +81,20 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
 		return nullptr;
 	}
 	
-	// Now convert that into binary wire format for saving
+	// Now convert the Program into binary wire format for saving
 	std::string data = compilerOutput.program().SerializeAsString();
 
-	// Finally, convert THAT into a TArray of bytes and we're done!
+	// And convert THAT into a TArray of bytes for storage
 	TArray<uint8> output = TArray<uint8>((const uint8*)data.c_str(), data.size());
 
 	YarnAsset->Data = output;
+
+	// For each line we've received, store it in the Yarn asset
+	for (auto pair : compilerOutput.strings()) {
+		FName lineID = FName(pair.first.c_str());
+		FString lineText = FString(pair.second.text().c_str());
+		YarnAsset->Lines.Add(lineID, lineText);
+	}
 
 	// FString Result;
 	// if (FFileHelper::LoadFileToArray(YarnAsset->Data, fileName)) {

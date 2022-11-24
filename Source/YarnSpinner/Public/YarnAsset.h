@@ -19,6 +19,9 @@ public:
     UPROPERTY(VisibleAnywhere, Category="Yarn Spinner")
     TArray<uint8> Data;
 
+    UPROPERTY(VisibleAnywhere, Category="Yarn Spinner")
+    TMap<FName, FString> Lines;
+
 #if WITH_EDITORONLY_DATA
     YARNSPINNER_API virtual void PostInitProperties() override;
 	
