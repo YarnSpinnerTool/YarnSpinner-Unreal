@@ -32,11 +32,11 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
 {
 //    FEditorDelegates::OnAssetPreImport.Broadcast(this, InClass, InParent, InName, Type);
     
-    UYarnAsset* TextAsset = nullptr;
+    UYarnAsset* YarnAsset = nullptr;
     FString TextString;
 
-    TextAsset = NewObject<UYarnAsset>(InParent, InClass, InName, Flags);
-    // TextAsset->SourceFilePath = UAssetImportData::SanitizeImportFilename(CurrentFilename, TextAsset->GetOutermost());
+    YarnAsset = NewObject<UYarnAsset>(InParent, InClass, InName, Flags);
+    // YarnAsset->SourceFilePath = UAssetImportData::SanitizeImportFilename(CurrentFilename, YarnAsset->GetOutermost());
 
     const TCHAR* fileName = *CurrentFilename;
 
@@ -87,10 +87,10 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
 	// Finally, convert THAT into a TArray of bytes and we're done!
 	TArray<uint8> output = TArray<uint8>((const uint8*)data.c_str(), data.size());
 
-	TextAsset->Data = output;
+	YarnAsset->Data = output;
 
 	// FString Result;
-	// if (FFileHelper::LoadFileToArray(TextAsset->Data, fileName)) {
+	// if (FFileHelper::LoadFileToArray(YarnAsset->Data, fileName)) {
 	// 	// TODO: report successfully loading the data
 	// } else {
 	// 	// TODO: report failing to load the data
@@ -99,12 +99,12 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
 	// Record where this asset came from so we know how to update it
 	if (!CurrentFilename.IsEmpty())
 	{
-        TextAsset->AssetImportData->Update(CurrentFilename);
+        YarnAsset->AssetImportData->Update(CurrentFilename);
     }
     
-//    FEditorDelegates::OnAssetPostImport.Broadcast(this, TextAsset);
+//    FEditorDelegates::OnAssetPostImport.Broadcast(this, YarnAsset);
 
-    return TextAsset;
+    return YarnAsset;
 }
 
 bool UYarnAssetFactory::FactoryCanImport(const FString& Filename) {
