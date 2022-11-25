@@ -1,0 +1,16 @@
+title: Start
+---
+A: Hey, here's a line!
+B: Here's another line!
+
+// Show some options
+-> Wow!
+    A: Right?
+-> Cool!
+    B: Yeah!
+
+// Run a command
+<<do_something_cool param1 param2>>
+
+A: All done!
+===
