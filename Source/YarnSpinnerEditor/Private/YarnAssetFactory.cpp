@@ -40,9 +40,17 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
 
     const TCHAR* fileName = *CurrentFilename;
 
-	Yarn::CompilerOutput compilerOutput = UYarnAssetFactory::GetCompiledDataForScript(fileName);
+	Yarn::CompilerOutput compilerOutput;
 
-	if (!compilerOutput.IsInitialized())
+	// Record where this asset came from so we know how to update it
+	if (!CurrentFilename.IsEmpty())
+	{
+        YarnAsset->AssetImportData->Update(CurrentFilename);
+    }
+	
+	bool success = UYarnAssetFactory::GetCompiledDataForScript(fileName, compilerOutput);
+
+	if (!success)
 	{
 		UE_LOG(LogYarnSpinnerEditor, Error, TEXT("Failed to get results from the compiler. Stopping import."));
 		return nullptr;
@@ -75,7 +83,7 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
 		}
 	}
 
-	if (anyErrors || !compilerOutput.program().IsInitialized())
+	if (anyErrors)
 	{
 		UE_LOG(LogYarnSpinnerEditor, Error, TEXT("File contains errors; stopping import."));
 		return nullptr;
@@ -147,7 +155,7 @@ EReimportResult::Type UYarnAssetFactory::Reimport(UYarnAsset* TextAsset) {
 	return EReimportResult::Failed;
 }
 
-Yarn::CompilerOutput UYarnAssetFactory::GetCompiledDataForScript(const TCHAR* InFilePath) {
+bool UYarnAssetFactory::GetCompiledDataForScript(const TCHAR* InFilePath, Yarn::CompilerOutput& InCompilerOutput) {
 	FString yscPath = FPaths::Combine(FPaths::ProjectPluginsDir(), FString(YSC_PATH));
 
 	FString stdOut;
@@ -167,26 +175,24 @@ Yarn::CompilerOutput UYarnAssetFactory::GetCompiledDataForScript(const TCHAR* In
 
 	UE_LOG(LogYarnSpinnerEditor, Log, TEXT("ysc returned %i; stdout:\n%s\nstderr:%s\n"), returnCode, *stdOut, *stdErr);
 
-	Yarn::CompilerOutput compilerOutput;
-
 	if (returnCode != 0) {
 		UE_LOG(LogYarnSpinnerEditor, Error, TEXT("Error compiling Yarn script: %s"), *stdErr);
-		return compilerOutput;
+		return false;
 	}
 
 	// Convert stdout from an FString to a std::string
 	std::string json(TCHAR_TO_UTF8(*stdOut));
 
 	// Parse the incoming JSON into a Program message (to check that it's valid)
-	auto status = google::protobuf::util::JsonStringToMessage(json, &compilerOutput);
+	auto status = google::protobuf::util::JsonStringToMessage(json, &InCompilerOutput);
 
 	if (!status.ok()) {
 		// Whoa, we failed to parse a CompilerOutput struct from the compiler.
 		UE_LOG(LogYarnSpinnerEditor, Error, TEXT("Error importing result from ysc: %s"), status.ToString().c_str());
-		return compilerOutput;
+		return false;
 	}
 
-	return compilerOutput;
+	return true;
 }
 
 ///////////// Reimport

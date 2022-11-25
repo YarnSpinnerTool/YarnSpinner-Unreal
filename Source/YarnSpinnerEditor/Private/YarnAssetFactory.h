@@ -41,5 +41,5 @@ public:
 
     EReimportResult::Type Reimport(UYarnAsset* TextAsset);
 
-    static Yarn::CompilerOutput GetCompiledDataForScript(const TCHAR *InFilePath);
+    static bool GetCompiledDataForScript(const TCHAR *InFilePath, Yarn::CompilerOutput &InCompilerOutput);
 };
