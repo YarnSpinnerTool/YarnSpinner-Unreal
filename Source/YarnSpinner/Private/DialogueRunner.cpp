@@ -8,6 +8,33 @@
 #include "YarnSpinnerCore/VirtualMachine.h"
 //#include "StaticParty.h"
 
+static void GetDisplayTextForLine(ULine* line, Yarn::Line& yarnLine, UYarnAsset* yarnAsset) {
+    // FIXME: Currently, we store the text of lines directly in the
+    // YarnAsset. This will eventually be replaced with string tables.
+
+    FName lineID = FName(yarnLine.LineID.c_str());
+
+    FString* maybeNonLocalisedDisplayText = yarnAsset->Lines.Find(lineID);
+    if (maybeNonLocalisedDisplayText) {
+
+        FString nonLocalisedDisplayText = *maybeNonLocalisedDisplayText;
+
+        // Apply substitutions
+        TArray<FStringFormatArg> formatArguments;
+
+        for (auto substitution : yarnLine.Substitutions)
+        {
+            formatArguments.Add(FStringFormatArg(UTF8_TO_TCHAR(substitution.c_str())));
+        }
+
+        FString textWithSubstitutions = FString::Format(*nonLocalisedDisplayText, formatArguments);
+
+        line->DisplayText = FText::FromString(textWithSubstitutions);
+    } else {
+        line->DisplayText = FText::FromString(TEXT("(missing line!)"));
+    }
+}
+
 // Sets default values
 ADialogueRunner::ADialogueRunner()
 {
@@ -49,6 +76,9 @@ void ADialogueRunner::PreInitializeComponents()
         // Get the Yarn line struct, and make a ULine out of it to use
         ULine* lineObject = NewObject<ULine>(this);
         lineObject->LineID = FName(line.LineID.c_str());
+
+        GetDisplayTextForLine(lineObject, line, yarnAsset);
+
         OnRunLine(lineObject);
     };
 
@@ -67,6 +97,8 @@ void ADialogueRunner::PreInitializeComponents()
 
             opt->Line = NewObject<ULine>(opt);
             opt->Line->LineID = FName(option.Line.LineID.c_str());
+
+            GetDisplayTextForLine(opt->Line, option.Line, yarnAsset);
 
             opt->bIsAvailable = option.IsAvailable;
 
