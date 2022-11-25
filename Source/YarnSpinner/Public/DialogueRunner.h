@@ -39,7 +39,7 @@ public:
     void OnRunOptions(const TArray<class UOption*>& options);
 
     UFUNCTION(BlueprintNativeEvent, Category="Dialogue Runner")
-    void OnRunCommand(const FString& command);
+    void OnRunCommand(const FString& command, const TArray<FString>& parameters);
     
     UFUNCTION(BlueprintCallable, Category="Dialogue Runner")
     void StartDialogue(FName nodeName);

@@ -117,7 +117,21 @@ void ADialogueRunner::PreInitializeComponents()
 
         FString commandText = FString(UTF8_TO_TCHAR(command.Text.c_str()));
 
-        OnRunCommand(commandText);
+        TArray<FString> commandElements;
+        commandText.ParseIntoArray(commandElements, TEXT(" "));
+
+        if (commandElements.Num() == 0) {
+            TArray<FString> emptyParameters;
+            UE_LOG(LogYarnSpinner, Error, TEXT("Command received, but was unable to parse it."));
+            OnRunCommand(FString("(unknown)"), emptyParameters);
+            return;
+        }
+
+        FString commandName = commandElements[0];
+        commandElements.RemoveAt(0);
+
+        OnRunCommand(commandName, commandElements);
+
     };
 
     this->VirtualMachine->NodeStartHandler = [this](std::string nodeName)
@@ -165,7 +179,7 @@ void ADialogueRunner::OnRunOptions_Implementation(const TArray<class UOption*>& 
     SelectOption(options[0]);
 }
 
-void ADialogueRunner::OnRunCommand_Implementation(const FString& command) {
+void ADialogueRunner::OnRunCommand_Implementation(const FString& command, const TArray<FString>& parameters) {
     // default = no-op
     UE_LOG(LogYarnSpinner, Warning, TEXT("DialogueRunner received command \"%s\". Implement OnRunCommand to customise its behaviour."), *command);
     ContinueDialogue();
