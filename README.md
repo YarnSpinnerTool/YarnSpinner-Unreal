@@ -16,10 +16,12 @@ Welcome to **Yarn Spinner for Unreal!** Yarn Spinner is the friendly dialogue to
 
 There are several important Yarn Spinner features that are not yet present in the alpha release of Yarn Spinner for Unreal.
 
+- **Tested on macOS only.** We haven't yet tested this on Windows. It may not even compile.
 - **No variables.** Storing and retrieving Yarn variables is not yet implemented.
 - **No localisation support.** The Yarn Spinner importer does not currently populate string tables automatically.
 - **No functions.** Functions cannot be called from inside Yarn scripts.
 - **String-only command dispatch.** Dispatching commands to functions is not implemented; however, when a command is run, the Dialogue Runner emits an `OnRunCommand` event that contains the command name and an array of its parameters.
+- **Single files only.** `.yarn` files are currently imported in isolation, and variables declared in one file will not be known in other files.
 
 ## Troubleshooting
 
