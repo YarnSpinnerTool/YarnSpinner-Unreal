@@ -37,7 +37,7 @@
 #include "yarn_spinner.pb.h"
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
-#define PROTOBUF_INTERNAL_EXPORT_compiler_5foutput_2eproto YARNSPINNER_API
+#define PROTOBUF_INTERNAL_EXPORT_compiler_5foutput_2eproto YARNSPINNEREDITOR_API
 PROTOBUF_NAMESPACE_OPEN
 namespace internal {
 class AnyMetadata;
@@ -45,37 +45,37 @@ class AnyMetadata;
 PROTOBUF_NAMESPACE_CLOSE
 
 // Internal implementation detail -- do not use these members.
-struct YARNSPINNER_API TableStruct_compiler_5foutput_2eproto {
+struct YARNSPINNEREDITOR_API TableStruct_compiler_5foutput_2eproto {
   static const uint32_t offsets[];
 };
-YARNSPINNER_API extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_compiler_5foutput_2eproto;
+YARNSPINNEREDITOR_API extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_compiler_5foutput_2eproto;
 namespace Yarn {
 class CompilerOutput;
 struct CompilerOutputDefaultTypeInternal;
-YARNSPINNER_API extern CompilerOutputDefaultTypeInternal _CompilerOutput_default_instance_;
+YARNSPINNEREDITOR_API extern CompilerOutputDefaultTypeInternal _CompilerOutput_default_instance_;
 class CompilerOutput_StringsEntry_DoNotUse;
 struct CompilerOutput_StringsEntry_DoNotUseDefaultTypeInternal;
-YARNSPINNER_API extern CompilerOutput_StringsEntry_DoNotUseDefaultTypeInternal _CompilerOutput_StringsEntry_DoNotUse_default_instance_;
+YARNSPINNEREDITOR_API extern CompilerOutput_StringsEntry_DoNotUseDefaultTypeInternal _CompilerOutput_StringsEntry_DoNotUse_default_instance_;
 class Diagnostic;
 struct DiagnosticDefaultTypeInternal;
-YARNSPINNER_API extern DiagnosticDefaultTypeInternal _Diagnostic_default_instance_;
+YARNSPINNEREDITOR_API extern DiagnosticDefaultTypeInternal _Diagnostic_default_instance_;
 class Position;
 struct PositionDefaultTypeInternal;
-YARNSPINNER_API extern PositionDefaultTypeInternal _Position_default_instance_;
+YARNSPINNEREDITOR_API extern PositionDefaultTypeInternal _Position_default_instance_;
 class Range;
 struct RangeDefaultTypeInternal;
-YARNSPINNER_API extern RangeDefaultTypeInternal _Range_default_instance_;
+YARNSPINNEREDITOR_API extern RangeDefaultTypeInternal _Range_default_instance_;
 class StringInfo;
 struct StringInfoDefaultTypeInternal;
-YARNSPINNER_API extern StringInfoDefaultTypeInternal _StringInfo_default_instance_;
+YARNSPINNEREDITOR_API extern StringInfoDefaultTypeInternal _StringInfo_default_instance_;
 }  // namespace Yarn
 PROTOBUF_NAMESPACE_OPEN
-template<> YARNSPINNER_API ::Yarn::CompilerOutput* Arena::CreateMaybeMessage<::Yarn::CompilerOutput>(Arena*);
-template<> YARNSPINNER_API ::Yarn::CompilerOutput_StringsEntry_DoNotUse* Arena::CreateMaybeMessage<::Yarn::CompilerOutput_StringsEntry_DoNotUse>(Arena*);
-template<> YARNSPINNER_API ::Yarn::Diagnostic* Arena::CreateMaybeMessage<::Yarn::Diagnostic>(Arena*);
-template<> YARNSPINNER_API ::Yarn::Position* Arena::CreateMaybeMessage<::Yarn::Position>(Arena*);
-template<> YARNSPINNER_API ::Yarn::Range* Arena::CreateMaybeMessage<::Yarn::Range>(Arena*);
-template<> YARNSPINNER_API ::Yarn::StringInfo* Arena::CreateMaybeMessage<::Yarn::StringInfo>(Arena*);
+template<> YARNSPINNEREDITOR_API ::Yarn::CompilerOutput* Arena::CreateMaybeMessage<::Yarn::CompilerOutput>(Arena*);
+template<> YARNSPINNEREDITOR_API ::Yarn::CompilerOutput_StringsEntry_DoNotUse* Arena::CreateMaybeMessage<::Yarn::CompilerOutput_StringsEntry_DoNotUse>(Arena*);
+template<> YARNSPINNEREDITOR_API ::Yarn::Diagnostic* Arena::CreateMaybeMessage<::Yarn::Diagnostic>(Arena*);
+template<> YARNSPINNEREDITOR_API ::Yarn::Position* Arena::CreateMaybeMessage<::Yarn::Position>(Arena*);
+template<> YARNSPINNEREDITOR_API ::Yarn::Range* Arena::CreateMaybeMessage<::Yarn::Range>(Arena*);
+template<> YARNSPINNEREDITOR_API ::Yarn::StringInfo* Arena::CreateMaybeMessage<::Yarn::StringInfo>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace Yarn {
 
@@ -86,12 +86,12 @@ enum Diagnostic_Severity : int {
   Diagnostic_Severity_Diagnostic_Severity_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   Diagnostic_Severity_Diagnostic_Severity_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
-YARNSPINNER_API bool Diagnostic_Severity_IsValid(int value);
+YARNSPINNEREDITOR_API bool Diagnostic_Severity_IsValid(int value);
 constexpr Diagnostic_Severity Diagnostic_Severity_Severity_MIN = Diagnostic_Severity_Error;
 constexpr Diagnostic_Severity Diagnostic_Severity_Severity_MAX = Diagnostic_Severity_Info;
 constexpr int Diagnostic_Severity_Severity_ARRAYSIZE = Diagnostic_Severity_Severity_MAX + 1;
 
-YARNSPINNER_API const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Diagnostic_Severity_descriptor();
+YARNSPINNEREDITOR_API const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Diagnostic_Severity_descriptor();
 template<typename T>
 inline const std::string& Diagnostic_Severity_Name(T enum_t_value) {
   static_assert(::std::is_same<T, Diagnostic_Severity>::value ||
@@ -133,7 +133,7 @@ public:
 
 // -------------------------------------------------------------------
 
-class YARNSPINNER_API CompilerOutput final :
+class YARNSPINNEREDITOR_API CompilerOutput final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Yarn.CompilerOutput) */ {
  public:
   inline CompilerOutput() : CompilerOutput(nullptr) {}
@@ -336,7 +336,7 @@ class YARNSPINNER_API CompilerOutput final :
 };
 // -------------------------------------------------------------------
 
-class YARNSPINNER_API Range final :
+class YARNSPINNEREDITOR_API Range final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Yarn.Range) */ {
  public:
   inline Range() : Range(nullptr) {}
@@ -513,7 +513,7 @@ class YARNSPINNER_API Range final :
 };
 // -------------------------------------------------------------------
 
-class YARNSPINNER_API Position final :
+class YARNSPINNEREDITOR_API Position final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Yarn.Position) */ {
  public:
   inline Position() : Position(nullptr) {}
@@ -672,7 +672,7 @@ class YARNSPINNER_API Position final :
 };
 // -------------------------------------------------------------------
 
-class YARNSPINNER_API Diagnostic final :
+class YARNSPINNEREDITOR_API Diagnostic final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Yarn.Diagnostic) */ {
  public:
   inline Diagnostic() : Diagnostic(nullptr) {}
@@ -904,7 +904,7 @@ class YARNSPINNER_API Diagnostic final :
 };
 // -------------------------------------------------------------------
 
-class YARNSPINNER_API StringInfo final :
+class YARNSPINNEREDITOR_API StringInfo final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Yarn.StringInfo) */ {
  public:
   inline StringInfo() : StringInfo(nullptr) {}
