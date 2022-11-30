@@ -12,8 +12,8 @@ set_target_properties(protobuf::libprotobuf-lite PROPERTIES
   IMPORTED_LOCATION_DEBUG "${_IMPORT_PREFIX}/debug/lib/libprotobuf-lited.a"
   )
 
-list(APPEND _IMPORT_CHECK_TARGETS protobuf::libprotobuf-lite )
-list(APPEND _IMPORT_CHECK_FILES_FOR_protobuf::libprotobuf-lite "${_IMPORT_PREFIX}/debug/lib/libprotobuf-lited.a" )
+list(APPEND _cmake_import_check_targets protobuf::libprotobuf-lite )
+list(APPEND _cmake_import_check_files_for_protobuf::libprotobuf-lite "${_IMPORT_PREFIX}/debug/lib/libprotobuf-lited.a" )
 
 # Import target "protobuf::libprotobuf" for configuration "Debug"
 set_property(TARGET protobuf::libprotobuf APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
@@ -22,8 +22,8 @@ set_target_properties(protobuf::libprotobuf PROPERTIES
   IMPORTED_LOCATION_DEBUG "${_IMPORT_PREFIX}/debug/lib/libprotobufd.a"
   )
 
-list(APPEND _IMPORT_CHECK_TARGETS protobuf::libprotobuf )
-list(APPEND _IMPORT_CHECK_FILES_FOR_protobuf::libprotobuf "${_IMPORT_PREFIX}/debug/lib/libprotobufd.a" )
+list(APPEND _cmake_import_check_targets protobuf::libprotobuf )
+list(APPEND _cmake_import_check_files_for_protobuf::libprotobuf "${_IMPORT_PREFIX}/debug/lib/libprotobufd.a" )
 
 # Import target "protobuf::libprotoc" for configuration "Debug"
 set_property(TARGET protobuf::libprotoc APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
@@ -32,8 +32,8 @@ set_target_properties(protobuf::libprotoc PROPERTIES
   IMPORTED_LOCATION_DEBUG "${_IMPORT_PREFIX}/debug/lib/libprotocd.a"
   )
 
-list(APPEND _IMPORT_CHECK_TARGETS protobuf::libprotoc )
-list(APPEND _IMPORT_CHECK_FILES_FOR_protobuf::libprotoc "${_IMPORT_PREFIX}/debug/lib/libprotocd.a" )
+list(APPEND _cmake_import_check_targets protobuf::libprotoc )
+list(APPEND _cmake_import_check_files_for_protobuf::libprotoc "${_IMPORT_PREFIX}/debug/lib/libprotocd.a" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

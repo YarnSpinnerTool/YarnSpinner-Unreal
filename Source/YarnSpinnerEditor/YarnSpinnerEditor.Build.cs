@@ -28,7 +28,7 @@ public class YarnSpinnerEditor : ModuleRules
         PublicDefinitions.Add($"YSC_PATH=TEXT(\"{yscPath}\")");
 
 		if (Target.Platform == UnrealTargetPlatform.Mac) {
-			PublicAdditionalLibraries.Add(Path.Combine(protobufDir, "lib", "libprotobufd.a"));
+			PublicAdditionalLibraries.Add(Path.Combine(protobufDir, "lib", "libprotobuf.a"));
         } else {
             throw new System.PlatformNotSupportedException($"Platform {Target.Platform} is not currently supported.");
         }

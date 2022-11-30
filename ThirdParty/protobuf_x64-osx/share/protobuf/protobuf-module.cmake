@@ -94,7 +94,7 @@ function(_protobuf_find_libraries name filename)
   elseif(${name}_LIBRARY)
     # Honor cache entry used by CMake 3.5 and lower.
     set(${name}_LIBRARIES "${${name}_LIBRARY}" PARENT_SCOPE)
-  else()
+  elseif(TARGET protobuf::lib${filename})
     get_target_property(${name}_LIBRARY_RELEASE protobuf::lib${filename}
       LOCATION_RELEASE)
     get_target_property(${name}_LIBRARY_RELWITHDEBINFO protobuf::lib${filename}
@@ -134,27 +134,29 @@ get_target_property(Protobuf_INCLUDE_DIRS protobuf::libprotobuf
   INTERFACE_INCLUDE_DIRECTORIES)
 
 # Set the protoc Executable
-get_target_property(Protobuf_PROTOC_EXECUTABLE protobuf::protoc
-  IMPORTED_LOCATION_RELEASE)
-if(NOT EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
+if(NOT Protobuf_PROTOC_EXECUTABLE AND TARGET protobuf::protoc)
   get_target_property(Protobuf_PROTOC_EXECUTABLE protobuf::protoc
-    IMPORTED_LOCATION_RELWITHDEBINFO)
-endif()
-if(NOT EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
-  get_target_property(Protobuf_PROTOC_EXECUTABLE protobuf::protoc
-    IMPORTED_LOCATION_MINSIZEREL)
-endif()
-if(NOT EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
-  get_target_property(Protobuf_PROTOC_EXECUTABLE protobuf::protoc
-    IMPORTED_LOCATION_DEBUG)
-endif()
-if(NOT EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
-  get_target_property(Protobuf_PROTOC_EXECUTABLE protobuf::protoc
-    IMPORTED_LOCATION_NOCONFIG)
+    IMPORTED_LOCATION_RELEASE)
+  if(NOT EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
+    get_target_property(Protobuf_PROTOC_EXECUTABLE protobuf::protoc
+      IMPORTED_LOCATION_RELWITHDEBINFO)
+  endif()
+  if(NOT EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
+    get_target_property(Protobuf_PROTOC_EXECUTABLE protobuf::protoc
+      IMPORTED_LOCATION_MINSIZEREL)
+  endif()
+  if(NOT EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
+    get_target_property(Protobuf_PROTOC_EXECUTABLE protobuf::protoc
+      IMPORTED_LOCATION_DEBUG)
+  endif()
+  if(NOT EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
+    get_target_property(Protobuf_PROTOC_EXECUTABLE protobuf::protoc
+      IMPORTED_LOCATION_NOCONFIG)
+  endif()
 endif()
 
 # Version info variable
-set(Protobuf_VERSION "3.19.4.0")
+set(Protobuf_VERSION "3.21.8.0")
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Protobuf

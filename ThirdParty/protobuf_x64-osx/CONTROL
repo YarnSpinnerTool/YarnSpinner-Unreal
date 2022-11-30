@@ -1,8 +1,0 @@
-Package: protobuf
-Version: 3.19.4
-Depends: protobuf:arm64-osx, vcpkg-cmake:arm64-osx, vcpkg-cmake-config:arm64-osx
-Architecture: x64-osx
-Multi-Arch: same
-Abi: eab73bd4c48902a38ae32d47b33be0b874f6cf8c941476438f509d4b26d5c1da
-Description: Protocol Buffers - Google's data interchange format
-Type: Port
