@@ -58,7 +58,7 @@ void ADialogueRunner::PreInitializeComponents()
     bool parseSuccess = program.ParsePartialFromArray(yarnAsset->Data.GetData(), yarnAsset->Data.Num());
 
     if (!parseSuccess) {
-        UE_LOG(LogYarnSpinner, Error, TEXT("DialogueRunner can't initialize, because its Yarn Asset failed to parse."));
+        UE_LOG(LogYarnSpinner, Error, TEXT("DialogueRunner can't initialize, because its Yarn Asset failed to load."));
         return;
     }
 
@@ -261,15 +261,15 @@ void ADialogueRunner::Log(std::string message, Type severity) {
 }
 
 void ADialogueRunner::SetValue(std::string name, bool value) {
-    UE_LOG(LogYarnSpinner, Error, TEXT("YarnSpinner: set %s to bool %i"), UTF8_TO_TCHAR(name.c_str()), value);
+    UE_LOG(LogYarnSpinner, Error, TEXT("Setting Yarn variables is not currently supported. (Attempted to set set %s to bool %i)"), UTF8_TO_TCHAR(name.c_str()), value);
 }
 
 void ADialogueRunner::SetValue(std::string name, float value) {
-    UE_LOG(LogYarnSpinner, Error, TEXT("YarnSpinner: set %s to float %f"), UTF8_TO_TCHAR(name.c_str()), value);
+    UE_LOG(LogYarnSpinner, Error, TEXT("Setting Yarn variables is not currently supported.  (Attempted to set %s to float %f)"), UTF8_TO_TCHAR(name.c_str()), value);
 }
 
 void ADialogueRunner::SetValue(std::string name, std::string value) {
-    UE_LOG(LogYarnSpinner, Error, TEXT("YarnSpinner: set %s to string \"%s\""), 
+    UE_LOG(LogYarnSpinner, Error, TEXT("Setting Yarn variables is not currently supported. (Attempted to set %s to string \"%s\")"), 
         UTF8_TO_TCHAR(name.c_str()), 
         UTF8_TO_TCHAR(value.c_str()));
 }
@@ -279,12 +279,12 @@ bool ADialogueRunner::HasValue(std::string name) {
 }
 
 Yarn::Value ADialogueRunner::GetValue(std::string name) {
-    UE_LOG(LogYarnSpinner, Error, TEXT("YarnSpinner: get %s"), UTF8_TO_TCHAR(name.c_str()));
+    UE_LOG(LogYarnSpinner, Error, TEXT("Getting Yarn variables is not currently supported. (%s)"), UTF8_TO_TCHAR(name.c_str()));
 
     return Yarn::Value(0);
 }
 
 void ADialogueRunner::ClearValue(std::string name) {
-    UE_LOG(LogYarnSpinner, Error, TEXT("YarnSpinner: clear %s"), UTF8_TO_TCHAR(name.c_str()));
+    UE_LOG(LogYarnSpinner, Error, TEXT("Clearing Yarn variables is not currently supported. (%s)"), UTF8_TO_TCHAR(name.c_str()));
 
 }
