@@ -3,7 +3,7 @@
 Welcome to **Yarn Spinner for Unreal!** Yarn Spinner is the friendly dialogue tool that makes it easy for writers to create content, and has powerful features for programmers.
 
 > **Warning**
-> This plugin is in an **extremely early alpha** state. Please see the list of [Caveats](#caveats). This release is intended to get early feedback from users.
+> This plugin is in an **extremely early alpha** state. Please see the list of [Caveats](#caveats). This release is intended to get early feedback from users. **Do not use this plugin in production.**
 
 ## Installation Instructions
 
@@ -16,7 +16,7 @@ Welcome to **Yarn Spinner for Unreal!** Yarn Spinner is the friendly dialogue to
 
 There are several important Yarn Spinner features that are not yet present in the alpha release of Yarn Spinner for Unreal.
 
-- **Tested on macOS only.** We haven't yet tested this on Windows. It may not even compile.
+- **macOS support only.** Windows is not currently supported, but it will be in future version.
 - **No variables.** Storing and retrieving Yarn variables is not yet implemented.
 - **No localisation support.** The Yarn Spinner importer does not currently populate string tables automatically.
 - **No functions.** Functions cannot be called from inside Yarn scripts.
