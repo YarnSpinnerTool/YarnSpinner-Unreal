@@ -1,9 +1,13 @@
 # Yarn Spinner for Unreal
 
+<img src="https://yarnspinner.dev/img/YarnSpinnerLogo.png" alt="Yarn Spinner logo" width="100px;" align="right">
+
 Welcome to **Yarn Spinner for Unreal!** Yarn Spinner is the friendly dialogue tool that makes it easy for writers to create content, and has powerful features for programmers.
 
 > **Warning**
 > This plugin is in an **extremely early alpha** state. Please see the list of [Caveats](#caveats). This release is intended to get early feedback from users. **Do not use this plugin in production.**
+
+<img src=".github/assets/Epic_MegaGrants_Recipient_logo.png" alt="Yarn Spinner logo" width="100px;" align="right"> This project's development is supported by an Epic MegaGrant.
 
 ## Installation Instructions
 
