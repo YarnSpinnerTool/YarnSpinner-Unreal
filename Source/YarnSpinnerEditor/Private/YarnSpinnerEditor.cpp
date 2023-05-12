@@ -2,18 +2,23 @@
 
 #include "YarnSpinnerEditor.h"
 
+#include "AssetToolsModule.h"
+#include "IAssetTools.h"
 #include "YarnSpinner.h"
 
 #include "IYarnSpinnerModuleInterface.h"
+#include "YarnAssetActions.h"
+#include "Interfaces/IPluginManager.h"
+
 
 DEFINE_LOG_CATEGORY(LogYarnSpinnerEditor);
 
-//IMPLEMENT_GAME_MODULE(FToolExampleEditor, ToolExampleEditor)
 
 void FYarnSpinnerEditor::AddModuleListeners()
 {
     // add tools later
 }
+
 
 void FYarnSpinnerEditor::StartupModule()
 {
@@ -35,6 +40,7 @@ void FYarnSpinnerEditor::StartupModule()
     IYarnSpinnerModuleInterface::StartupModule();
 }
 
+
 void FYarnSpinnerEditor::ShutdownModule()
 {
     // Unregister all the asset types that we registered
@@ -50,5 +56,6 @@ void FYarnSpinnerEditor::ShutdownModule()
     
     IYarnSpinnerModuleInterface::ShutdownModule();
 }
+
 
 IMPLEMENT_MODULE(FYarnSpinnerEditor, YarnSpinnerEditor)

@@ -9,7 +9,7 @@
 #include "ReimportYarnAssetFactory.generated.h"
 
 UCLASS()
-class UNREALED_API UReimportYarnAssetFactory : public UYarnAssetFactory, public FReimportHandler
+class UReimportYarnAssetFactory : public UYarnAssetFactory, public FReimportHandler
 {
 	GENERATED_UCLASS_BODY()
 

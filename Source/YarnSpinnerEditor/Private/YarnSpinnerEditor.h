@@ -5,10 +5,12 @@
 //#include "SlateExtras.h"
 //#include "Editor/LevelEditor/Public/LevelEditor.h"
 //#include "Editor/PropertyEditor/Public/PropertyEditing.h"
+#include "CoreMinimal.h"
 #include "IAssetTypeActions.h"
 #include "IYarnSpinnerModuleInterface.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogYarnSpinnerEditor, Log, All);
+
+YARNSPINNEREDITOR_API DECLARE_LOG_CATEGORY_EXTERN(LogYarnSpinnerEditor, Log, All);
 
 class FYarnSpinnerEditor : public IYarnSpinnerModuleInterface
 {
@@ -21,7 +23,7 @@ public:
 
     static inline FYarnSpinnerEditor& Get()
     {
-        return FModuleManager::LoadModuleChecked< FYarnSpinnerEditor >("YarnSpinnerEditor");
+        return FModuleManager::LoadModuleChecked<FYarnSpinnerEditor>("YarnSpinnerEditor");
     }
 
     static inline bool IsAvailable()

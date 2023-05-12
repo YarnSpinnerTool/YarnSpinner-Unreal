@@ -5,9 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "YarnAsset.h"
+
+THIRD_PARTY_INCLUDES_START
 #include "YarnSpinnerCore/VirtualMachine.h"
 #include "YarnSpinnerCore/Library.h"
 #include "YarnSpinnerCore/Common.h"
+THIRD_PARTY_INCLUDES_END
+
 #include "DialogueRunner.generated.h"
 
 UCLASS()

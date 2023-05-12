@@ -1,4 +1,3 @@
-// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
 using System.IO;
@@ -9,65 +8,33 @@ public class YarnSpinnerEditor : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		OptimizeCode = CodeOptimization.Never;
+        string YscPath;
 
-		var protobufDir = Path.Combine(PluginDirectory,
-            "ThirdParty",
-            "protobuf_x64-osx");
+        if (Target.Platform == UnrealTargetPlatform.Mac)
+        {
+			// The protobuf header files use '#if _MSC_VER', but this will
+			// trigger -Wundef. Disable unidentified compiler directive warnings.
+			bEnableUndefinedIdentifierWarnings = false;
 
-        // PrivateIncludePaths.Add(Path.Combine(protobufDir, "include"));
-
-		// PublicDefinitions.Add("GOOGLE_PROTOBUF_NO_RTTI=1");
-
-		// // The protobuf header files use '#if _MSC_VER', but this will
-		// // trigger -Wundef. Disable unidentified compiler directive warnings.
-        bEnableUndefinedIdentifierWarnings = false;
-
-        var yscPath = Path.Combine("YarnSpinner/Tools/osx-x64/ysc");
-
-        PublicDefinitions.Add($"YSC_PATH=TEXT(\"{yscPath}\")");
-
-		if (Target.Platform == UnrealTargetPlatform.Mac) {
-			PublicAdditionalLibraries.Add(Path.Combine(protobufDir, "lib", "libprotobuf.a"));
-        } else {
-            throw new System.PlatformNotSupportedException($"Platform {Target.Platform} is not currently supported.");
+	        YscPath = ToolPath(Target) + "ysc";
+        }
+        else if (Target.Platform == UnrealTargetPlatform.Win64)
+        {
+	        YscPath = ToolPath(Target) + "ysc.exe";
+        }
+        else
+        {
+            throw new System.PlatformNotSupportedException("Platform " + Target.Platform + " is not currently supported.");
         }
 
+        PublicDefinitions.Add("YSC_PATH=TEXT(\"" + YscPath + "\")");
+        
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[] {
 				"AssetTools",
 				"MainFrame",
-//				"WorkspaceMenuStructure",
 			});
-
-		PrivateIncludePaths.AddRange(
-			new string[] {
-				"YarnSpinnerEditor/Private",
-				// "TextAssetEditor/Private/AssetTools",
-				// "TextAssetEditor/Private/Factories",
-				// "TextAssetEditor/Private/Shared",
-				// "TextAssetEditor/Private/Styles",
-				// "TextAssetEditor/Private/Toolkits",
-				// "TextAssetEditor/Private/Widgets",
-			});
-   
-        PublicDependencyModuleNames.AddRange(
-            new string[] {
-                "ContentBrowser",
-                "Core",
-                "CoreUObject",
-                "DesktopWidgets",
-                "EditorStyle",
-                "Engine",
-                "InputCore",
-                "Projects",
-                "Slate",
-                "SlateCore",
-                "UnrealEd",
-
-                "YarnSpinner",
-            });
-
+		
 		PrivateDependencyModuleNames.AddRange(
 			new string[] {
 				"ContentBrowser",
@@ -82,21 +49,13 @@ public class YarnSpinnerEditor : ModuleRules
 				"SlateCore",
 				"UnrealEd",
 
-				"YarnSpinner",
-			});
-
-		PrivateIncludePathModuleNames.AddRange(
-			new string[] {
-               "Core",
-                "CoreUObject",
-                "DesktopWidgets",
-                "EditorStyle",
-                "Engine",
-                "InputCore",
-                "Projects",
-				"AssetTools",
-				"UnrealEd",
-//				"WorkspaceMenuStructure",
+                "YarnSpinner",
+				"YSProtobuf",
 			});
 	}
+	
+	public string ToolPath(ReadOnlyTargetRules Target)
+	{
+		return "YarnSpinner-Unreal/Tools/" + Target.Platform + "/";
+    }
 }

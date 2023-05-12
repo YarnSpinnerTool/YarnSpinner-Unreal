@@ -1,0 +1,11 @@
+prefix=D:/dev/YarnSpinner/YarnSpinner-Protobuf4Unreal/out/install
+exec_prefix=D:/dev/YarnSpinner/YarnSpinner-Protobuf4Unreal/out/install
+libdir=D:/dev/YarnSpinner/YarnSpinner-Protobuf4Unreal/out/install/lib/Win64/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>
+includedir=D:/dev/YarnSpinner/YarnSpinner-Protobuf4Unreal/out/install/include
+
+Name: Protocol Buffers
+Description: Google's Data Interchange Format
+Version: 3.21.9.0
+Libs: -L${libdir} -lprotobuf-lite 
+Cflags: -I${includedir}
+Conflicts: protobuf

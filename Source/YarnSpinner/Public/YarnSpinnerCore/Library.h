@@ -13,7 +13,7 @@ namespace Yarn
     using YarnFunction = std::function<T(std::vector<Value>)>;
 
     template <typename T>
-    class FunctionInfo
+    class YARNSPINNER_API FunctionInfo
     {
     public:
         int ExpectedParameterCount;
@@ -23,7 +23,7 @@ namespace Yarn
         FunctionInfo(int paramCount, T (*f)(std::vector<Value>));
     };
 
-    class Library
+    class YARNSPINNER_API Library
     {
     private:
         ILogger &logger;

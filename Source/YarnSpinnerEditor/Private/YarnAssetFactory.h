@@ -10,7 +10,9 @@
 #include "YarnAsset.h"
 #include "EditorReimportHandler.h"
 
-#include "compiler_output.pb.h"
+THIRD_PARTY_INCLUDES_START
+#include "YarnSpinnerCore/compiler_output.pb.h"
+THIRD_PARTY_INCLUDES_END
 
 #include "YarnAssetFactory.generated.h"
 

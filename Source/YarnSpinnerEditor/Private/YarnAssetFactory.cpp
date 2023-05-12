@@ -2,17 +2,22 @@
 
 #include "YarnAssetFactory.h"
 
+#include "YarnSpinnerEditor.h"
+
 #include "Misc/FileHelper.h"
 #include "EditorFramework/AssetImportData.h"
 #include "Containers/UnrealString.h"
 
 #include "ReimportYarnAssetFactory.h"
+#include "YarnSpinner.h"
 
-#include "yarn_spinner.pb.h"
-#include "compiler_output.pb.h"
+THIRD_PARTY_INCLUDES_START
+#include "YarnSpinnerCore/yarn_spinner.pb.h"
+#include "YarnSpinnerCore/compiler_output.pb.h"
 
 #include <google/protobuf/util/json_util.h>
 #include <google/protobuf/util/type_resolver_util.h>
+THIRD_PARTY_INCLUDES_END
 
 google::protobuf::Message &from_json(google::protobuf::Message &msg,
 								const std::string &json);
@@ -173,7 +178,11 @@ bool UYarnAssetFactory::GetCompiledDataForScript(const TCHAR* InFilePath, Yarn::
 	UE_LOG(LogYarnSpinnerEditor, Log, TEXT("Calling ysc with %s"), *params);
 	FPlatformProcess::ExecProcess(*yscPath, *params, &returnCode, &stdOut, &stdErr);
 
-	UE_LOG(LogYarnSpinnerEditor, Log, TEXT("ysc returned %i; stdout:\n%s\nstderr:%s\n"), returnCode, *stdOut, *stdErr);
+	UE_LOG(LogYarnSpinnerEditor, Log, TEXT("ysc returned %i;"), returnCode);
+	UE_LOG(LogYarnSpinnerEditor, Log, TEXT("stdout:"));
+	YS_LOG_CLEAN("%s", *stdOut);
+	UE_LOG(LogYarnSpinnerEditor, Log, TEXT("stderr:"));
+	YS_LOG_CLEAN("%s", *stdErr);
 
 	if (returnCode != 0) {
 		UE_LOG(LogYarnSpinnerEditor, Error, TEXT("Error compiling Yarn script: %s"), *stdErr);
@@ -188,7 +197,8 @@ bool UYarnAssetFactory::GetCompiledDataForScript(const TCHAR* InFilePath, Yarn::
 
 	if (!status.ok()) {
 		// Whoa, we failed to parse a CompilerOutput struct from the compiler.
-		UE_LOG(LogYarnSpinnerEditor, Error, TEXT("Error importing result from ysc: %s"), status.ToString().c_str());
+		UE_LOG(LogYarnSpinnerEditor, Error, TEXT("Error importing result from ysc: %s"), *FString(status.ToString().c_str()));
+		
 		return false;
 	}
 

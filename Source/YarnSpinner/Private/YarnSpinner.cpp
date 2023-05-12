@@ -1,11 +1,23 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "YarnSpinner.h"
+
+#include "Modules/ModuleManager.h"
+#include "Interfaces/IPluginManager.h"
+#include "Misc/MessageDialog.h"
+
+THIRD_PARTY_INCLUDES_START
 #include <google/protobuf/stubs/logging.h>
+THIRD_PARTY_INCLUDES_END
+
 
 #define LOCTEXT_NAMESPACE "FYarnSpinnerModule"
 
+
 DEFINE_LOG_CATEGORY(LogYarnSpinner);
+DEFINE_LOG_CATEGORY(YSLogClean);
+DEFINE_LOG_CATEGORY(YSLogFuncSig);
+
 
 void UnrealLogHandler(google::protobuf::LogLevel level, const char* filename, int line,
                         const std::string& message) {
@@ -17,7 +29,8 @@ void FYarnSpinnerModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 	SetLogHandler(UnrealLogHandler);
-	UE_LOG(LogYarnSpinner, Warning, TEXT("Installed Protobuf log handler"));
+	
+	UE_LOG(LogYarnSpinner, Display, TEXT("Installed Protobuf log handler"));
 }
 
 void FYarnSpinnerModule::ShutdownModule()
@@ -30,7 +43,6 @@ bool FYarnSpinnerModule::SupportsDynamicReloading()
 {
     return true;
 }
-
 
 
 #undef LOCTEXT_NAMESPACE

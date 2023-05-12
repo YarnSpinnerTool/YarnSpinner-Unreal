@@ -1,4 +1,4 @@
-#include "VirtualMachine.h"
+#include "YarnSpinnerCore/VirtualMachine.h"
 
 #include <stack>
 #include <regex>

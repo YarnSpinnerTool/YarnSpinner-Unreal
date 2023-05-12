@@ -5,8 +5,12 @@
 #include "Line.h"
 #include "Option.h"
 #include "YarnSpinner.h"
+
+THIRD_PARTY_INCLUDES_START
 #include "YarnSpinnerCore/VirtualMachine.h"
+THIRD_PARTY_INCLUDES_END
 //#include "StaticParty.h"
+
 
 static void GetDisplayTextForLine(ULine* line, Yarn::Line& yarnLine, UYarnAsset* yarnAsset) {
     // FIXME: Currently, we store the text of lines directly in the
@@ -53,7 +57,7 @@ void ADialogueRunner::PreInitializeComponents()
         return;
     }
 
-    Yarn::Program program;
+    Yarn::Program program{};
 
     bool parseSuccess = program.ParsePartialFromArray(yarnAsset->Data.GetData(), yarnAsset->Data.Num());
 

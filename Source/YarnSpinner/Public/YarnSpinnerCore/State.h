@@ -4,12 +4,12 @@
 #include <stack>
 #include <vector>
 
-#include "Common.h"
+#include "YarnSpinnerCore/Common.h"
 #include "Value.h"
 
 namespace Yarn
 {
-    class State
+    class YARNSPINNER_API State
     {
     public:
         std::vector<Value> stack;

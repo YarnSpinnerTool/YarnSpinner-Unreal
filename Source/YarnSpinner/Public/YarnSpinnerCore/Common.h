@@ -9,7 +9,7 @@
 namespace Yarn
 {
 
-    class ILogger
+    class YARNSPINNER_API ILogger
     {
     public:
         enum Type

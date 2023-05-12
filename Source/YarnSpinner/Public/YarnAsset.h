@@ -23,7 +23,7 @@ public:
     TMap<FName, FString> Lines;
 
 #if WITH_EDITORONLY_DATA
-    YARNSPINNER_API virtual void PostInitProperties() override;
+    virtual void PostInitProperties() override;
 	
     /** The file this data table was imported from, may be empty */
 	UPROPERTY(VisibleAnywhere, Instanced, Category=ImportSource)

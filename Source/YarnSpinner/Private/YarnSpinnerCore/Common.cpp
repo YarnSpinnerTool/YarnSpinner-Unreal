@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "YarnSpinnerCore/Common.h"
 
 #include <string>
 #include <stdexcept>

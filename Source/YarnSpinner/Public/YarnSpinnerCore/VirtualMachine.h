@@ -2,11 +2,11 @@
 
 #include <string>
 #include <memory>
-#include "yarn_spinner.pb.h"
+#include "YarnSpinnerCore/yarn_spinner.pb.h"
 
-#include "Common.h"
-#include "Library.h"
-#include "State.h"
+#include "YarnSpinnerCore/Common.h"
+#include "YarnSpinnerCore/Library.h"
+#include "YarnSpinnerCore/State.h"
 #include "Value.h"
 
 #include <functional>
@@ -14,7 +14,7 @@
 namespace Yarn
 {
 
-    class IVariableStorage
+    class YARNSPINNER_API IVariableStorage
     {
     public:
         virtual void SetValue(std::string name, bool value) = 0;
@@ -27,7 +27,7 @@ namespace Yarn
         virtual void ClearValue(std::string name) = 0;
     };
 
-    class VirtualMachine
+    class YARNSPINNER_API VirtualMachine
     {
     public:
         enum ExecutionState

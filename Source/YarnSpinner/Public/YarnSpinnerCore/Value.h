@@ -1,12 +1,12 @@
 #pragma once
 
 #include <string>
-#include "Common.h"
+#include "YarnSpinnerCore/Common.h"
 #include <cmath>
 
 namespace Yarn
 {
-    class Value
+    class YARNSPINNER_API Value
     {
 
     public:
