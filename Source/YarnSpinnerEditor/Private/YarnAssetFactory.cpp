@@ -19,8 +19,7 @@ THIRD_PARTY_INCLUDES_START
 #include <google/protobuf/util/type_resolver_util.h>
 THIRD_PARTY_INCLUDES_END
 
-google::protobuf::Message &from_json(google::protobuf::Message &msg,
-								const std::string &json);
+// google::protobuf::Message &from_json(google::protobuf::Message &msg, const std::string &json);
 
 UYarnAssetFactory::UYarnAssetFactory( const FObjectInitializer& ObjectInitializer )
     : Super(ObjectInitializer)

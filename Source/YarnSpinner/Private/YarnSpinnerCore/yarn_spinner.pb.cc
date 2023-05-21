@@ -84,6 +84,7 @@ PROTOBUF_CONSTEXPR Node::Node(
     /*decltype(_impl_.instructions_)*/{}
   , /*decltype(_impl_.labels_)*/{::_pbi::ConstantInitialized()}
   , /*decltype(_impl_.tags_)*/{}
+  , /*decltype(_impl_.headers_)*/{}
   , /*decltype(_impl_.name_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.sourcetextstringid_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_._cached_size_)*/{}} {}
@@ -96,6 +97,20 @@ struct NodeDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NodeDefaultTypeInternal _Node_default_instance_;
+PROTOBUF_CONSTEXPR Header::Header(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.key_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.value_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct HeaderDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR HeaderDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~HeaderDefaultTypeInternal() {}
+  union {
+    Header _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 HeaderDefaultTypeInternal _Header_default_instance_;
 PROTOBUF_CONSTEXPR Instruction::Instruction(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.operands_)*/{}
@@ -125,7 +140,7 @@ struct OperandDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 OperandDefaultTypeInternal _Operand_default_instance_;
 }  // namespace Yarn
-static ::_pb::Metadata file_level_metadata_yarn_5fspinner_2eproto[7];
+static ::_pb::Metadata file_level_metadata_yarn_5fspinner_2eproto[8];
 static const ::_pb::EnumDescriptor* file_level_enum_descriptors_yarn_5fspinner_2eproto[1];
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_yarn_5fspinner_2eproto = nullptr;
 
@@ -180,6 +195,15 @@ const uint32_t TableStruct_yarn_5fspinner_2eproto::offsets[] PROTOBUF_SECTION_VA
   PROTOBUF_FIELD_OFFSET(::Yarn::Node, _impl_.labels_),
   PROTOBUF_FIELD_OFFSET(::Yarn::Node, _impl_.tags_),
   PROTOBUF_FIELD_OFFSET(::Yarn::Node, _impl_.sourcetextstringid_),
+  PROTOBUF_FIELD_OFFSET(::Yarn::Node, _impl_.headers_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::Yarn::Header, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::Yarn::Header, _impl_.key_),
+  PROTOBUF_FIELD_OFFSET(::Yarn::Header, _impl_.value_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::Yarn::Instruction, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -205,8 +229,9 @@ static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protode
   { 20, -1, -1, sizeof(::Yarn::Program)},
   { 29, 37, -1, sizeof(::Yarn::Node_LabelsEntry_DoNotUse)},
   { 39, -1, -1, sizeof(::Yarn::Node)},
-  { 50, -1, -1, sizeof(::Yarn::Instruction)},
-  { 58, -1, -1, sizeof(::Yarn::Operand)},
+  { 51, -1, -1, sizeof(::Yarn::Header)},
+  { 59, -1, -1, sizeof(::Yarn::Instruction)},
+  { 67, -1, -1, sizeof(::Yarn::Operand)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
@@ -215,6 +240,7 @@ static const ::_pb::Message* const file_default_instances[] = {
   &::Yarn::_Program_default_instance_._instance,
   &::Yarn::_Node_LabelsEntry_DoNotUse_default_instance_._instance,
   &::Yarn::_Node_default_instance_._instance,
+  &::Yarn::_Header_default_instance_._instance,
   &::Yarn::_Instruction_default_instance_._instance,
   &::Yarn::_Operand_default_instance_._instance,
 };
@@ -226,30 +252,31 @@ const char descriptor_table_protodef_yarn_5fspinner_2eproto[] PROTOBUF_SECTION_V
   "Yarn.Program.InitialValuesEntry\0328\n\nNodes"
   "Entry\022\013\n\003key\030\001 \001(\t\022\031\n\005value\030\002 \001(\0132\n.Yarn"
   ".Node:\0028\001\032C\n\022InitialValuesEntry\022\013\n\003key\030\001"
-  " \001(\t\022\034\n\005value\030\002 \001(\0132\r.Yarn.Operand:\0028\001\"\276"
+  " \001(\t\022\034\n\005value\030\002 \001(\0132\r.Yarn.Operand:\0028\001\"\335"
   "\001\n\004Node\022\014\n\004name\030\001 \001(\t\022\'\n\014instructions\030\002 "
   "\003(\0132\021.Yarn.Instruction\022&\n\006labels\030\003 \003(\0132\026"
   ".Yarn.Node.LabelsEntry\022\014\n\004tags\030\004 \003(\t\022\032\n\022"
-  "sourceTextStringID\030\005 \001(\t\032-\n\013LabelsEntry\022"
-  "\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\005:\0028\001\"\344\002\n\013Inst"
-  "ruction\022(\n\006opcode\030\001 \001(\0162\030.Yarn.Instructi"
-  "on.OpCode\022\037\n\010operands\030\002 \003(\0132\r.Yarn.Opera"
-  "nd\"\211\002\n\006OpCode\022\013\n\007JUMP_TO\020\000\022\010\n\004JUMP\020\001\022\014\n\010"
-  "RUN_LINE\020\002\022\017\n\013RUN_COMMAND\020\003\022\016\n\nADD_OPTIO"
-  "N\020\004\022\020\n\014SHOW_OPTIONS\020\005\022\017\n\013PUSH_STRING\020\006\022\016"
-  "\n\nPUSH_FLOAT\020\007\022\r\n\tPUSH_BOOL\020\010\022\r\n\tPUSH_NU"
-  "LL\020\t\022\021\n\rJUMP_IF_FALSE\020\n\022\007\n\003POP\020\013\022\r\n\tCALL"
-  "_FUNC\020\014\022\021\n\rPUSH_VARIABLE\020\r\022\022\n\016STORE_VARI"
-  "ABLE\020\016\022\010\n\004STOP\020\017\022\014\n\010RUN_NODE\020\020\"W\n\007Operan"
-  "d\022\026\n\014string_value\030\001 \001(\tH\000\022\024\n\nbool_value\030"
-  "\002 \001(\010H\000\022\025\n\013float_value\030\003 \001(\002H\000B\007\n\005valueb"
-  "\006proto3"
+  "sourceTextStringID\030\005 \001(\t\022\035\n\007headers\030\006 \003("
+  "\0132\014.Yarn.Header\032-\n\013LabelsEntry\022\013\n\003key\030\001 "
+  "\001(\t\022\r\n\005value\030\002 \001(\005:\0028\001\"$\n\006Header\022\013\n\003key\030"
+  "\001 \001(\t\022\r\n\005value\030\002 \001(\t\"\344\002\n\013Instruction\022(\n\006"
+  "opcode\030\001 \001(\0162\030.Yarn.Instruction.OpCode\022\037"
+  "\n\010operands\030\002 \003(\0132\r.Yarn.Operand\"\211\002\n\006OpCo"
+  "de\022\013\n\007JUMP_TO\020\000\022\010\n\004JUMP\020\001\022\014\n\010RUN_LINE\020\002\022"
+  "\017\n\013RUN_COMMAND\020\003\022\016\n\nADD_OPTION\020\004\022\020\n\014SHOW"
+  "_OPTIONS\020\005\022\017\n\013PUSH_STRING\020\006\022\016\n\nPUSH_FLOA"
+  "T\020\007\022\r\n\tPUSH_BOOL\020\010\022\r\n\tPUSH_NULL\020\t\022\021\n\rJUM"
+  "P_IF_FALSE\020\n\022\007\n\003POP\020\013\022\r\n\tCALL_FUNC\020\014\022\021\n\r"
+  "PUSH_VARIABLE\020\r\022\022\n\016STORE_VARIABLE\020\016\022\010\n\004S"
+  "TOP\020\017\022\014\n\010RUN_NODE\020\020\"W\n\007Operand\022\026\n\014string"
+  "_value\030\001 \001(\tH\000\022\024\n\nbool_value\030\002 \001(\010H\000\022\025\n\013"
+  "float_value\030\003 \001(\002H\000B\007\n\005valueb\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_yarn_5fspinner_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_yarn_5fspinner_2eproto = {
-    false, false, 927, descriptor_table_protodef_yarn_5fspinner_2eproto,
+    false, false, 996, descriptor_table_protodef_yarn_5fspinner_2eproto,
     "yarn_spinner.proto",
-    &descriptor_table_yarn_5fspinner_2eproto_once, nullptr, 0, 7,
+    &descriptor_table_yarn_5fspinner_2eproto_once, nullptr, 0, 8,
     schemas, file_default_instances, TableStruct_yarn_5fspinner_2eproto::offsets,
     file_level_metadata_yarn_5fspinner_2eproto, file_level_enum_descriptors_yarn_5fspinner_2eproto,
     file_level_service_descriptors_yarn_5fspinner_2eproto,
@@ -701,6 +728,7 @@ Node::Node(const Node& from)
       decltype(_impl_.instructions_){from._impl_.instructions_}
     , /*decltype(_impl_.labels_)*/{}
     , decltype(_impl_.tags_){from._impl_.tags_}
+    , decltype(_impl_.headers_){from._impl_.headers_}
     , decltype(_impl_.name_){}
     , decltype(_impl_.sourcetextstringid_){}
     , /*decltype(_impl_._cached_size_)*/{}};
@@ -734,6 +762,7 @@ inline void Node::SharedCtor(
       decltype(_impl_.instructions_){arena}
     , /*decltype(_impl_.labels_)*/{::_pbi::ArenaInitialized(), arena}
     , decltype(_impl_.tags_){arena}
+    , decltype(_impl_.headers_){arena}
     , decltype(_impl_.name_){}
     , decltype(_impl_.sourcetextstringid_){}
     , /*decltype(_impl_._cached_size_)*/{}
@@ -764,6 +793,7 @@ inline void Node::SharedDtor() {
   _impl_.labels_.Destruct();
   _impl_.labels_.~MapField();
   _impl_.tags_.~RepeatedPtrField();
+  _impl_.headers_.~RepeatedPtrField();
   _impl_.name_.Destroy();
   _impl_.sourcetextstringid_.Destroy();
 }
@@ -785,6 +815,7 @@ void Node::Clear() {
   _impl_.instructions_.Clear();
   _impl_.labels_.Clear();
   _impl_.tags_.Clear();
+  _impl_.headers_.Clear();
   _impl_.name_.ClearToEmpty();
   _impl_.sourcetextstringid_.ClearToEmpty();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -854,6 +885,19 @@ const char* Node::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
           CHK_(::_pbi::VerifyUTF8(str, "Yarn.Node.sourceTextStringID"));
+        } else
+          goto handle_unusual;
+        continue;
+      // repeated .Yarn.Header headers = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            ptr = ctx->ParseMessage(_internal_add_headers(), ptr);
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<50>(ptr));
         } else
           goto handle_unusual;
         continue;
@@ -950,6 +994,14 @@ uint8_t* Node::_InternalSerialize(
         5, this->_internal_sourcetextstringid(), target);
   }
 
+  // repeated .Yarn.Header headers = 6;
+  for (unsigned i = 0,
+      n = static_cast<unsigned>(this->_internal_headers_size()); i < n; i++) {
+    const auto& repfield = this->_internal_headers(i);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(6, repfield, repfield.GetCachedSize(), target, stream);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -990,6 +1042,13 @@ size_t Node::ByteSizeLong() const {
       _impl_.tags_.Get(i));
   }
 
+  // repeated .Yarn.Header headers = 6;
+  total_size += 1UL * this->_internal_headers_size();
+  for (const auto& msg : this->_impl_.headers_) {
+    total_size +=
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
+
   // string name = 1;
   if (!this->_internal_name().empty()) {
     total_size += 1 +
@@ -1025,6 +1084,7 @@ void Node::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_
   _this->_impl_.instructions_.MergeFrom(from._impl_.instructions_);
   _this->_impl_.labels_.MergeFrom(from._impl_.labels_);
   _this->_impl_.tags_.MergeFrom(from._impl_.tags_);
+  _this->_impl_.headers_.MergeFrom(from._impl_.headers_);
   if (!from._internal_name().empty()) {
     _this->_internal_set_name(from._internal_name());
   }
@@ -1053,6 +1113,7 @@ void Node::InternalSwap(Node* other) {
   _impl_.instructions_.InternalSwap(&other->_impl_.instructions_);
   _impl_.labels_.InternalSwap(&other->_impl_.labels_);
   _impl_.tags_.InternalSwap(&other->_impl_.tags_);
+  _impl_.headers_.InternalSwap(&other->_impl_.headers_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
       &_impl_.name_, lhs_arena,
       &other->_impl_.name_, rhs_arena
@@ -1067,6 +1128,259 @@ void Node::InternalSwap(Node* other) {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_yarn_5fspinner_2eproto_getter, &descriptor_table_yarn_5fspinner_2eproto_once,
       file_level_metadata_yarn_5fspinner_2eproto[4]);
+}
+
+// ===================================================================
+
+class Header::_Internal {
+ public:
+};
+
+Header::Header(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:Yarn.Header)
+}
+Header::Header(const Header& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  Header* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.key_){}
+    , decltype(_impl_.value_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _impl_.key_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.key_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_key().empty()) {
+    _this->_impl_.key_.Set(from._internal_key(), 
+      _this->GetArenaForAllocation());
+  }
+  _impl_.value_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.value_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_value().empty()) {
+    _this->_impl_.value_.Set(from._internal_value(), 
+      _this->GetArenaForAllocation());
+  }
+  // @@protoc_insertion_point(copy_constructor:Yarn.Header)
+}
+
+inline void Header::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.key_){}
+    , decltype(_impl_.value_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.key_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.key_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.value_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.value_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+}
+
+Header::~Header() {
+  // @@protoc_insertion_point(destructor:Yarn.Header)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void Header::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.key_.Destroy();
+  _impl_.value_.Destroy();
+}
+
+void Header::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void Header::Clear() {
+// @@protoc_insertion_point(message_clear_start:Yarn.Header)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.key_.ClearToEmpty();
+  _impl_.value_.ClearToEmpty();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* Header::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // string key = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          auto str = _internal_mutable_key();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "Yarn.Header.key"));
+        } else
+          goto handle_unusual;
+        continue;
+      // string value = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          auto str = _internal_mutable_value();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "Yarn.Header.value"));
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* Header::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:Yarn.Header)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string key = 1;
+  if (!this->_internal_key().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_key().data(), static_cast<int>(this->_internal_key().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "Yarn.Header.key");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_key(), target);
+  }
+
+  // string value = 2;
+  if (!this->_internal_value().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_value().data(), static_cast<int>(this->_internal_value().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "Yarn.Header.value");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_value(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:Yarn.Header)
+  return target;
+}
+
+size_t Header::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Yarn.Header)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string key = 1;
+  if (!this->_internal_key().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_key());
+  }
+
+  // string value = 2;
+  if (!this->_internal_value().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_value());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Header::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    Header::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Header::GetClassData() const { return &_class_data_; }
+
+
+void Header::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<Header*>(&to_msg);
+  auto& from = static_cast<const Header&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:Yarn.Header)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_key().empty()) {
+    _this->_internal_set_key(from._internal_key());
+  }
+  if (!from._internal_value().empty()) {
+    _this->_internal_set_value(from._internal_value());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void Header::CopyFrom(const Header& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Yarn.Header)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool Header::IsInitialized() const {
+  return true;
+}
+
+void Header::InternalSwap(Header* other) {
+  using std::swap;
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.key_, lhs_arena,
+      &other->_impl_.key_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.value_, lhs_arena,
+      &other->_impl_.value_, rhs_arena
+  );
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata Header::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_yarn_5fspinner_2eproto_getter, &descriptor_table_yarn_5fspinner_2eproto_once,
+      file_level_metadata_yarn_5fspinner_2eproto[5]);
 }
 
 // ===================================================================
@@ -1281,7 +1595,7 @@ void Instruction::InternalSwap(Instruction* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata Instruction::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_yarn_5fspinner_2eproto_getter, &descriptor_table_yarn_5fspinner_2eproto_once,
-      file_level_metadata_yarn_5fspinner_2eproto[5]);
+      file_level_metadata_yarn_5fspinner_2eproto[6]);
 }
 
 // ===================================================================
@@ -1571,7 +1885,7 @@ void Operand::InternalSwap(Operand* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata Operand::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_yarn_5fspinner_2eproto_getter, &descriptor_table_yarn_5fspinner_2eproto_once,
-      file_level_metadata_yarn_5fspinner_2eproto[6]);
+      file_level_metadata_yarn_5fspinner_2eproto[7]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -1596,6 +1910,10 @@ Arena::CreateMaybeMessage< ::Yarn::Node_LabelsEntry_DoNotUse >(Arena* arena) {
 template<> PROTOBUF_NOINLINE ::Yarn::Node*
 Arena::CreateMaybeMessage< ::Yarn::Node >(Arena* arena) {
   return Arena::CreateMessageInternal< ::Yarn::Node >(arena);
+}
+template<> PROTOBUF_NOINLINE ::Yarn::Header*
+Arena::CreateMaybeMessage< ::Yarn::Header >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Yarn::Header >(arena);
 }
 template<> PROTOBUF_NOINLINE ::Yarn::Instruction*
 Arena::CreateMaybeMessage< ::Yarn::Instruction >(Arena* arena) {
