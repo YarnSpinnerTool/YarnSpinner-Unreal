@@ -5,6 +5,7 @@
 #include "Modules/ModuleManager.h"
 #include "Interfaces/IPluginManager.h"
 #include "Misc/MessageDialog.h"
+#include "Misc/YSLogging.h"
 
 THIRD_PARTY_INCLUDES_START
 #include <google/protobuf/stubs/logging.h>
@@ -13,10 +14,6 @@ THIRD_PARTY_INCLUDES_END
 
 #define LOCTEXT_NAMESPACE "FYarnSpinnerModule"
 
-
-DEFINE_LOG_CATEGORY(LogYarnSpinner);
-DEFINE_LOG_CATEGORY(YSLogClean);
-DEFINE_LOG_CATEGORY(YSLogFuncSig);
 
 
 void UnrealLogHandler(google::protobuf::LogLevel level, const char* filename, int line,

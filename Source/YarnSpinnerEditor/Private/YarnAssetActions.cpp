@@ -1,5 +1,5 @@
 #include "YarnAssetActions.h"
-#include "YarnAsset.h"
+#include "YarnProjectAsset.h"
 #include "EditorFramework/AssetImportData.h"
 
 FYarnAssetActions::FYarnAssetActions(EAssetTypeCategories::Type InAssetCategory)
@@ -9,7 +9,7 @@ FYarnAssetActions::FYarnAssetActions(EAssetTypeCategories::Type InAssetCategory)
 
 FText FYarnAssetActions::GetName() const
 {
-    return FText::FromString("Yarn");
+    return FText::FromString("Yarn Project");
 }
 
 FColor FYarnAssetActions::GetTypeColor() const
@@ -19,7 +19,7 @@ FColor FYarnAssetActions::GetTypeColor() const
 
 UClass* FYarnAssetActions::GetSupportedClass() const
 {
-    return UYarnAsset::StaticClass();
+    return UYarnProjectAsset::StaticClass();
 }
 
 uint32 FYarnAssetActions::GetCategories()
@@ -31,7 +31,7 @@ void FYarnAssetActions::GetResolvedSourceFilePaths(const TArray<UObject*>& TypeA
 {
 	for (auto& Asset : TypeAssets)
 	{
-		const auto YarnAsset = CastChecked<UYarnAsset>(Asset);
+		const auto YarnAsset = CastChecked<UYarnProjectAsset>(Asset);
         if (YarnAsset) {
             YarnAsset->AssetImportData->ExtractFilenames(OutSourceFilePaths);
         }

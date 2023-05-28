@@ -3,6 +3,8 @@
 #include "Option.h"
 #include "YarnSpinner.h"
 #include "DialogueRunner.h"
+#include "Misc/YSLogging.h"
+
 
 void UOption::SelectOption() {
     if (IsValid(this->SourceDialogueRunner) == false) {

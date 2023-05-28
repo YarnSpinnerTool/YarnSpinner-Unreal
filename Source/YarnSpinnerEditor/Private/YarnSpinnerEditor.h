@@ -30,6 +30,17 @@ public:
     {
         return FModuleManager::Get().IsModuleLoaded("YarnSpinnerEditor");
     }
-    
+
     TArray<TSharedPtr<IAssetTypeActions>> CreatedAssetTypeActions;
+
+	TArray<TSoftObjectPtr<class UYarnProjectAsset>> YarnProjectAssets;
+
+private:
+	void OnAssetAdded(const FAssetData& AssetData);
+	void OnAssetRemoved(const FAssetData& AssetData);
+	void OnAssetRenamed(const FAssetData& AssetData, const FString& OldObjectPath);
+
+	void OnAssetRegistryFilesLoaded();
+
+	FDelegateHandle OnAssetRegistryFilesLoadedHandle;
 };

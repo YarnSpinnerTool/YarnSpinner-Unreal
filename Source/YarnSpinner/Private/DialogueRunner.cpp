@@ -5,6 +5,7 @@
 #include "Line.h"
 #include "Option.h"
 #include "YarnSpinner.h"
+#include "Misc/YSLogging.h"
 
 THIRD_PARTY_INCLUDES_START
 #include "YarnSpinnerCore/VirtualMachine.h"
@@ -12,7 +13,7 @@ THIRD_PARTY_INCLUDES_END
 //#include "StaticParty.h"
 
 
-static void GetDisplayTextForLine(ULine* line, Yarn::Line& yarnLine, UYarnAsset* yarnAsset) {
+static void GetDisplayTextForLine(ULine* line, Yarn::Line& yarnLine, UYarnProjectAsset* yarnAsset) {
     // FIXME: Currently, we store the text of lines directly in the
     // YarnAsset. This will eventually be replaced with string tables.
 

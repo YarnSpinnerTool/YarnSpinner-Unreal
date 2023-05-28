@@ -50,7 +50,9 @@ public class YarnSpinnerEditor : ModuleRules
 				"UnrealEd",
 
                 "YarnSpinner",
-				"YSProtobuf",
+				"YSProtobuf", 
+				"Json",
+				"JsonUtilities",
 			});
 	}
 	

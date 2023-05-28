@@ -7,7 +7,7 @@
 
 #include "CoreMinimal.h"
 #include "Factories/Factory.h"
-#include "YarnAsset.h"
+#include "YarnProjectAsset.h"
 #include "EditorReimportHandler.h"
 
 THIRD_PARTY_INCLUDES_START
@@ -41,7 +41,7 @@ public:
     
     virtual bool FactoryCanImport(const FString& Filename) override;
 
-    EReimportResult::Type Reimport(UYarnAsset* TextAsset);
+    EReimportResult::Type Reimport(UYarnProjectAsset* TextAsset);
 
     static bool GetCompiledDataForScript(const TCHAR *InFilePath, Yarn::CompilerOutput &InCompilerOutput);
 };

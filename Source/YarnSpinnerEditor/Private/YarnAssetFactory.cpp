@@ -9,7 +9,7 @@
 #include "Containers/UnrealString.h"
 
 #include "ReimportYarnAssetFactory.h"
-#include "YarnSpinner.h"
+#include "Misc/YSLogging.h"
 
 THIRD_PARTY_INCLUDES_START
 #include "YarnSpinnerCore/yarn_spinner.pb.h"
@@ -24,10 +24,10 @@ THIRD_PARTY_INCLUDES_END
 UYarnAssetFactory::UYarnAssetFactory( const FObjectInitializer& ObjectInitializer )
     : Super(ObjectInitializer)
 {
-    Formats.Add(FString(TEXT("yarn;")) + NSLOCTEXT("UYarnAssetFactory", "FormatTxt", "Yarn File").ToString());
+    Formats.Add(FString(TEXT("yarnproject;")) + NSLOCTEXT("UYarnAssetFactory", "FormatTxt", "Yarn Project File").ToString());
     // Formats.Add(FString(TEXT("yarnc;")) + NSLOCTEXT("UYarnAssetFactory", "FormatTxt", "Compiled Yarn File").ToString());
     // Formats.Add(FString(TEXT("yarnproject;")) + NSLOCTEXT("UYarnAssetFactory", "FormatTxt", "Yarn Project").ToString());
-    SupportedClass = UYarnAsset::StaticClass();
+    SupportedClass = UYarnProjectAsset::StaticClass();
     bCreateNew = false;
     bEditorImport = true;
 }
@@ -36,10 +36,10 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
 {
 //    FEditorDelegates::OnAssetPreImport.Broadcast(this, InClass, InParent, InName, Type);
     
-    UYarnAsset* YarnAsset = nullptr;
+    UYarnProjectAsset* YarnAsset = nullptr;
     FString TextString;
 
-    YarnAsset = NewObject<UYarnAsset>(InParent, InClass, InName, Flags);
+    YarnAsset = NewObject<UYarnProjectAsset>(InParent, InClass, InName, Flags);
     // YarnAsset->SourceFilePath = UAssetImportData::SanitizeImportFilename(CurrentFilename, YarnAsset->GetOutermost());
 
     const TCHAR* fileName = *CurrentFilename;
@@ -132,9 +132,8 @@ bool UYarnAssetFactory::FactoryCanImport(const FString& Filename) {
 	//     || FPaths::GetExtension(Filename).Equals(TEXT("yarnproject"));
 }
 
-EReimportResult::Type UYarnAssetFactory::Reimport(UYarnAsset* TextAsset) {
+EReimportResult::Type UYarnAssetFactory::Reimport(UYarnProjectAsset* TextAsset) {
     auto Path = TextAsset->AssetImportData->GetFirstFilename();
-
     
 	if (Path.IsEmpty() == false)
 	{ 
@@ -219,7 +218,7 @@ bool UReimportYarnAssetFactory::FactoryCanImport( const FString& Filename )
 
 bool UReimportYarnAssetFactory::CanReimport( UObject* Obj, TArray<FString>& OutFilenames )
 {	
-	UYarnAsset* DataTable = Cast<UYarnAsset>(Obj);
+	UYarnProjectAsset* DataTable = Cast<UYarnProjectAsset>(Obj);
 	if (DataTable)
 	{
 		DataTable->AssetImportData->ExtractFilenames(OutFilenames);
@@ -232,7 +231,7 @@ bool UReimportYarnAssetFactory::CanReimport( UObject* Obj, TArray<FString>& OutF
 
 void UReimportYarnAssetFactory::SetReimportPaths( UObject* Obj, const TArray<FString>& NewReimportPaths )
 {	
-	UYarnAsset* DataTable = Cast<UYarnAsset>(Obj);
+	UYarnProjectAsset* DataTable = Cast<UYarnProjectAsset>(Obj);
 	if (DataTable && ensure(NewReimportPaths.Num() == 1))
 	{
 		DataTable->AssetImportData->UpdateFilenameOnly(NewReimportPaths[0]);
@@ -242,7 +241,7 @@ void UReimportYarnAssetFactory::SetReimportPaths( UObject* Obj, const TArray<FSt
 EReimportResult::Type UReimportYarnAssetFactory::Reimport( UObject* Obj )
 {	
 	EReimportResult::Type Result = EReimportResult::Failed;
-	if (UYarnAsset* DataTable = Cast<UYarnAsset>(Obj))
+	if (UYarnProjectAsset* DataTable = Cast<UYarnProjectAsset>(Obj))
 	{
         // Result = EReimportResult::Failed;
         Result = UYarnAssetFactory::Reimport(DataTable) ? EReimportResult::Succeeded : EReimportResult::Failed;
