@@ -33,7 +33,7 @@ TOptional<FYarnProjectMetaData> FYarnProjectMetaData::FromAsset(const UYarnProje
 		if (File.EndsWith(".yarnproject"))
 		{
 			bYarnProjectFileFound = true;
-		
+			
 			// Read the file into a string
 			FString FileContents;
 
@@ -58,6 +58,8 @@ TOptional<FYarnProjectMetaData> FYarnProjectMetaData::FromAsset(const UYarnProje
 			// i.e.: if (JsonObject->HasField("projectFileVersion") && JsonObject->GetIntegerField("projectFileVersion") != 2) { ... }
 			
 			FYarnProjectMetaData Meta;
+			Meta.YarnProjectFilePath = File;
+		
 			if (!FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), &Meta, 0, 0))
 			// if (!FJsonObjectConverter::JsonObjectStringToUStruct(FileContents, &Meta, 0, 0)) // if not testing the yarn project file version above then this one line is all that's needed after '// Parse the JSON'
 			{
@@ -76,3 +78,5 @@ TOptional<FYarnProjectMetaData> FYarnProjectMetaData::FromAsset(const UYarnProje
 
 	return MetaData;
 }
+
+

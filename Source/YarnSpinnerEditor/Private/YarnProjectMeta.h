@@ -16,13 +16,14 @@ struct YARNSPINNEREDITOR_API FYarnProjectLocalisationData
 	FString strings;
 };
 
+
 USTRUCT()
 struct YARNSPINNEREDITOR_API FYarnProjectMetaData
 {
 	GENERATED_BODY()
 
 	static TOptional<FYarnProjectMetaData> FromAsset(const UYarnProjectAsset* Asset);
-
+	
 	UPROPERTY()
 	int32 projectFileVersion = -1;
 
@@ -44,5 +45,8 @@ struct YARNSPINNEREDITOR_API FYarnProjectMetaData
 	// TODO: confirm this is the correct format -- all the examples contain an empty object {}
 	UPROPERTY()
 	TMap<FString, FString> compilerOptions;
+
+	// The path to the .yarnproject file
+	FString YarnProjectFilePath;
 };
 

@@ -7,6 +7,7 @@
 
 #include "IYarnSpinnerModuleInterface.h"
 #include "YarnAssetActions.h"
+#include "YarnAssetFactory.h"
 #include "YarnProjectAsset.h"
 #include "YarnProjectMeta.h"
 #include "AssetRegistry/AssetRegistryModule.h"
@@ -62,17 +63,52 @@ void FYarnSpinnerEditor::OnAssetRegistryFilesLoaded()
 		TArray<FAssetData> Assets;
 		AssetRegistry.GetAssets(Filter, Assets);
 
-		for (auto Asset : Assets)
-		{
-			YS_LOG("YarnProject Asset found: %s", *Asset.AssetName.ToString());
-			auto ProjectMeta = FYarnProjectMetaData::FromAsset(Cast<UYarnProjectAsset>(Asset.GetAsset()));
-			if (ProjectMeta.IsSet())
-			{
-				YS_LOG(".yarnproject file parsed successfully; updating out of date assets for %s", *Asset.AssetName.ToString())
-				// TODO: update out of date assets
+		YarnProjectAssets = Assets;
 
-				// TODO: monitor yarn asset folders for changes (esp. new & deleted files)
-			}
+		UpdateAssetsAsNecessary();
+	}
+}
+
+
+void FYarnSpinnerEditor::UpdateAssetsAsNecessary()
+{
+	for (auto Asset : YarnProjectAssets)
+	{
+		UYarnProjectAsset* YarnProjectAsset = Cast<UYarnProjectAsset>(Asset.GetAsset());
+		YS_LOG("YarnProject Asset found: %s", *Asset.AssetName.ToString());
+
+		// Check if yarn sources need a recompile
+		UYarnAssetFactory::YscPath();
+
+		TArray<FString> Sources;
+		UYarnAssetFactory::GetSourcesForProject(YarnProjectAsset, Sources);
+		if (YarnProjectAsset->ShouldRecompile(Sources))
+		{
+			YS_LOG(".yarnproject file is out of date; recompiling %s...", *Asset.AssetName.ToString())
+			// YarnProjectAsset->Recompile();
+			// TODO: recompile
+		}
+
+		// Check if other project assets need to be imported/updated/removed
+		TOptional<FYarnProjectMetaData> ProjectMeta = FYarnProjectMetaData::FromAsset(YarnProjectAsset);
+		if (ProjectMeta.IsSet())
+		{
+			YS_LOG(".yarnproject file parsed successfully; updating out of date assets for %s...", *Asset.AssetName.ToString())
+			
+			// TODO: update out of date assets
+			// 1. build a list of assets referenced by the project file
+			// TArray<FString> Files = ProjectMeta->GetYarnSourceFiles();
+			
+			// 2. compare with assets already imported
+			
+			
+			// ---- how?? where is the resource info? need to store it in the asset
+			
+			
+			// 3. import/reimport as necessary
+			
+
+			// TODO: monitor yarn asset folders for changes (esp. new & deleted files)
 		}
 	}
 }
@@ -87,10 +123,10 @@ void FYarnSpinnerEditor::StartupModule()
         IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
         
         // add custom category
-        EAssetTypeCategories::Type ExampleCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("YarnSpinner")), FText::FromString("YarnSpinner"));
+        EAssetTypeCategories::Type YarnSpinnerAssetCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("YarnSpinner")), FText::FromString("YarnSpinner"));
         
         // register our custom asset with example category
-        TSharedPtr<IAssetTypeActions> Action = MakeShareable(new FYarnAssetActions(ExampleCategory));
+        TSharedPtr<IAssetTypeActions> Action = MakeShareable(new FYarnAssetActions(YarnSpinnerAssetCategory));
         AssetTools.RegisterAssetTypeActions(Action.ToSharedRef());
         
         // saved it here for unregister later
@@ -107,6 +143,8 @@ void FYarnSpinnerEditor::StartupModule()
     }
 	
     IYarnSpinnerModuleInterface::StartupModule();
+
+	UpdateAssetsAsNecessary();
 }
 
 

@@ -32,7 +32,7 @@ void FYarnAssetActions::GetResolvedSourceFilePaths(const TArray<UObject*>& TypeA
 	for (auto& Asset : TypeAssets)
 	{
 		const auto YarnAsset = CastChecked<UYarnProjectAsset>(Asset);
-        if (YarnAsset) {
+        if (YarnAsset && YarnAsset->AssetImportData) {
             YarnAsset->AssetImportData->ExtractFilenames(OutSourceFilePaths);
         }
 	}
