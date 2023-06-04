@@ -164,7 +164,7 @@ EReimportResult::Type UYarnAssetFactory::Reimport(UYarnProjectAsset* TextAsset)
 			const uint8* Ptr = Data.GetData();
 			CurrentFilename = FilePath; //not thread safe but seems to be how it is done..
 			bool bWasCancelled = false;
-			UObject* Result = FactoryCreateBinary(TextAsset->GetClass(), TextAsset->GetOuter(), TextAsset->GetFName(), TextAsset->GetFlags(), nullptr, *FPaths::GetExtension(FilePath), Ptr, Ptr + Data.Num(), GWarn);
+			UYarnProjectAsset* Result = Cast<UYarnProjectAsset>(FactoryCreateBinary(TextAsset->GetClass(), TextAsset->GetOuter(), TextAsset->GetFName(), TextAsset->GetFlags(), nullptr, *FPaths::GetExtension(FilePath), Ptr, Ptr + Data.Num(), GWarn));
 
 			// if (bWasCancelled)
 			// {
@@ -302,7 +302,13 @@ EReimportResult::Type UReimportYarnAssetFactory::Reimport(UObject* Obj)
 	if (UYarnProjectAsset* DataTable = Cast<UYarnProjectAsset>(Obj))
 	{
 		// Result = EReimportResult::Failed;
-		Result = UYarnAssetFactory::Reimport(DataTable) ? EReimportResult::Succeeded : EReimportResult::Failed;
+		Result = UYarnAssetFactory::Reimport(DataTable);// ? EReimportResult::Succeeded : EReimportResult::Failed;
+		if (Result == EReimportResult::Succeeded)
+		{
+			Obj->MarkPackageDirty();
+			
+			
+		}
 	}
 	return Result;
 }

@@ -33,12 +33,14 @@ void UYarnProjectAsset::SetYarnSources(const TArray<FString>& NewYarnSources)
 			YS_WARN("Yarn source file '%s' does not exist.", *FullPath);
 			continue;
 		}
-		YarnFiles.Add(FYarnSourceFile {
-			FullPath,
+		YarnFiles.Add(
+			SourceFile,
+			FYarnSourceMeta {
 			IFileManager::Get().GetTimeStamp(*FullPath),
-			LexToString(FMD5Hash::HashFile(*FullPath))
-		});
-		YS_LOG("--> set source file %s - %s - %s from %s", *YarnFiles.Last().Path, *YarnFiles.Last().Timestamp.ToString(), *YarnFiles.Last().FileHash, *SourceFile);
+			LexToString(FMD5Hash::HashFile(*FullPath)) 
+			}
+		);
+		YS_LOG("--> set source file %s - %s - %s", *SourceFile, *YarnFiles.FindChecked(SourceFile).Timestamp.ToString(), *YarnFiles.FindChecked(SourceFile).FileHash);
 	}
 }
 
@@ -51,7 +53,7 @@ bool UYarnProjectAsset::ShouldRecompile(const TArray<FString>& LatestYarnSources
 	YS_LOG("Sources included in last compile:");
 	for (auto OriginalSource : YarnFiles)
 	{
-		YS_LOG("--> %s", *OriginalSource.ToString());
+		YS_LOG("--> %s", *OriginalSource.Key);
 	}
 	YS_LOG("Latest yarn sources:");
 	for (auto NewSource : LatestYarnSources)
@@ -66,9 +68,9 @@ bool UYarnProjectAsset::ShouldRecompile(const TArray<FString>& LatestYarnSources
 
 	for (auto OriginalSource : YarnFiles)
 	{
-		if (!LatestYarnSources.Contains(OriginalSource.Path))
+		if (!LatestYarnSources.Contains(OriginalSource.Key))
 		{
-			YS_LOG("Original source file %s not in latest yarn sources", *OriginalSource.Path);
+			YS_LOG("Original source file %s not in latest yarn sources", *OriginalSource.Key);
 			return true;
 		}
 	}
@@ -76,18 +78,18 @@ bool UYarnProjectAsset::ShouldRecompile(const TArray<FString>& LatestYarnSources
 	// it's all the same files, so compare timestamps and hashes
 	for (auto OriginalSource : YarnFiles)
 	{
-		const FString FullPath = FPaths::IsRelative(OriginalSource.Path) ? FPaths::Combine(ProjectPath, OriginalSource.Path) : OriginalSource.Path;
+		const FString FullPath = FPaths::IsRelative(OriginalSource.Key) ? FPaths::Combine(ProjectPath, OriginalSource.Key) : OriginalSource.Key;
 		if (!FPaths::FileExists(FullPath))
 		{
 			YS_WARN("Yarn source file '%s' does not exist.", *FullPath);
 			return true;
 		}
 		
-		if (IFileManager::Get().GetTimeStamp(*FullPath) != OriginalSource.Timestamp)
+		if (IFileManager::Get().GetTimeStamp(*FullPath) != OriginalSource.Value.Timestamp)
 		{
-			if (LexToString(FMD5Hash::HashFile(*FullPath)) != OriginalSource.FileHash)
+			if (LexToString(FMD5Hash::HashFile(*FullPath)) != OriginalSource.Value.FileHash)
 			{
-				YS_LOG("Source file %s has changed", *OriginalSource.Path);
+				YS_LOG("Source file %s has changed", *OriginalSource.Key);
 				return true;
 			}
 		}
@@ -101,4 +103,5 @@ FString UYarnProjectAsset::YarnProjectPath() const
 {
 	return FPaths::GetPath(AssetImportData->GetFirstFilename());
 }
+
 #endif

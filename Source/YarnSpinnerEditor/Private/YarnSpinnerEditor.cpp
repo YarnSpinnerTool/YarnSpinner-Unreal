@@ -3,6 +3,7 @@
 #include "YarnSpinnerEditor.h"
 
 #include "AssetToolsModule.h"
+#include "FileHelpers.h"
 #include "IAssetTools.h"
 
 #include "IYarnSpinnerModuleInterface.h"
@@ -85,8 +86,18 @@ void FYarnSpinnerEditor::UpdateAssetsAsNecessary()
 		if (YarnProjectAsset->ShouldRecompile(Sources))
 		{
 			YS_LOG(".yarnproject file is out of date; recompiling %s...", *Asset.AssetName.ToString())
-			// YarnProjectAsset->Recompile();
-			// TODO: recompile
+			if (FReimportManager::Instance()->Reimport(YarnProjectAsset, /*bAskForNewFileIfMissing=*/false))
+			{
+				YS_LOG("Reimport succeeded");
+			}
+			else
+			{
+				YS_WARN("Reimport failed");
+			}
+		}
+		else
+		{
+			YS_LOG("Yarn project is up to date; no recompilation necessary")
 		}
 
 		// Check if other project assets need to be imported/updated/removed
