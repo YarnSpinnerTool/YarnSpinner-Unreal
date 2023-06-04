@@ -73,7 +73,7 @@ TOptional<FYarnProjectMetaData> FYarnProjectMetaData::FromAsset(const UYarnProje
 
 	if (!bYarnProjectFileFound)
 	{
-		YS_ERR("Could not find .yarporject file for project %s", *Asset->GetName())
+		YS_ERR("Could not find .yarnproject file for project %s", *Asset->GetName())
 	}
 
 	return MetaData;

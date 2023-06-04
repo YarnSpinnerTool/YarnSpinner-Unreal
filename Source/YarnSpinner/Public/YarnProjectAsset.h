@@ -42,6 +42,7 @@ public:
 	UPROPERTY(VisibleAnywhere, Category="Yarn Spinner")
 	TMap<FName, FString> Lines;
 
+	// Yarn files that were imported into this project, relative to the .yarnproject file, mapped to file metadata.
 	UPROPERTY(VisibleAnywhere, Category="File Path")
 	TMap<FString, FYarnSourceMeta> YarnFiles;
 

@@ -39,11 +39,11 @@ private:
 	void OnAssetAdded(const FAssetData& AssetData);
 	void OnAssetRemoved(const FAssetData& AssetData);
 	void OnAssetRenamed(const FAssetData& AssetData, const FString& OldObjectPath);
-	void OnAssetRegistryFilesLoaded();
+	void OnAssetRegistryFilesLoaded() const;
 
-	void UpdateAssetsAsNecessary();
+	void UpdateAssetsAsNecessary() const;
 
 	FDelegateHandle OnAssetRegistryFilesLoadedHandle;
 	
-	TArray<FAssetData> YarnProjectAssets;
+	// TArray<FAssetData> YarnProjectAssets;
 };
