@@ -12,8 +12,10 @@
 #include "YarnProjectAsset.h"
 #include "YarnProjectMeta.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "EditorFramework/AssetImportData.h"
 #include "Interfaces/IPluginManager.h"
 #include "Misc/YSLogging.h"
+#include "Sound/SoundWave.h"
 
 
 DEFINE_LOG_CATEGORY(LogYarnSpinnerEditor);
@@ -67,7 +69,7 @@ void FYarnSpinnerEditor::OnAssetRegistryFilesLoaded() const
 void FYarnSpinnerEditor::UpdateAssetsAsNecessary() const
 {
 	FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
-	
+
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
 
@@ -110,51 +112,103 @@ void FYarnSpinnerEditor::UpdateAssetsAsNecessary() const
 
 			for (auto& Localisation : ProjectMeta->localisation)
 			{
-				auto& Loc = Localisation.Key;
-				auto& LocAssets = Localisation.Value.assets;
-				auto& LocStrings = Localisation.Value.strings;
+				const FString& Loc = Localisation.Key;
+				const FString& LocAssets = Localisation.Value.assets;
+				const FString& LocStrings = Localisation.Value.strings;
 				if (LocAssets.Len() > 0)
 				{
 					// check for localised asset files
 					YS_LOG("Localised audio files found for language %s", *Localisation.Key)
-					FString AssetDir = YarnProjectAsset->GetName() + TEXT("_Loc");
-					FString LocalisedAssetPath = FPaths::Combine(FPaths::GetPath(YarnProjectAsset->GetPathName()), AssetDir, Loc);
+					const FString AssetDir = YarnProjectAsset->GetName() + TEXT("_Loc");
+					const FString LocalisedAssetPackage = FPaths::Combine(FPaths::GetPath(YarnProjectAsset->GetPathName()), AssetDir, Loc);
+					const FString LocalisedAssetPath = FPackageName::LongPackageNameToFilename(LocalisedAssetPackage);
 					if (!FPaths::DirectoryExists(LocalisedAssetPath))
 					{
-						YS_WARN("missing localised asset directory %s", *LocalisedAssetPath)
+						// YS_WARN("Missing localised asset directory %s", *LocalisedAssetPath)
 						IFileManager::Get().MakeDirectory(*LocalisedAssetPath);
 					}
 
 					// read the list of assets, check if there is a matching unreal asset in the expected location
-					FString LocAssetSourcePath = FPaths::IsRelative(LocAssets) ? FPaths::Combine(YarnProjectAsset->YarnProjectPath(), LocAssets) : LocAssets;
+					const FString LocAssetSourcePath = FPaths::IsRelative(LocAssets) ? FPaths::Combine(YarnProjectAsset->YarnProjectPath(), LocAssets) : LocAssets;
 					TArray<FString> LocAssetSourceFiles;
 					IFileManager::Get().FindFiles(LocAssetSourceFiles, *LocAssetSourcePath, TEXT(".wav")); // TODO: what other asset files do we support?
-					
+
 					FString RelativeSourcePath = LocAssetSourcePath;
 					FPaths::MakePathRelativeTo(RelativeSourcePath, *FPaths::ProjectContentDir());
-					
-					FARFilter LocAssetFilter;
-					LocAssetFilter.ObjectPaths.Add(FName(LocalisedAssetPath));
 
-					TArray<FAssetData> ImportedAssets;
-					AssetRegistry.GetAssets(LocAssetFilter, ImportedAssets);
-					
-					for (auto& LocAssetSourceFile : LocAssetSourceFiles)
+					TArray<FAssetData> ExistingAssets;
+					FARFilter LocAssetFilter;
+					LocAssetFilter.PackagePaths.Add(FName(LocalisedAssetPackage));
+					AssetRegistry.GetAssets(LocAssetFilter, ExistingAssets);
+					// YS_WARN("found %d imported assets in %s", ExistingAssets.Num(), *LocalisedAssetPackage)
+					// YS_WARN("maybe should try this %s", *Asset.ObjectPath.ToString())
+
+					TMap<FString, FAssetData> ExistingAssetsMap;
+					TMap<FString, bool> ExistingAssetSourceSeen;
+					for (const FAssetData& ExistingAsset : ExistingAssets)
 					{
-						FString BaseName = FPaths::GetBaseFilename(LocAssetSourceFile);
-						// check the imported asset exists in the expected location
-						YS_LOG("checking for localised asset %s", *LocAssetSourceFile)
-						TArray<FString> ToImport;
-						if (!ImportedAssets.ContainsByPredicate([&](const FAssetData& A) { return A.GetAsset()->GetName() == BaseName; }))
-						{
-							ToImport.Add(FPaths::Combine(LocAssetSourcePath, LocAssetSourceFile));
-						}
-						if (!ToImport.Num() == 0)
-						{
-							YS_LOG("importing %i new localised assets", ToImport.Num())
-							AssetToolsModule.Get().ImportAssets(ToImport, LocalisedAssetPath);
-						}
+						ExistingAssetsMap.Add(ExistingAsset.AssetName.ToString(), ExistingAsset);
+						ExistingAssetSourceSeen.Add(ExistingAsset.AssetName.ToString(), false);
 					}
+
+					for (const FString& LocAssetSourceFile : LocAssetSourceFiles)
+					{
+						const FString BaseName = FPaths::GetBaseFilename(LocAssetSourceFile);
+						const FString FullLocAssetSourceFilePath = FPaths::Combine(LocAssetSourcePath, LocAssetSourceFile);
+
+						// check the imported asset exists in the expected location
+						YS_LOG("Checking for existing imported asset for localised file %s", *LocAssetSourceFile)
+
+						if (ExistingAssetsMap.Contains(BaseName))
+						{
+							YS_LOG("found existing imported asset %s", *BaseName)
+							ExistingAssetSourceSeen[BaseName] = true;
+							// check if the asset is up to date
+							FAssetData& ExistingAssetData = ExistingAssetsMap[BaseName];
+							USoundWave* ExistingAsset = Cast<USoundWave>(ExistingAssetData.GetAsset());
+							if (!ExistingAsset)
+							{
+								YS_WARN("Could not load asset data for %s", *LocAssetSourceFile)
+							}
+							else
+							{
+								const auto SourceFile = ExistingAsset->AssetImportData->SourceData.SourceFiles[0];
+								if (SourceFile.Timestamp != IFileManager::Get().GetTimeStamp(*FullLocAssetSourceFilePath) && SourceFile.FileHash != FMD5Hash::HashFile(*FullLocAssetSourceFilePath))
+								{
+									YS_LOG("Existing asset %s is out of date and will be reimported", *LocAssetSourceFile)
+									if (FReimportManager::Instance()->Reimport(ExistingAsset, false, true, "", nullptr, INDEX_NONE, false, true))
+									{
+										YS_LOG("Reimport succeeded");
+									}
+									else
+									{
+										YS_WARN("Reimport failed");
+									}
+								}
+							}
+						}
+						else
+						{
+							AssetToolsModule.Get().ImportAssets({ FullLocAssetSourceFilePath }, LocalisedAssetPackage);
+						}
+
+						// TArray<FString> ToImport;
+						// if (!ImportedAssets.ContainsByPredicate([&](const FAssetData& A)
+						// {
+						// 	YS_LOG("comparing %s and %s", *A.AssetName.ToString(), *BaseName)
+						// 	return A.GetAsset()->GetName() == BaseName;
+						// }))
+						// {
+						// 	ToImport.Add(FPaths::Combine(LocAssetSourcePath, LocAssetSourceFile));
+						// }
+						// if (!ToImport.Num() == 0)
+						// {
+						// 	YS_LOG("importing %i new localised assets", ToImport.Num())
+						// 	AssetToolsModule.Get().ImportAssets(ToImport, LocalisedAssetPackage);
+						// }
+					}
+
+					// TODO: delete unseen/old assets
 				}
 			}
 
