@@ -36,6 +36,22 @@ YARNSPINNER_API DECLARE_LOG_CATEGORY_EXTERN(YSLogFuncSig, Log, All);
 	UE_LOG(LogYarnSpinner, Log, TEXT("%s: %s"), *FString(SIG), *_Msg) \
 }
 
+#define YS_DISPLAY(Format, ...) \
+{ \
+	UE_LOG(LogYarnSpinner, Display, TEXT(Format), ##__VA_ARGS__) \
+}
+
+#define YS_VERBOSE(Format, ...) \
+{ \
+	UE_LOG(LogYarnSpinner, Verbose, TEXT(Format), ##__VA_ARGS__) \
+}
+
+#define YS_VERBOSE_FUNC(Format, ...) \
+{ \
+	const FString _Msg = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
+	UE_LOG(LogYarnSpinner, Verbose, TEXT("%s: %s"), *FString(SIG), *_Msg) \
+}
+
 #define YS_WARN(Format, ...) \
 { \
 	UE_LOG(LogYarnSpinner, Warning, TEXT(Format), ##__VA_ARGS__) \
