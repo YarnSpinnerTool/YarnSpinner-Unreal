@@ -16,12 +16,15 @@ public:
 	void Setup();
 	void TearDown();
 
+	void SetLocFileImporter(class UCSVImportFactory* Importer);
+
 private:
 	FDelegateHandle OnAssetRegistryFilesLoadedHandle;
 	FDelegateHandle OnAssetAddedHandle;
 	FDelegateHandle OnAssetRemovedHandle;
 	FDelegateHandle OnAssetRenamedHandle;
 	FTimerHandle TimerHandle;
+	class UCSVImportFactory* LocFileImporter = nullptr;
 
 	// Callback for when the asset registry has finished scanning assets on Unreal Editor load.
 	void OnAssetRegistryFilesLoaded();
@@ -30,12 +33,12 @@ private:
 	void OnAssetRenamed(const FAssetData& AssetData, const FString& OldObjectPath) const;
 
 	// Scan all YarnProjectAssets and update them as necessary.
-	static void UpdateAllYarnProjects();
+	void UpdateAllYarnProjects() const;
 	// Checks if a yarn project's source files has changed since last compile and recompiles if necessary.
-	static void UpdateYarnProjectAsset(class UYarnProjectAsset* YarnProjectAsset);
+	void UpdateYarnProjectAsset(class UYarnProjectAsset* YarnProjectAsset) const;
 	// Reads a .yarnproject file for a YarnProjectAsset and calls localisation updaters for each locale's data.
-	static void UpdateYarnProjectAssetLocalizations(const class UYarnProjectAsset* YarnProjectAsset);
+	void UpdateYarnProjectAssetLocalizations(const class UYarnProjectAsset* YarnProjectAsset) const;
 	// Checks if a yarn project's localization asset files have changed since last import and imports/reimports/deletes if necessary.
-	static void UpdateYarnProjectAssetLocalizationAssets(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocAssets);
-	static void UpdateYarnProjectAssetLocalizationStrings(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocStrings);
+	void UpdateYarnProjectAssetLocalizationAssets(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocAssets) const;
+	void UpdateYarnProjectAssetLocalizationStrings(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocStrings) const;
 };

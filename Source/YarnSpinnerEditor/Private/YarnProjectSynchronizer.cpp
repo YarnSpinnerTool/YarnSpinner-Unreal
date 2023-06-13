@@ -12,6 +12,7 @@
 #include "YarnProjectMeta.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "EditorFramework/AssetImportData.h"
+#include "Factories/CSVImportFactory.h"
 #include "Misc/YSLogging.h"
 #include "Sound/SoundWave.h"
 
@@ -55,6 +56,12 @@ void FYarnProjectSynchronizer::TearDown()
 	{
 		AssetRegistryModule->Get().OnFilesLoaded().Remove(OnAssetRegistryFilesLoadedHandle);
 		OnAssetRegistryFilesLoadedHandle.Reset();
+		AssetRegistryModule->Get().OnAssetAdded().Remove(OnAssetAddedHandle);
+		OnAssetAddedHandle.Reset();
+		AssetRegistryModule->Get().OnAssetRemoved().Remove(OnAssetRemovedHandle);
+		OnAssetRemovedHandle.Reset();
+		AssetRegistryModule->Get().OnAssetRenamed().Remove(OnAssetRenamedHandle);
+		OnAssetRenamedHandle.Reset();
 	}
 
 	if (GEditor && GEditor->GetEditorWorldContext().World())
@@ -62,11 +69,17 @@ void FYarnProjectSynchronizer::TearDown()
 }
 
 
+void FYarnProjectSynchronizer::SetLocFileImporter(UCSVImportFactory* Importer)
+{
+	LocFileImporter = Importer;
+}
+
+
 void FYarnProjectSynchronizer::OnAssetRegistryFilesLoaded()
 {
 	// Set a timer to update yarn projects in a loop with a max-10-sec delay between loops.
 	// TODO: consider replacing the loop with directory watching (complicated by the fact that we need to watch multiple directories per yarn project) and registry callbacks
-	GEditor->GetEditorWorldContext().World()->GetTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateStatic(&FYarnProjectSynchronizer::UpdateAllYarnProjects), 10.0f, true);
+	GEditor->GetEditorWorldContext().World()->GetTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateRaw(this, &FYarnProjectSynchronizer::UpdateAllYarnProjects), 10.0f, true);
 }
 
 
@@ -88,7 +101,7 @@ void FYarnProjectSynchronizer::OnAssetRenamed(const FAssetData& AssetData, const
 }
 
 
-void FYarnProjectSynchronizer::UpdateAllYarnProjects()
+void FYarnProjectSynchronizer::UpdateAllYarnProjects() const
 {
 	FARFilter YarnProjectFilter;
 	YarnProjectFilter.ClassNames.Add(UYarnProjectAsset::StaticClass()->GetFName());
@@ -107,7 +120,7 @@ void FYarnProjectSynchronizer::UpdateAllYarnProjects()
 }
 
 
-void FYarnProjectSynchronizer::UpdateYarnProjectAsset(UYarnProjectAsset* YarnProjectAsset)
+void FYarnProjectSynchronizer::UpdateYarnProjectAsset(UYarnProjectAsset* YarnProjectAsset) const
 {
 	YS_LOG("Checking .yarnproject asset; %s...", *YarnProjectAsset->GetName())
 	// Check if yarn sources need a recompile
@@ -132,7 +145,7 @@ void FYarnProjectSynchronizer::UpdateYarnProjectAsset(UYarnProjectAsset* YarnPro
 }
 
 
-void FYarnProjectSynchronizer::UpdateYarnProjectAssetLocalizations(const UYarnProjectAsset* YarnProjectAsset)
+void FYarnProjectSynchronizer::UpdateYarnProjectAssetLocalizations(const UYarnProjectAsset* YarnProjectAsset) const
 {
 	// Check if other project assets need to be imported/updated/removed
 	TOptional<FYarnProjectMetaData> ProjectMeta = FYarnProjectMetaData::FromAsset(YarnProjectAsset);
@@ -154,7 +167,7 @@ void FYarnProjectSynchronizer::UpdateYarnProjectAssetLocalizations(const UYarnPr
 }
 
 
-void FYarnProjectSynchronizer::UpdateYarnProjectAssetLocalizationAssets(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocAssets)
+void FYarnProjectSynchronizer::UpdateYarnProjectAssetLocalizationAssets(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocAssets) const
 {
 	if (LocAssets.IsEmpty())
 		return;
@@ -254,8 +267,40 @@ void FYarnProjectSynchronizer::UpdateYarnProjectAssetLocalizationAssets(const UY
 }
 
 
-void FYarnProjectSynchronizer::UpdateYarnProjectAssetLocalizationStrings(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocStrings)
+void FYarnProjectSynchronizer::UpdateYarnProjectAssetLocalizationStrings(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocStrings) const
 {
-	// TODO: update localisation strings
+	if (!LocFileImporter)
+	{
+		YS_ERR("No string file localisation importer set")
+		return;
+	}
+	
+	if (LocStrings.IsEmpty())
+		return;
+	
+	// Check for existing localised asset files
+	YS_LOG("Localised audio files found for language '%s'.  Looking for changes...", *Loc)
+	
+	const FString AssetDir = YarnProjectAsset->GetName() + TEXT("_Loc");
+	
+	const FString LocalisedAssetPackage = FPaths::Combine(FPaths::GetPath(YarnProjectAsset->GetPathName()), AssetDir, Loc);
+	const FString LocalisedAssetPath = FPackageName::LongPackageNameToFilename(LocalisedAssetPackage);
+	if (!FPaths::DirectoryExists(LocalisedAssetPath))
+	{
+		// YS_WARN("Missing localised asset directory %s", *LocalisedAssetPath)
+		IFileManager::Get().MakeDirectory(*LocalisedAssetPath);
+	}
+
+	// TODO: below overwrites with a new import every time, need to check if the file already exists and either leave it or reimport if changed, only do a fresh import if the file is missing
+
+	// Read the list of assets, check if there is a matching unreal asset in the expected location
+	const FString LocAssetSourceFile = FPaths::IsRelative(LocStrings) ? FPaths::Combine(YarnProjectAsset->YarnProjectPath(), LocStrings) : LocStrings;
+	YS_LOG("Importing localisation asset %s", *LocAssetSourceFile)
+	UAutomatedAssetImportData* ImportData = NewObject<UAutomatedAssetImportData>();
+	ImportData->Filenames.Add(LocAssetSourceFile);
+	ImportData->DestinationPath = LocalisedAssetPackage;
+	ImportData->bReplaceExisting = true;
+	ImportData->Factory = LocFileImporter;
+	FAssetToolsModule::GetModule().Get().ImportAssetsAutomated(ImportData);
 }
 

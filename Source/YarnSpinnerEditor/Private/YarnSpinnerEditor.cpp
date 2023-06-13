@@ -3,12 +3,17 @@
 #include "YarnSpinnerEditor.h"
 
 #include "AssetToolsModule.h"
+#include "DisplayLine.h"
 #include "IAssetTools.h"
 
 #include "IYarnSpinnerModuleInterface.h"
 #include "YarnAssetActions.h"
 #include "YarnAssetFactory.h"
 #include "YarnProjectSynchronizer.h"
+#include "Dom/JsonObject.h"
+#include "Dom/JsonValue.h"
+#include "Factories/CSVImportFactory.h"
+#include "Factories/DataTableFactory.h"
 #include "Misc/YSLogging.h"
 
 
@@ -40,7 +45,23 @@ void FYarnSpinnerEditor::StartupModule()
 		CreatedAssetTypeActions.Add(Action);
 	}
 
+	LocFileImporter = NewObject<UCSVImportFactory>();
+	LocFileImporter->AddToRoot();
+	UDataTable* ImportOptions = NewObject<UDataTable>();
+	ImportOptions->RowStruct = FDisplayLine::StaticStruct();
+	ImportOptions->RowStructName = "DisplayLine";
+	ImportOptions->bIgnoreExtraFields = true;
+	ImportOptions->bIgnoreMissingFields = false;
+	ImportOptions->ImportKeyField = "id"; // becomes the Name field of the DataTable
+	LocFileImporter->DataTableImportOptions = ImportOptions;
+	// The FCSVImportSettings struct is not part of the dll export so we have to use the JSON API to set it up
+	TSharedRef<FJsonObject> CSVImportSettings = MakeShareable(new FJsonObject());
+	CSVImportSettings->SetField("ImportType", MakeShareable(new FJsonValueNumber(0)));
+	CSVImportSettings->SetField("ImportRowStruct", MakeShareable(new FJsonValueString("DisplayLine")));
+	LocFileImporter->ParseFromJson(CSVImportSettings);
+
 	YarnProjectSynchronizer = MakeUnique<FYarnProjectSynchronizer>();
+	YarnProjectSynchronizer->SetLocFileImporter(LocFileImporter);
 
 	IYarnSpinnerModuleInterface::StartupModule();
 }
@@ -60,6 +81,9 @@ void FYarnSpinnerEditor::ShutdownModule()
 	CreatedAssetTypeActions.Empty();
 
 	YarnProjectSynchronizer.Reset();
+
+	LocFileImporter->RemoveFromRoot();
+	LocFileImporter = nullptr;
 
 	IYarnSpinnerModuleInterface::ShutdownModule();
 }

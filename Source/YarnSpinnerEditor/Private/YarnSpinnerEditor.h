@@ -33,6 +33,9 @@ public:
 
     TArray<TSharedPtr<IAssetTypeActions>> CreatedAssetTypeActions;
 
+	
 private:
+	class UCSVImportFactory* LocFileImporter = nullptr;
 	TUniquePtr<class FYarnProjectSynchronizer> YarnProjectSynchronizer;
+	
 };
