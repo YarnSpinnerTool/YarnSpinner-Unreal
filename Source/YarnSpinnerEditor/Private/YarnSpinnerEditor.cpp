@@ -49,15 +49,16 @@ void FYarnSpinnerEditor::StartupModule()
 	LocFileImporter->AddToRoot();
 	UDataTable* ImportOptions = NewObject<UDataTable>();
 	ImportOptions->RowStruct = FDisplayLine::StaticStruct();
-	ImportOptions->RowStructName = "DisplayLine";
+	ImportOptions->RowStructName = FDisplayLine::StaticStruct()->GetFName();
 	ImportOptions->bIgnoreExtraFields = true;
 	ImportOptions->bIgnoreMissingFields = false;
 	ImportOptions->ImportKeyField = "id"; // becomes the Name field of the DataTable
 	LocFileImporter->DataTableImportOptions = ImportOptions;
 	// The FCSVImportSettings struct is not part of the dll export so we have to use the JSON API to set it up
 	TSharedRef<FJsonObject> CSVImportSettings = MakeShareable(new FJsonObject());
-	CSVImportSettings->SetField("ImportType", MakeShareable(new FJsonValueNumber(0)));
-	CSVImportSettings->SetField("ImportRowStruct", MakeShareable(new FJsonValueString("DisplayLine")));
+	CSVImportSettings->SetField("ImportType", MakeShareable(new FJsonValueNumber(static_cast<uint8>(ECSVImportType::ECSV_DataTable))));
+	CSVImportSettings->SetField("ImportRowStruct", MakeShareable(new FJsonValueString(FDisplayLine::StaticStruct()->GetName())));
+	
 	LocFileImporter->ParseFromJson(CSVImportSettings);
 
 	YarnProjectSynchronizer = MakeUnique<FYarnProjectSynchronizer>();
