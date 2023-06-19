@@ -38,7 +38,12 @@ private:
 	void UpdateYarnProjectAsset(class UYarnProjectAsset* YarnProjectAsset) const;
 	// Reads a .yarnproject file for a YarnProjectAsset and calls localisation updaters for each locale's data.
 	void UpdateYarnProjectAssetLocalizations(const class UYarnProjectAsset* YarnProjectAsset) const;
+	// Update yarn project asset files
+	void UpdateYarnProjectAssetLocalizationStrings(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocStrings) const;
 	// Checks if a yarn project's localization asset files have changed since last import and imports/reimports/deletes if necessary.
 	void UpdateYarnProjectAssetLocalizationAssets(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocAssets) const;
-	void UpdateYarnProjectAssetLocalizationStrings(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocStrings) const;
+
+	// Helper function for importing or updating assets of different types
+	template <class AssetClass>
+	void UpdateYarnProjectAssets(const UYarnProjectAsset* YarnProjectAsset, const FString& SourcesPath, const FString& Loc, const TArray<FString>& LocSources, TFunction<TArray<UObject*>(const FString& SourceFile, const FString& DestinationPackage)> ImportNew, TFunction<bool(AssetClass* Asset)> Reimport,TSubclassOf<UDataAsset> TheAssetClass = AssetClass::StaticClass()) const;
 };

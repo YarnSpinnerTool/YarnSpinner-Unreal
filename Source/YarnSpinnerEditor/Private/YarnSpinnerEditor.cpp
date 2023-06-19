@@ -15,6 +15,7 @@
 #include "Factories/CSVImportFactory.h"
 #include "Factories/DataTableFactory.h"
 #include "Misc/YSLogging.h"
+#include "Serialization/Csv/CsvParser.h"
 
 
 DEFINE_LOG_CATEGORY(LogYarnSpinnerEditor);
@@ -63,6 +64,17 @@ void FYarnSpinnerEditor::StartupModule()
 
 	YarnProjectSynchronizer = MakeUnique<FYarnProjectSynchronizer>();
 	YarnProjectSynchronizer->SetLocFileImporter(LocFileImporter);
+
+
+	FCsvParser Parser("col1,col2,col3\n1,2,3\n4,5,6");
+	FCsvParser::FRows Rows = Parser.GetRows();
+	for (auto R: Rows)
+	{
+		for (auto F : R)
+		{
+			UE_LOG(LogTemp, Log, TEXT("Field: %s"), F);
+		}
+	}
 
 	IYarnSpinnerModuleInterface::StartupModule();
 }

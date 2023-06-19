@@ -1,0 +1,18 @@
+title: Start
+---
+A: Hey, here's a line! #line:test1_1
+B: Here's another line! #line:test1_2
+
+// Show some options
+-> Wow! #line:test1_3
+    A: Right? #line:test1_4
+-> Cool! #line:test1_5
+    B: Yeah! #line:test1_6
+-> Neat! #line:test1_7
+    A: I know! #line:test1_8
+
+// Run a command
+<<do_something_cool param1 param2>>
+
+A: All done! #line:test1_9
+===
