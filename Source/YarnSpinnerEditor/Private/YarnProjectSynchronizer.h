@@ -38,12 +38,12 @@ private:
 	void UpdateYarnProjectAsset(class UYarnProjectAsset* YarnProjectAsset) const;
 	// Reads a .yarnproject file for a YarnProjectAsset and calls localisation updaters for each locale's data.
 	void UpdateYarnProjectAssetLocalizations(const class UYarnProjectAsset* YarnProjectAsset) const;
-	// Update yarn project asset files
-	void UpdateYarnProjectAssetLocalizationStrings(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocStrings) const;
-	// Checks if a yarn project's localization asset files have changed since last import and imports/reimports/deletes if necessary.
-	void UpdateYarnProjectAssetLocalizationAssets(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocAssets) const;
 
-	// Helper function for importing or updating assets of different types
+	static FString AbsoluteSourcePath(const class UYarnProjectAsset* YarnProjectAsset, const FString& SourcePath);
+	void UpdateLocAssets(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocAssets) const;
+	void UpdateLocStrings(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocStrings) const;
+	
+	// Helper function for importing or updating assets of different types (voice overs, strings files, etc)
 	template <class AssetClass>
-	void UpdateYarnProjectAssets(const UYarnProjectAsset* YarnProjectAsset, const FString& SourcesPath, const FString& Loc, const TArray<FString>& LocSources, TFunction<TArray<UObject*>(const FString& SourceFile, const FString& DestinationPackage)> ImportNew, TFunction<bool(AssetClass* Asset)> Reimport,TSubclassOf<UDataAsset> TheAssetClass = AssetClass::StaticClass()) const;
+	void UpdateYarnProjectAssets(const UYarnProjectAsset* YarnProjectAsset, const FString& SourcesPath, const FString& Loc, const TArray<FString>& LocSources, TFunction<TArray<UObject*>(const FString& SourceFile, const FString& DestinationPackage)> ImportNew, TFunction<bool(AssetClass* Asset)> Reimport, TSubclassOf<UObject> TheAssetClass = AssetClass::StaticClass()) const;
 };
