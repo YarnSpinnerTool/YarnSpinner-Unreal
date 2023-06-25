@@ -3,6 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "IDirectoryWatcher.h"
+#include "YarnProjectSynchronizer.generated.h"
+
+
+UENUM()
+enum class EYSFileAction : uint8
+{
+	Added, Modified, Removed, Unknown
+};
+
 
 /**
  * 
@@ -12,12 +22,15 @@ class YARNSPINNEREDITOR_API FYarnProjectSynchronizer
 public:
 	FYarnProjectSynchronizer();
 	~FYarnProjectSynchronizer();
-	
+
+	void OnYarnSourceDirectoryChanged(const TArray<struct FFileChangeData>& Array) const;
 	void Setup();
 	void TearDown();
 
 	void SetLocFileImporter(class UCSVImportFactory* Importer);
 
+	static EYSFileAction ToFileAction(FFileChangeData::EFileChangeAction InAction);
+	
 private:
 	FDelegateHandle OnAssetRegistryFilesLoadedHandle;
 	FDelegateHandle OnAssetAddedHandle;
@@ -25,6 +38,7 @@ private:
 	FDelegateHandle OnAssetRenamedHandle;
 	FTimerHandle TimerHandle;
 	class UCSVImportFactory* LocFileImporter = nullptr;
+	FDelegateHandle DirectoryWatcherHandle;
 
 	// Callback for when the asset registry has finished scanning assets on Unreal Editor load.
 	void OnAssetRegistryFilesLoaded();
@@ -40,6 +54,7 @@ private:
 	void UpdateYarnProjectAssetLocalizations(const class UYarnProjectAsset* YarnProjectAsset) const;
 
 	static FString AbsoluteSourcePath(const class UYarnProjectAsset* YarnProjectAsset, const FString& SourcePath);
+	// void UpdateChangedLocStrings(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocStrings) const;
 	void UpdateLocAssets(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocAssets) const;
 	void UpdateLocStrings(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocStrings) const;
 	

@@ -17,13 +17,14 @@ YARNSPINNER_API DECLARE_LOG_CATEGORY_EXTERN(LogYarnSpinner, Log, All);
 
 YARNSPINNER_API DECLARE_LOG_CATEGORY_EXTERN(YSLogFuncSig, Log, All);
 
+#define YS_FUNCNAME __FUNCTION__
 #if defined(_MSC_VER) && !defined(__clang__)
-	#define SIG __FUNCSIG__
+	#define YS_FUNCSIG __FUNCSIG__
 #else
-	#define SIG __PRETTY_FUNCTION__
+	#define YS_FUNCSIG __PRETTY_FUNCTION__
 #endif
 
-#define YS_LOG_FUNCSIG UE_LOG(YSLogFuncSig, Log, TEXT("%s"), *FString(SIG))
+#define YS_LOG_FUNCSIG UE_LOG(YSLogFuncSig, Log, TEXT("%s"), *FString(YS_FUNCSIG))
 
 #define YS_LOG(Format, ...) \
 { \
@@ -33,7 +34,7 @@ YARNSPINNER_API DECLARE_LOG_CATEGORY_EXTERN(YSLogFuncSig, Log, All);
 #define YS_LOG_FUNC(Format, ...) \
 { \
 	const FString _Msg = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
-	UE_LOG(LogYarnSpinner, Log, TEXT("%s: %s"), *FString(SIG), *_Msg) \
+	UE_LOG(LogYarnSpinner, Log, TEXT("%s: %s"), *FString(YS_FUNCNAME), *_Msg) \
 }
 
 #define YS_DISPLAY(Format, ...) \
@@ -49,7 +50,7 @@ YARNSPINNER_API DECLARE_LOG_CATEGORY_EXTERN(YSLogFuncSig, Log, All);
 #define YS_VERBOSE_FUNC(Format, ...) \
 { \
 	const FString _Msg = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
-	UE_LOG(LogYarnSpinner, Verbose, TEXT("%s: %s"), *FString(SIG), *_Msg) \
+	UE_LOG(LogYarnSpinner, Verbose, TEXT("%s: %s"), *FString(YS_FUNCNAME), *_Msg) \
 }
 
 #define YS_WARN(Format, ...) \
@@ -60,7 +61,7 @@ YARNSPINNER_API DECLARE_LOG_CATEGORY_EXTERN(YSLogFuncSig, Log, All);
 #define YS_WARN_FUNC(Format, ...) \
 { \
 	const FString _Msg = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
-	UE_LOG(LogYarnSpinner, Warning, TEXT("%s: %s"), *FString(SIG), *_Msg) \
+	UE_LOG(LogYarnSpinner, Warning, TEXT("%s: %s"), *FString(YS_FUNCNAME), *_Msg) \
 }
 
 #define YS_ERR(Format, ...) \
@@ -71,5 +72,5 @@ YARNSPINNER_API DECLARE_LOG_CATEGORY_EXTERN(YSLogFuncSig, Log, All);
 #define YS_ERR_FUNC(Format, ...) \
 { \
 	const FString _Msg = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
-	UE_LOG(LogYarnSpinner, Error, TEXT("%s: %s"), *FString(SIG), *_Msg) \
+	UE_LOG(LogYarnSpinner, Error, TEXT("%s: %s"), *FString(YS_FUNCNAME), *_Msg) \
 }
