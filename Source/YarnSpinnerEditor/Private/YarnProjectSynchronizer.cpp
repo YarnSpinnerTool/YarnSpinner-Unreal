@@ -192,12 +192,11 @@ FString FYarnProjectSynchronizer::AbsoluteSourcePath(const UYarnProjectAsset* Ya
 }
 
 
-// // Not a great solution, probably worst of the 3 options (datatable, csv, stringtable)
+// // Not a great solution, probably worst of the 3 options (datatable, csv, stringtable) as none of UStringTable, FStringTable or IStringTableEngineBridge contain FAssetImportData or anything equivalent
 // void FYarnProjectSynchronizer::UpdateChangedLocStrings(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocStrings) const
 // {
 //     const FString LocStringsPath = FPaths::GetPath(AbsoluteSourcePath(YarnProjectAsset, LocStrings));
 //
-//     /*
 //     UpdateYarnProjectAssets<UStringTable>(
 //         YarnProjectAsset,
 //         LocStringsPath,
@@ -247,7 +246,6 @@ FString FYarnProjectSynchronizer::AbsoluteSourcePath(const UYarnProjectAsset* Ya
 //             return false;
 //         }
 //     );
-//     */
 // }
 
 
@@ -445,11 +443,22 @@ void FYarnProjectSynchronizer::UpdateYarnProjectAssets(const UYarnProjectAsset* 
             {
                 for (auto Asset : NewAssets)
                 {
-                    // TODO: consider force-saving the asset...
-                    YS_LOG("New asset package: %s", *Asset->GetPackage()->GetName())
-                    YS_LOG("New asset file: %s", *FPackageName::LongPackageNameToFilename(LocalisedAssetPackage))
-                    // Asset->package
-                    UPackage::Save(Asset->GetPackage(), Asset, RF_Public | RF_Standalone, *FPackageName::LongPackageNameToFilename(LocalisedAssetPackage));
+                    // // TODO: consider force-saving the asset...
+                    // // auto NewAsset = Cast<AssetClass>(Asset);
+                    // auto NewAsset = Cast<UDataAsset>(Asset);
+                    // if (NewAsset)
+                    // {
+                    //     YS_LOG("New asset package: %s", *Asset->GetPackage()->GetName())
+                    //     YS_LOG("New asset file: %s", *FPackageName::LongPackageNameToFilename(FullLocSourceFilePath))
+                    //     YS_LOG("New asset fullname: %s", *Asset->GetFullName())
+                    //     auto Id = NewAsset->GetPrimaryAssetId();
+                    //     NewAsset->GetPackage()->Save();
+                    //     // FAssetRegistryModule::Get().
+                    //     // Asset->assetd
+                    //     // Asset->package
+                    //     // Asset->full
+                    //     // UPackage::Save(Asset->GetPackage(), Asset, RF_Public | RF_Standalone, *FPackageName::LongPackageNameToFilename(FullLocSourceFilePath));
+                    // }
                 }
             }
         }
