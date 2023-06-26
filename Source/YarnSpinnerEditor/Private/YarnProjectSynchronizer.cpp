@@ -141,7 +141,12 @@ void FYarnProjectSynchronizer::OnAssetRenamed(const FAssetData& AssetData, const
 void FYarnProjectSynchronizer::UpdateAllYarnProjects() const
 {
     FARFilter YarnProjectFilter;
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 1
+    YarnProjectFilter.ClassPaths.Add(UYarnProjectAsset::StaticClass()->GetClassPathName());
+#else
     YarnProjectFilter.ClassNames.Add(UYarnProjectAsset::StaticClass()->GetFName());
+#endif
+    
 
     TArray<FAssetData> YarnProjectAssets;
     FAssetRegistryModule::GetRegistry().GetAssets(YarnProjectFilter, YarnProjectAssets);
@@ -374,7 +379,11 @@ void FYarnProjectSynchronizer::UpdateYarnProjectAssets(const UYarnProjectAsset* 
     TArray<FAssetData> ExistingAssets;
     FARFilter LocAssetFilter;
     LocAssetFilter.PackagePaths.Add(FName(LocalisedAssetPackage));
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 1
+    LocAssetFilter.ClassPaths.Add(TheAssetClass->GetClassPathName());
+#else
     LocAssetFilter.ClassNames.Add(TheAssetClass->GetFName());
+#endif
     FAssetRegistryModule::GetRegistry().GetAssets(LocAssetFilter, ExistingAssets);
 
     TMap<FString, FAssetData> ExistingAssetsMap;

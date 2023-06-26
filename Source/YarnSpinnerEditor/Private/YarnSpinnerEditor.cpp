@@ -50,7 +50,11 @@ void FYarnSpinnerEditor::StartupModule()
 	LocFileImporter->AddToRoot();
 	UDataTable* ImportOptions = NewObject<UDataTable>();
 	ImportOptions->RowStruct = FDisplayLine::StaticStruct();
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 1
+    ImportOptions->RowStructPathName = FDisplayLine::StaticStruct()->GetStructPathName();
+#else
 	ImportOptions->RowStructName = FDisplayLine::StaticStruct()->GetFName();
+#endif
 	ImportOptions->bIgnoreExtraFields = true;
 	ImportOptions->bIgnoreMissingFields = false;
 	ImportOptions->ImportKeyField = "id"; // becomes the Name field of the DataTable
@@ -95,8 +99,11 @@ void FYarnSpinnerEditor::ShutdownModule()
 
 	YarnProjectSynchronizer.Reset();
 
-	LocFileImporter->RemoveFromRoot();
-	LocFileImporter = nullptr;
+    if (LocFileImporter)
+    {
+        LocFileImporter->RemoveFromRoot();
+        LocFileImporter = nullptr;
+    }
 
 	IYarnSpinnerModuleInterface::ShutdownModule();
 }
