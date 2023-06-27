@@ -8,7 +8,7 @@
 #include "FileCache.h"
 #include "ObjectTools.h"
 #include "SCreateAssetFromObject.h"
-#include "UYarnSubsystem.h"
+#include "..\..\YarnSpinner\Public\YarnSubsystem.h"
 #include "YarnAssetFactory.h"
 #include "YarnProjectAsset.h"
 #include "YarnProjectMeta.h"

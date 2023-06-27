@@ -37,22 +37,22 @@ public:
     void OnDialogueEnded();
     
     UFUNCTION(BlueprintNativeEvent, Category="Dialogue Runner")
-    void OnRunLine(class ULine* line);
+    void OnRunLine(class ULine* Line);
 
     UFUNCTION(BlueprintNativeEvent, Category="Dialogue Runner")
-    void OnRunOptions(const TArray<class UOption*>& options);
+    void OnRunOptions(const TArray<class UOption*>& Options);
 
     UFUNCTION(BlueprintNativeEvent, Category="Dialogue Runner")
-    void OnRunCommand(const FString& command, const TArray<FString>& parameters);
+    void OnRunCommand(const FString& Command, const TArray<FString>& Parameters);
     
     UFUNCTION(BlueprintCallable, Category="Dialogue Runner")
-    void StartDialogue(FName nodeName);
+    void StartDialogue(FName NodeName);
     
     UFUNCTION(BlueprintCallable, Category="Dialogue Runner")
     void ContinueDialogue();
     
     UFUNCTION(BlueprintCallable, Category="Dialogue Runner")
-    void SelectOption(UOption* option);
+    void SelectOption(UOption* Option);
     
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Dialogue Runner")
     UYarnProjectAsset* YarnAsset;
@@ -63,24 +63,24 @@ private:
     TUniquePtr<Yarn::Library> Library;
 
     // ILogger
-    virtual void Log(std::string message, Type severity = Type::INFO) override;
+    virtual void Log(std::string Message, Type Severity = Type::INFO) override;
 
     // IVariableStorage
-    virtual void SetValue(std::string name, bool value) override;
-    virtual void SetValue(std::string name, float value) override;
-    virtual void SetValue(std::string name, std::string value) override;
+    virtual void SetValue(std::string Name, bool bValue) override;
+    virtual void SetValue(std::string Name, float Value) override;
+    virtual void SetValue(std::string Name, std::string Value) override;
 
-    virtual bool HasValue(std::string name) override;
-    virtual Yarn::Value GetValue(std::string name) override;
+    virtual bool HasValue(std::string Name) override;
+    virtual Yarn::Value GetValue(std::string Name) override;
 
-    virtual void ClearValue(std::string name) override;
+    virtual void ClearValue(std::string Name) override;
 
     FString GetLine(FName LineID, FName Language);
 
     UPROPERTY()
     FString Blah;
 
-    class UUYarnSubsystem* YarnSubsystem;
+    class UYarnSubsystem* YarnSubsystem;
     
-    static void GetDisplayTextForLine(class ULine* Line, Yarn::Line& YarnLine, UYarnProjectAsset* YarnAsset);
+    void GetDisplayTextForLine(class ULine* Line, Yarn::Line& YarnLine);
 };

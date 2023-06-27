@@ -25,10 +25,8 @@ FString UYarnProjectAsset::GetLocAssetPackage(const FName Language) const
 UDataTable* UYarnProjectAsset::GetLocTextDataTable(const FName Language) const
 {
     const FString LocalisedAssetPackage = GetLocAssetPackage(Language);
-    if (!FPaths::DirectoryExists(LocalisedAssetPackage))
-        return nullptr;
-
-    TArray<FAssetData> AssetData = FYarnAssetHelpers::FindAssetsInRegistry<UYarnProjectAsset>(LocalisedAssetPackage);
+    
+    TArray<FAssetData> AssetData = FYarnAssetHelpers::FindAssetsInRegistry<UDataTable>(LocalisedAssetPackage);
 
     if (AssetData.Num() == 0)
         return nullptr;
