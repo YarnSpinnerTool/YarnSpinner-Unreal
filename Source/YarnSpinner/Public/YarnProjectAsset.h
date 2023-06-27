@@ -46,6 +46,10 @@ public:
 	UPROPERTY(VisibleAnywhere, Category="File Path")
 	TMap<FString, FYarnSourceMeta> YarnFiles;
 
+    FString GetLocAssetPackage() const;
+    FString GetLocAssetPackage(FName Language) const;
+    class UDataTable* GetLocTextDataTable(FName Language) const;
+    
 #if WITH_EDITORONLY_DATA
 	virtual void PostInitProperties() override;
 	void SetYarnSources(const TArray<FString>& NewYarnSources);

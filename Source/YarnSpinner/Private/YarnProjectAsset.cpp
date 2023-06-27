@@ -5,9 +5,42 @@
 
 #include "YarnSpinner.h"
 #include "EditorFramework/AssetImportData.h"
+#include "Engine/DataTable.h"
+#include "Misc/YarnAssetHelpers.h"
 #include "Misc/YSLogging.h"
 
+
+FString UYarnProjectAsset::GetLocAssetPackage() const
+{
+    return FPaths::Combine(FPaths::GetPath(GetPathName()), GetName() + TEXT("_Loc"));
+}
+
+
+FString UYarnProjectAsset::GetLocAssetPackage(const FName Language) const
+{
+    return FPaths::Combine(GetLocAssetPackage(), Language.ToString());
+}
+
+
+UDataTable* UYarnProjectAsset::GetLocTextDataTable(const FName Language) const
+{
+    const FString LocalisedAssetPackage = GetLocAssetPackage(Language);
+    if (!FPaths::DirectoryExists(LocalisedAssetPackage))
+        return nullptr;
+
+    TArray<FAssetData> AssetData = FYarnAssetHelpers::FindAssetsInRegistry<UYarnProjectAsset>(LocalisedAssetPackage);
+
+    if (AssetData.Num() == 0)
+        return nullptr;
+        
+    UDataTable* DataTable = Cast<UDataTable>(AssetData[0].GetAsset());
+    return DataTable;
+}
+
+
 #if WITH_EDITORONLY_DATA
+
+
 void UYarnProjectAsset::PostInitProperties()
 {
 	if (!HasAnyFlags(RF_ClassDefaultObject))

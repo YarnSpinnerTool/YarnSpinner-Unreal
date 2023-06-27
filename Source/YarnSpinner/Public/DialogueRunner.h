@@ -55,7 +55,7 @@ public:
     void SelectOption(UOption* option);
     
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Dialogue Runner")
-    UYarnProjectAsset* yarnAsset;
+    UYarnProjectAsset* YarnAsset;
 
 private:
     TUniquePtr<Yarn::VirtualMachine> VirtualMachine;
@@ -74,4 +74,13 @@ private:
     virtual Yarn::Value GetValue(std::string name) override;
 
     virtual void ClearValue(std::string name) override;
+
+    FString GetLine(FName LineID, FName Language);
+
+    UPROPERTY()
+    FString Blah;
+
+    class UUYarnSubsystem* YarnSubsystem;
+    
+    static void GetDisplayTextForLine(class ULine* Line, Yarn::Line& YarnLine, UYarnProjectAsset* YarnAsset);
 };

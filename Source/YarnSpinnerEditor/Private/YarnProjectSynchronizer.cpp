@@ -8,6 +8,7 @@
 #include "FileCache.h"
 #include "ObjectTools.h"
 #include "SCreateAssetFromObject.h"
+#include "UYarnSubsystem.h"
 #include "YarnAssetFactory.h"
 #include "YarnProjectAsset.h"
 #include "YarnProjectMeta.h"
@@ -15,6 +16,7 @@
 #include "EditorFramework/AssetImportData.h"
 #include "Factories/CSVImportFactory.h"
 #include "Internationalization/StringTable.h"
+#include "Misc/YarnAssetHelpers.h"
 #include "Misc/YSLogging.h"
 #include "Sound/SoundWave.h"
 
@@ -140,17 +142,8 @@ void FYarnProjectSynchronizer::OnAssetRenamed(const FAssetData& AssetData, const
 
 void FYarnProjectSynchronizer::UpdateAllYarnProjects() const
 {
-    FARFilter YarnProjectFilter;
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 1
-    YarnProjectFilter.ClassPaths.Add(UYarnProjectAsset::StaticClass()->GetClassPathName());
-#else
-    YarnProjectFilter.ClassNames.Add(UYarnProjectAsset::StaticClass()->GetFName());
-#endif
+    TArray<FAssetData> YarnProjectAssets = FYarnAssetHelpers::FindAssetsInRegistry<UYarnProjectAsset>();
     
-
-    TArray<FAssetData> YarnProjectAssets;
-    FAssetRegistryModule::GetRegistry().GetAssets(YarnProjectFilter, YarnProjectAssets);
-
     for (auto Asset : YarnProjectAssets)
     {
         UYarnProjectAsset* YarnProjectAsset = Cast<UYarnProjectAsset>(Asset.GetAsset());
@@ -364,9 +357,7 @@ void FYarnProjectSynchronizer::UpdateYarnProjectAssets(const UYarnProjectAsset* 
     // Check for existing localised asset files
     YS_LOG("Localised files found for language '%s'.  Looking for changes...", *Loc)
 
-    const FString AssetDir = YarnProjectAsset->GetName() + TEXT("_Loc");
-
-    const FString LocalisedAssetPackage = FPaths::Combine(FPaths::GetPath(YarnProjectAsset->GetPathName()), AssetDir, Loc);
+    const FString LocalisedAssetPackage = YarnProjectAsset->GetLocAssetPackage(FName(Loc));
 
     const FString LocalisedAssetPath = FPackageName::LongPackageNameToFilename(LocalisedAssetPackage);
     if (!FPaths::DirectoryExists(LocalisedAssetPath))
@@ -376,15 +367,7 @@ void FYarnProjectSynchronizer::UpdateYarnProjectAssets(const UYarnProjectAsset* 
     }
 
     // Find existing assets of the correct type in the expected package so we can check if they need to be updated/removed 
-    TArray<FAssetData> ExistingAssets;
-    FARFilter LocAssetFilter;
-    LocAssetFilter.PackagePaths.Add(FName(LocalisedAssetPackage));
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 1
-    LocAssetFilter.ClassPaths.Add(TheAssetClass->GetClassPathName());
-#else
-    LocAssetFilter.ClassNames.Add(TheAssetClass->GetFName());
-#endif
-    FAssetRegistryModule::GetRegistry().GetAssets(LocAssetFilter, ExistingAssets);
+    TArray<FAssetData> ExistingAssets = FYarnAssetHelpers::FindAssetsInRegistry<AssetClass>(LocalisedAssetPackage);
 
     TMap<FString, FAssetData> ExistingAssetsMap;
     TMap<FString, bool> ExistingAssetSourceSeen;

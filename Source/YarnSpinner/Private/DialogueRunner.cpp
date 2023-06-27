@@ -13,33 +13,6 @@ THIRD_PARTY_INCLUDES_END
 //#include "StaticParty.h"
 
 
-static void GetDisplayTextForLine(ULine* line, Yarn::Line& yarnLine, UYarnProjectAsset* yarnAsset) {
-    // FIXME: Currently, we store the text of lines directly in the
-    // YarnAsset. This will eventually be replaced with string tables.
-
-    FName lineID = FName(yarnLine.LineID.c_str());
-
-    FString* maybeNonLocalisedDisplayText = yarnAsset->Lines.Find(lineID);
-    if (maybeNonLocalisedDisplayText) {
-
-        FString nonLocalisedDisplayText = *maybeNonLocalisedDisplayText;
-
-        // Apply substitutions
-        TArray<FStringFormatArg> formatArguments;
-
-        for (auto substitution : yarnLine.Substitutions)
-        {
-            formatArguments.Add(FStringFormatArg(UTF8_TO_TCHAR(substitution.c_str())));
-        }
-
-        FString textWithSubstitutions = FString::Format(*nonLocalisedDisplayText, formatArguments);
-
-        line->DisplayText = FText::FromString(textWithSubstitutions);
-    } else {
-        line->DisplayText = FText::FromString(TEXT("(missing line!)"));
-    }
-}
-
 // Sets default values
 ADialogueRunner::ADialogueRunner()
 {
@@ -53,14 +26,14 @@ void ADialogueRunner::PreInitializeComponents()
     Super::PreInitializeComponents();
 
 
-    if (!yarnAsset) {
+    if (!YarnAsset) {
         UE_LOG(LogYarnSpinner, Error, TEXT("DialogueRunner can't initialize, because it doesn't have a Yarn Asset."));
         return;
     }
 
     Yarn::Program program{};
 
-    bool parseSuccess = program.ParsePartialFromArray(yarnAsset->Data.GetData(), yarnAsset->Data.Num());
+    bool parseSuccess = program.ParsePartialFromArray(YarnAsset->Data.GetData(), YarnAsset->Data.Num());
 
     if (!parseSuccess) {
         UE_LOG(LogYarnSpinner, Error, TEXT("DialogueRunner can't initialize, because its Yarn Asset failed to load."));
@@ -82,7 +55,7 @@ void ADialogueRunner::PreInitializeComponents()
         ULine* lineObject = NewObject<ULine>(this);
         lineObject->LineID = FName(line.LineID.c_str());
 
-        GetDisplayTextForLine(lineObject, line, yarnAsset);
+        GetDisplayTextForLine(lineObject, line, YarnAsset);
 
         OnRunLine(lineObject);
     };
@@ -103,7 +76,7 @@ void ADialogueRunner::PreInitializeComponents()
             opt->Line = NewObject<ULine>(opt);
             opt->Line->LineID = FName(option.Line.LineID.c_str());
 
-            GetDisplayTextForLine(opt->Line, option.Line, yarnAsset);
+            GetDisplayTextForLine(opt->Line, option.Line, YarnAsset);
 
             opt->bIsAvailable = option.IsAvailable;
 
@@ -293,3 +266,33 @@ void ADialogueRunner::ClearValue(std::string name) {
     UE_LOG(LogYarnSpinner, Error, TEXT("Clearing Yarn variables is not currently supported. (%s)"), UTF8_TO_TCHAR(name.c_str()));
 
 }
+
+
+void ADialogueRunner::GetDisplayTextForLine(ULine* Line, Yarn::Line& YarnLine, UYarnProjectAsset* YarnAsset)
+{
+    // FIXME: Currently, we store the text of lines directly in the
+    // YarnAsset. This will eventually be replaced with string tables.
+
+    const FName LineID = FName(YarnLine.LineID.c_str());
+
+    FString* MaybeNonLocalisedDisplayText = YarnAsset->Lines.Find(LineID);
+    if (MaybeNonLocalisedDisplayText) {
+
+        FString NonLocalisedDisplayText = *MaybeNonLocalisedDisplayText;
+
+        // Apply substitutions
+        TArray<FStringFormatArg> FormatArguments;
+
+        for (auto Substitution : YarnLine.Substitutions)
+        {
+            FormatArguments.Add(FStringFormatArg(UTF8_TO_TCHAR(Substitution.c_str())));
+        }
+
+        FString TextWithSubstitutions = FString::Format(*NonLocalisedDisplayText, FormatArguments);
+
+        Line->DisplayText = FText::FromString(TextWithSubstitutions);
+    } else {
+        Line->DisplayText = FText::FromString(TEXT("(missing line!)"));
+    }
+}
+

@@ -13,6 +13,8 @@ public class YarnSpinner : ModuleRules
 				"Core",
 				"Projects",
 				"YSProtobuf",
+				 "CoreUObject", 
+				 "AssetRegistry",
 			});
 		
 		PrivateDependencyModuleNames.AddRange(
