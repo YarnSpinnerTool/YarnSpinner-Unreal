@@ -6,6 +6,7 @@
 #include "Option.h"
 #include "YarnSubsystem.h"
 #include "YarnSpinner.h"
+#include "Kismet/KismetInternationalizationLibrary.h"
 #include "Misc/YSLogging.h"
 
 THIRD_PARTY_INCLUDES_START
@@ -288,11 +289,18 @@ void ADialogueRunner::GetDisplayTextForLine(ULine* Line, Yarn::Line& YarnLine)
     {
         YarnSubsystem = GetGameInstance()->GetSubsystem<UYarnSubsystem>();
     }
+
+    // FString CurrentLanguage = FTextLocalizationManager::Get().GetRequestedLanguageName();
+
+    FString CurrentLanguage = UKismetInternationalizationLibrary::GetCurrentLanguage();
+    YS_LOG("Current language: %s", *CurrentLanguage)
+    FString CurrentCulture = UKismetInternationalizationLibrary::GetCurrentCulture();
+    YS_LOG("Current culture: %s", *CurrentCulture)
     
     FString NonLocalisedDisplayText;
     if (YarnSubsystem)
         // TODO: look up the correct language
-        NonLocalisedDisplayText = YarnSubsystem->GetLocText(YarnAsset, "fr", LineID);
+        NonLocalisedDisplayText = YarnSubsystem->GetLocText(YarnAsset, FName(CurrentLanguage), LineID);
     else
         NonLocalisedDisplayText = YarnAsset->Lines[LineID];
 
