@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "YarnProjectAsset.generated.h"
+#include "YarnProject.generated.h"
 
 
 USTRUCT()
@@ -31,7 +31,7 @@ struct FYarnSourceMeta
  * 
  */
 UCLASS(Blueprintable, AutoExpandCategories = "ImportOptions")
-class YARNSPINNER_API UYarnProjectAsset : public UObject
+class YARNSPINNER_API UYarnProject : public UObject
 {
 	GENERATED_BODY()
 

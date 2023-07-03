@@ -10,7 +10,7 @@
 #include "SCreateAssetFromObject.h"
 #include "..\..\YarnSpinner\Public\YarnSubsystem.h"
 #include "YarnAssetFactory.h"
-#include "YarnProjectAsset.h"
+#include "YarnProject.h"
 #include "YarnProjectMeta.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "EditorFramework/AssetImportData.h"
@@ -117,7 +117,7 @@ void FYarnProjectSynchronizer::OnAssetRegistryFilesLoaded()
 {
     // Set a timer to update yarn projects in a loop with a max-10-sec delay between loops.
     // TODO: consider replacing the loop with directory watching (complicated by the fact that we need to watch multiple directories per yarn project) and registry callbacks
-    GEditor->GetEditorWorldContext().World()->GetTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateRaw(this, &FYarnProjectSynchronizer::UpdateAllYarnProjects), 10.0f, true);
+    // GEditor->GetEditorWorldContext().World()->GetTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateRaw(this, &FYarnProjectSynchronizer::UpdateAllYarnProjects), 10.0f, false);
     // UpdateAllYarnProjects();
 }
 
@@ -142,11 +142,11 @@ void FYarnProjectSynchronizer::OnAssetRenamed(const FAssetData& AssetData, const
 
 void FYarnProjectSynchronizer::UpdateAllYarnProjects() const
 {
-    TArray<FAssetData> YarnProjectAssets = FYarnAssetHelpers::FindAssetsInRegistry<UYarnProjectAsset>();
+    TArray<FAssetData> YarnProjectAssets = FYarnAssetHelpers::FindAssetsInRegistry<UYarnProject>();
     
     for (auto Asset : YarnProjectAssets)
     {
-        UYarnProjectAsset* YarnProjectAsset = Cast<UYarnProjectAsset>(Asset.GetAsset());
+        UYarnProject* YarnProjectAsset = Cast<UYarnProject>(Asset.GetAsset());
         YS_LOG("YarnProject Asset found: %s", *Asset.AssetName.ToString());
 
         UpdateYarnProjectAsset(YarnProjectAsset);
@@ -155,7 +155,7 @@ void FYarnProjectSynchronizer::UpdateAllYarnProjects() const
 }
 
 
-void FYarnProjectSynchronizer::UpdateYarnProjectAsset(UYarnProjectAsset* YarnProjectAsset) const
+void FYarnProjectSynchronizer::UpdateYarnProjectAsset(UYarnProject* YarnProjectAsset) const
 {
     YS_LOG("Checking .yarnproject asset; %s...", *YarnProjectAsset->GetName())
     // Check if yarn sources need a recompile
@@ -180,7 +180,7 @@ void FYarnProjectSynchronizer::UpdateYarnProjectAsset(UYarnProjectAsset* YarnPro
 }
 
 
-FString FYarnProjectSynchronizer::AbsoluteSourcePath(const UYarnProjectAsset* YarnProjectAsset, const FString& SourcePath)
+FString FYarnProjectSynchronizer::AbsoluteSourcePath(const UYarnProject* YarnProjectAsset, const FString& SourcePath)
 {
     FString S = FPaths::IsRelative(SourcePath) ? FPaths::Combine(YarnProjectAsset->YarnProjectPath(), SourcePath) : SourcePath;
     FPaths::NormalizeDirectoryName(S);
@@ -247,7 +247,7 @@ FString FYarnProjectSynchronizer::AbsoluteSourcePath(const UYarnProjectAsset* Ya
 // }
 
 
-void FYarnProjectSynchronizer::UpdateLocAssets(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocAssets) const
+void FYarnProjectSynchronizer::UpdateLocAssets(const UYarnProject* YarnProjectAsset, const FString& Loc, const FString& LocAssets) const
 {
     const FString LocAssetsPath = AbsoluteSourcePath(YarnProjectAsset, LocAssets);
 
@@ -273,7 +273,7 @@ void FYarnProjectSynchronizer::UpdateLocAssets(const UYarnProjectAsset* YarnProj
 }
 
 
-void FYarnProjectSynchronizer::UpdateLocStrings(const UYarnProjectAsset* YarnProjectAsset, const FString& Loc, const FString& LocStrings) const
+void FYarnProjectSynchronizer::UpdateLocStrings(const UYarnProject* YarnProjectAsset, const FString& Loc, const FString& LocStrings) const
 {
     if (LocStrings.IsEmpty())
         return;
@@ -319,7 +319,7 @@ void FYarnProjectSynchronizer::UpdateLocStrings(const UYarnProjectAsset* YarnPro
 }
 
 
-void FYarnProjectSynchronizer::UpdateYarnProjectAssetLocalizations(const UYarnProjectAsset* YarnProjectAsset) const
+void FYarnProjectSynchronizer::UpdateYarnProjectAssetLocalizations(const UYarnProject* YarnProjectAsset) const
 {
     // Check if other project assets need to be imported/updated/removed
     TOptional<FYarnProjectMetaData> ProjectMeta = FYarnProjectMetaData::FromAsset(YarnProjectAsset);
@@ -342,7 +342,7 @@ void FYarnProjectSynchronizer::UpdateYarnProjectAssetLocalizations(const UYarnPr
 
 
 template <class AssetClass>
-void FYarnProjectSynchronizer::UpdateYarnProjectAssets(const UYarnProjectAsset* YarnProjectAsset, const FString& SourcesPath, const FString& Loc, const TArray<FString>& LocSources, TFunction<TArray<UObject*>(const FString& SourceFile, const FString& DestinationPackage)> ImportNew, TFunction<bool(AssetClass* Asset)> Reimport, TSubclassOf<UObject> TheAssetClass) const
+void FYarnProjectSynchronizer::UpdateYarnProjectAssets(const UYarnProject* YarnProjectAsset, const FString& SourcesPath, const FString& Loc, const TArray<FString>& LocSources, TFunction<TArray<UObject*>(const FString& SourceFile, const FString& DestinationPackage)> ImportNew, TFunction<bool(AssetClass* Asset)> Reimport, TSubclassOf<UObject> TheAssetClass) const
 {
     YS_LOG_FUNCSIG
 

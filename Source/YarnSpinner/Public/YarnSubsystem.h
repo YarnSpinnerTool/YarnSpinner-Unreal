@@ -6,7 +6,7 @@
 #include "AssetRegistry/ARFilter.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 
-#include "YarnProjectAsset.h"
+#include "YarnProject.h"
 #include "Engine/DataTable.h"
 
 #include "YarnSubsystem.generated.h"
@@ -23,7 +23,7 @@ public:
     virtual void Initialize(FSubsystemCollectionBase& Collection) override;
     virtual void Deinitialize() override;
 
-    FString GetLocText(const UYarnProjectAsset* YarnProject, const FName& Language, const FName& LineID);
+    FString GetLocText(const UYarnProject* YarnProject, const FName& Language, const FName& LineID);
 
 private:
     // UPROPERTY()

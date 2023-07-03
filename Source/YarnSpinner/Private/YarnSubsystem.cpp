@@ -25,7 +25,7 @@ void UYarnSubsystem::Deinitialize()
 
 
 // TODO: should maybe stick to FText, supposedly better for localization?
-FString UYarnSubsystem::GetLocText(const UYarnProjectAsset* YarnProject, const FName& Language, const FName& LineID)
+FString UYarnSubsystem::GetLocText(const UYarnProject* YarnProject, const FName& Language, const FName& LineID)
 {
     if (!YarnProject)
         return "";

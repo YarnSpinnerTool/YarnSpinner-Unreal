@@ -6,7 +6,7 @@
 #include "Misc/FileHelper.h"
 
 
-TOptional<FYarnProjectMetaData> FYarnProjectMetaData::FromAsset(const UYarnProjectAsset* Asset)
+TOptional<FYarnProjectMetaData> FYarnProjectMetaData::FromAsset(const UYarnProject* Asset)
 {
 	TOptional<FYarnProjectMetaData> MetaData;
 

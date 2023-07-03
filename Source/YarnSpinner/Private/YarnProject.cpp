@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "YarnProjectAsset.h"
+#include "YarnProject.h"
 
 #include "YarnSpinner.h"
 #include "EditorFramework/AssetImportData.h"
@@ -10,19 +10,19 @@
 #include "Misc/YSLogging.h"
 
 
-FString UYarnProjectAsset::GetLocAssetPackage() const
+FString UYarnProject::GetLocAssetPackage() const
 {
     return FPaths::Combine(FPaths::GetPath(GetPathName()), GetName() + TEXT("_Loc"));
 }
 
 
-FString UYarnProjectAsset::GetLocAssetPackage(const FName Language) const
+FString UYarnProject::GetLocAssetPackage(const FName Language) const
 {
     return FPaths::Combine(GetLocAssetPackage(), Language.ToString());
 }
 
 
-UDataTable* UYarnProjectAsset::GetLocTextDataTable(const FName Language) const
+UDataTable* UYarnProject::GetLocTextDataTable(const FName Language) const
 {
     const FString LocalisedAssetPackage = GetLocAssetPackage(Language);
     
@@ -39,7 +39,7 @@ UDataTable* UYarnProjectAsset::GetLocTextDataTable(const FName Language) const
 #if WITH_EDITORONLY_DATA
 
 
-void UYarnProjectAsset::PostInitProperties()
+void UYarnProject::PostInitProperties()
 {
 	if (!HasAnyFlags(RF_ClassDefaultObject))
 	{
@@ -50,7 +50,7 @@ void UYarnProjectAsset::PostInitProperties()
 }
 
 
-void UYarnProjectAsset::SetYarnSources(const TArray<FString>& NewYarnSources)
+void UYarnProject::SetYarnSources(const TArray<FString>& NewYarnSources)
 {
 	const FString ProjectPath = YarnProjectPath();
 	YarnFiles.Reset();
@@ -76,7 +76,7 @@ void UYarnProjectAsset::SetYarnSources(const TArray<FString>& NewYarnSources)
 }
 
 
-bool UYarnProjectAsset::ShouldRecompile(const TArray<FString>& LatestYarnSources) const
+bool UYarnProject::ShouldRecompile(const TArray<FString>& LatestYarnSources) const
 {
 	const FString ProjectPath = YarnProjectPath();
 
@@ -130,7 +130,7 @@ bool UYarnProjectAsset::ShouldRecompile(const TArray<FString>& LatestYarnSources
 }
 
 
-FString UYarnProjectAsset::YarnProjectPath() const
+FString UYarnProject::YarnProjectPath() const
 {
 	return FPaths::GetPath(AssetImportData->GetFirstFilename());
 }

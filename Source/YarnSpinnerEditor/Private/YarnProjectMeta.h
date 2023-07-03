@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "YarnProjectAsset.h"
+#include "YarnProject.h"
 #include "CoreMinimal.h"
 #include "YarnProjectMeta.generated.h"
 
@@ -22,7 +22,7 @@ struct YARNSPINNEREDITOR_API FYarnProjectMetaData
 {
 	GENERATED_BODY()
 
-	static TOptional<FYarnProjectMetaData> FromAsset(const UYarnProjectAsset* Asset);
+	static TOptional<FYarnProjectMetaData> FromAsset(const UYarnProject* Asset);
 	
 	UPROPERTY()
 	int32 projectFileVersion = -1;

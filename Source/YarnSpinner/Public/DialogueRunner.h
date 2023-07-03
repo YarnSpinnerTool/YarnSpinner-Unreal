@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "YarnProjectAsset.h"
+#include "YarnProject.h"
 
 THIRD_PARTY_INCLUDES_START
 #include "YarnSpinnerCore/VirtualMachine.h"
@@ -55,7 +55,7 @@ public:
     void SelectOption(UOption* Option);
     
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Dialogue Runner")
-    UYarnProjectAsset* YarnAsset;
+    UYarnProject* YarnAsset;
 
 private:
     TUniquePtr<Yarn::VirtualMachine> VirtualMachine;
