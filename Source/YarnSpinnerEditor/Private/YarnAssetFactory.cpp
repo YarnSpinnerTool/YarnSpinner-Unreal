@@ -2,7 +2,10 @@
 
 #include "YarnAssetFactory.h"
 
+#include "LocalizationConfigurationScript.h"
+#include "LocalizationSettings.h"
 #include "LocalizationSourceControlUtil.h"
+#include "LocalizationTargetTypes.h"
 #include "LocTextHelper.h"
 #include "YarnSpinnerEditor.h"
 
@@ -116,13 +119,6 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
         YarnProject->Lines.Add(LineID, LineText);
     }
 
-    // FString Result;
-    // if (FFileHelper::LoadFileToArray(YarnAsset->Data, fileName)) {
-    // 	// TODO: report successfully loading the data
-    // } else {
-    // 	// TODO: report failing to load the data
-    // }
-
     // Record where this asset came from so we know how to update it
     if (!CurrentFilename.IsEmpty())
     {
@@ -154,14 +150,63 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
     TArray<FString> Cultures;
     ProjectMeta->localisation.GetKeys(Cultures);
     
-	FLocTextHelper LocTextHelper(LocTargetPath, FString::Printf(TEXT("%s.manifest"), *LocTargetName), FString::Printf(TEXT("%s.archive"), *LocTargetName), ProjectMeta->baseLanguage, Cultures, nullptr);
+    // Find/create localisation target config, ensuring we add it to the correct target set
+    ULocalizationTarget* LocTarget;
+    for (auto Target : ULocalizationSettings::GetGameTargetSet()->TargetObjects)
+    {
+        if (Target->GetName() == LocTargetName)
+        {
+            LocTarget = Target;
+            break;
+        }
+    }
+    if (!LocTarget)
+    {
+        NewObject<ULocalizationTarget>(ULocalizationSettings::GetGameTargetSet());
+        // Register with game target set
+        ULocalizationSettings::GetGameTargetSet()->TargetObjects.Add(LocTarget);
+    }
 
-    // TODO: set up localisation target properties
+    if (!LocTarget)
+    {
+        YS_ERR("Failed to create localisation target object for '%s'", *LocTargetName);
+        return YarnProject;
+    }
+
+    // Set up config
+    FLocalizationTargetSettings& Settings = LocTarget->Settings;
+    Settings.Name = LocTargetName;
+    Settings.NativeCultureIndex = 0;
+    Settings.SupportedCulturesStatistics.Reset();
+    Settings.SupportedCulturesStatistics.Add({ProjectMeta->baseLanguage});
+    for (auto Culture : Cultures)
+    {
+        if (Culture != ProjectMeta->baseLanguage)
+        {
+            Settings.SupportedCulturesStatistics.Add({Culture});
+        }
+    }
+    Settings.CompileSettings.SkipSourceCheck = true;
+    Settings.GatherFromPackages.IsEnabled = false;
+    Settings.GatherFromMetaData.IsEnabled = false;
+    Settings.GatherFromTextFiles.IsEnabled = false;
+
+    // TODO: set loading policy
     
-    // TODO: look at ULocalisationTarget and FLocalisationTargetSettings ...
+    // Generate config files (Config/Localization/MyTarget_*.ini)
+    LocTarget->SaveConfig();
+    LocalizationConfigurationScript::GenerateAllConfigFiles(LocTarget);
     
-    // TODO: fill out manifest
-    // TODO: create language archives
+    // TODO: register in DefaultEngine.ini
+    
+    // Notify parent of change, which triggers loading the target settings in relevant caches and updating editor config and DefaultEditor.ini
+    FProperty* SettingsProp = LocTarget->GetClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(ULocalizationTarget, Settings));
+    FPropertyChangedEvent ChangeEvent(SettingsProp, EPropertyChangeType::ValueSet);
+    LocTarget->PostEditChangeProperty(ChangeEvent);
+
+    // Set up localisation data (keys, source text and translations) as a localisation target manifest (source) and archives (translations)
+    
+	FLocTextHelper LocTextHelper(LocTargetPath, FString::Printf(TEXT("%s.manifest"), *LocTargetName), FString::Printf(TEXT("%s.archive"), *LocTargetName), ProjectMeta->baseLanguage, Cultures, nullptr);
 
     FText OutError;
     // if (!LocTextHelper.LoadManifest(ELocTextHelperLoadFlags::LoadOrCreate, &OutError))
@@ -171,18 +216,9 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
     }
     else
     {
-        // FString Desc = "A description";
         FLocKey NamespaceKey {LocTargetName};
-        // FManifestContext ManifestContext {FLocKey("line1234")};
-        // ManifestContext.SourceLocation = YarnProject->GetPathName();
-        // TSharedPtr<FLocMetadataObject> LocMetadataObject {MakeShared<FLocMetadataObject>()};
-        // TSharedPtr<FLocMetadataValueString> LocMetadataValue {MakeShared<FLocMetadataValueString>(" AAAA STRRRINNNGNGG ")};
-        // LocMetadataObject->SetField("THEFIELDNAME", LocMetadataValue );
-        // FLocItem Item { "Line1234", LocMetadataObject};
-        // FLocItem Item { "Default text" };
-        // LocTextHelper.AddSourceText(NamespaceKey, Item, ManifestContext);//, &Desc);
         
-        // Add lines to manifest as source text
+        // Add lines to source text manifest
         for (auto Pair : CompilerOutput.strings())
         {
             FString LineID = FString(Pair.first.c_str());
@@ -249,13 +285,15 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
         }
 
         LocTextHelper.SaveAll();
+
+        // TODO: update word counts
+        // auto TimeStamp = FDateTime::UtcNow();
+        // FLocTextWordCounts WordCountReport = LocTextHelper.GetWordCountReport(TimeStamp);
+        // LocTextHelper.SaveWordCountReport(TimeStamp, LocTarget->Ge);
+        // LocTarget->UpdateWordCountsFromCSV();
         
-        // TODO: compile
+        // TODO: compile text
     }
-
-
-
-
 
     //    YarnAsset->PostEditChange();
     //    YarnAsset->MarkPackageDirty();
