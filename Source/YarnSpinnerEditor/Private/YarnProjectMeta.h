@@ -5,7 +5,7 @@
 
 
 USTRUCT()
-struct YARNSPINNEREDITOR_API FYarnProjectLocalisationData
+struct YARNSPINNEREDITOR_API FYarnProjectLocalizationData
 {
 	GENERATED_BODY()
 
@@ -34,7 +34,7 @@ struct YARNSPINNEREDITOR_API FYarnProjectMetaData
 	TArray<FString> excludeFiles;
 
 	UPROPERTY()
-	TMap<FString, FYarnProjectLocalisationData> localisation;
+	TMap<FString, FYarnProjectLocalizationData> localisation;
 
 	UPROPERTY()
 	FString baseLanguage = "en";

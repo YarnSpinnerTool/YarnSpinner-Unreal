@@ -13,6 +13,7 @@
 #include "ReimportYarnAssetFactory.h"
 #include "YarnProjectMeta.h"
 #include "Misc/YSLogging.h"
+#include "Serialization/Csv/CsvParser.h"
 
 THIRD_PARTY_INCLUDES_START
 #include "YarnSpinnerCore/yarn_spinner.pb.h"
@@ -166,7 +167,7 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
     // if (!LocTextHelper.LoadManifest(ELocTextHelperLoadFlags::LoadOrCreate, &OutError))
     if (!LocTextHelper.LoadAll(ELocTextHelperLoadFlags::Create, &OutError))
     {
-        YS_ERR("Could not load or create manifest & archive files for localisation target '%s': %s", *LocTargetName, *OutError.ToString());
+        YS_ERR("Could not create manifest & archive files for localisation target '%s': %s", *LocTargetName, *OutError.ToString());
     }
     else
     {
@@ -181,7 +182,7 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
         // FLocItem Item { "Default text" };
         // LocTextHelper.AddSourceText(NamespaceKey, Item, ManifestContext);//, &Desc);
         
-        // For each line we've received, store it in the Yarn asset
+        // Add lines to manifest as source text
         for (auto Pair : CompilerOutput.strings())
         {
             FString LineID = FString(Pair.first.c_str());
@@ -191,7 +192,61 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
             LocTextHelper.AddSourceText(NamespaceKey, FLocItem(LineText), ManifestContext);
         }
         
-        // TODO: add translations
+        // Add translations to archives
+        for (auto Loc : ProjectMeta->localisation)
+        {
+            FString Culture = Loc.Key;
+            FYarnProjectLocalizationData LocData = Loc.Value;
+            FString LocFile = FPaths::Combine(YarnProject->YarnProjectPath(), LocData.strings);
+            FPaths::NormalizeFilename(LocFile);
+            FPaths::CollapseRelativeDirectories(LocFile);
+            FPaths::RemoveDuplicateSlashes(LocFile);
+            FString LocFileData;
+            
+            if (!FFileHelper::LoadFileToString(LocFileData, *LocFile))
+            {
+                YS_WARN("Couldn't load strings file: %s", *LocFile)
+                continue;
+            }
+
+            const FCsvParser Parser(LocFileData);
+            const FCsvParser::FRows& Rows = Parser.GetRows();
+            if (Rows.Num() < 2)
+            {
+                YS_WARN("Empty strings file: %s", *LocFile)
+                continue;
+            }
+            
+            const auto& HeaderRow = Rows[0];
+            TMap<FString, int32> HeaderMap;
+            for (int32 I = 0; I < HeaderRow.Num(); ++I)
+            {
+                HeaderMap.Add(WCHAR_TO_TCHAR(HeaderRow[I]), I);
+            }
+            // Test for required columns
+            if (!HeaderMap.Contains(TEXT("character")) || !HeaderMap.Contains(TEXT("text")) || !HeaderMap.Contains(TEXT("id")))
+            {
+                YS_ERR("Missing required column 'id', 'text' or 'character' in strings file: %s", *LocFile)
+                continue;
+            }
+
+            for (int32 I = 1; I < Rows.Num(); ++I)
+            {
+                const auto& Row = Rows[I];
+                const FString& LineID = WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("id")]]);
+                const FString& LineText = WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("text")]]);
+                const FString& LineCharacter = WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("character")]]);
+
+                auto Source = LocTextHelper.FindSourceText(NamespaceKey, FLocKey(LineID));
+
+                FLocItem SourceText = Source.IsValid() ? Source->Source : FLocItem();
+                FLocItem Translation((!LineCharacter.IsEmpty() ? LineCharacter + TEXT(": ") : TEXT("")) + LineText);
+
+                const auto LocEntry = MakeShared<FArchiveEntry>(NamespaceKey, FLocKey(LineID), SourceText, Translation, nullptr, false);
+
+                LocTextHelper.AddTranslation(Culture, LocEntry);
+            }
+        }
 
         LocTextHelper.SaveAll();
         
