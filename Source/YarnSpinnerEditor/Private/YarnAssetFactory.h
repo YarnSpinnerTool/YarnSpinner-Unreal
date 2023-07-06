@@ -9,6 +9,7 @@
 #include "Factories/Factory.h"
 #include "YarnProject.h"
 #include "EditorReimportHandler.h"
+#include "LocalizationTargetTypes.h"
 
 THIRD_PARTY_INCLUDES_START
 #include "YarnSpinnerCore/compiler_output.pb.h"
@@ -48,4 +49,9 @@ public:
 	static bool GetCompiledDataForYarnProject(const TCHAR* InFilePath, Yarn::CompilerOutput& CompilerOutput);
 	static bool GetSourcesForProject(const TCHAR* InFilePath, TArray<FString>& SourceFiles);
 	static bool GetSourcesForProject(const UYarnProject* YarnProjectAsset, TArray<FString>& SourceFiles);
+    
+private:
+    // Set up localisation target for the Yarn project
+    void BuildLocalizationTarget(const UYarnProject* YarnProject, const Yarn::CompilerOutput& CompilerOutput) const;
+    void SetLoadingPolicy(TWeakObjectPtr<ULocalizationTarget> LocalizationTarget, ELocalizationTargetLoadingPolicy LoadingPolicy) const;
 };

@@ -2,6 +2,10 @@
 
 #include "YarnAssetFactory.h"
 
+#include "ISourceControlModule.h"
+#include "ISourceControlOperation.h"
+#include "ISourceControlProvider.h"
+#include "ISourceControlState.h"
 #include "LocalizationConfigurationScript.h"
 #include "LocalizationSettings.h"
 #include "LocalizationSourceControlUtil.h"
@@ -14,6 +18,7 @@
 #include "Containers/UnrealString.h"
 
 #include "ReimportYarnAssetFactory.h"
+#include "SourceControlOperations.h"
 #include "YarnProjectMeta.h"
 #include "Misc/YSLogging.h"
 #include "Serialization/Csv/CsvParser.h"
@@ -43,7 +48,7 @@ UYarnAssetFactory::UYarnAssetFactory(const FObjectInitializer& ObjectInitializer
 UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, UObject* Context, const TCHAR* Type, const uint8*& Buffer, const uint8* BufferEnd, FFeedbackContext* Warn)
 {
     YS_LOG_FUNCSIG
-    
+
     //    FEditorDelegates::OnAssetPreImport.Broadcast(this, InClass, InParent, InName, Type);
 
     UYarnProject* YarnProject = nullptr;
@@ -134,166 +139,7 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
         YarnProject->SetYarnSources(SourceFiles);
     }
 
-    
-    // Set up localisation target for the Yarn project
-
-    TOptional<FYarnProjectMetaData> ProjectMeta = FYarnProjectMetaData::FromAsset(YarnProject);
-    if (!ProjectMeta.IsSet())
-    {
-        YS_ERR("Failed to get project metadata from .yarnproject file.  Could not create/update localisation target.");
-        return YarnProject;
-    }
-
-	const FString LocTargetName = InName.ToString();
-	const FString LocTargetPath = FPaths::ProjectContentDir() / TEXT("Localization") / LocTargetName;
-
-    TArray<FString> Cultures;
-    ProjectMeta->localisation.GetKeys(Cultures);
-    
-    // Find/create localisation target config, ensuring we add it to the correct target set
-    ULocalizationTarget* LocTarget;
-    for (auto Target : ULocalizationSettings::GetGameTargetSet()->TargetObjects)
-    {
-        if (Target->GetName() == LocTargetName)
-        {
-            LocTarget = Target;
-            break;
-        }
-    }
-    if (!LocTarget)
-    {
-        NewObject<ULocalizationTarget>(ULocalizationSettings::GetGameTargetSet());
-        // Register with game target set
-        ULocalizationSettings::GetGameTargetSet()->TargetObjects.Add(LocTarget);
-    }
-
-    if (!LocTarget)
-    {
-        YS_ERR("Failed to create localisation target object for '%s'", *LocTargetName);
-        return YarnProject;
-    }
-
-    // Set up config
-    FLocalizationTargetSettings& Settings = LocTarget->Settings;
-    Settings.Name = LocTargetName;
-    Settings.NativeCultureIndex = 0;
-    Settings.SupportedCulturesStatistics.Reset();
-    Settings.SupportedCulturesStatistics.Add({ProjectMeta->baseLanguage});
-    for (auto Culture : Cultures)
-    {
-        if (Culture != ProjectMeta->baseLanguage)
-        {
-            Settings.SupportedCulturesStatistics.Add({Culture});
-        }
-    }
-    Settings.CompileSettings.SkipSourceCheck = true;
-    Settings.GatherFromPackages.IsEnabled = false;
-    Settings.GatherFromMetaData.IsEnabled = false;
-    Settings.GatherFromTextFiles.IsEnabled = false;
-
-    // TODO: set loading policy
-    
-    // Generate config files (Config/Localization/MyTarget_*.ini)
-    LocTarget->SaveConfig();
-    LocalizationConfigurationScript::GenerateAllConfigFiles(LocTarget);
-    
-    // TODO: register in DefaultEngine.ini
-    
-    // Notify parent of change, which triggers loading the target settings in relevant caches and updating editor config and DefaultEditor.ini
-    FProperty* SettingsProp = LocTarget->GetClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(ULocalizationTarget, Settings));
-    FPropertyChangedEvent ChangeEvent(SettingsProp, EPropertyChangeType::ValueSet);
-    LocTarget->PostEditChangeProperty(ChangeEvent);
-
-    // Set up localisation data (keys, source text and translations) as a localisation target manifest (source) and archives (translations)
-    
-	FLocTextHelper LocTextHelper(LocTargetPath, FString::Printf(TEXT("%s.manifest"), *LocTargetName), FString::Printf(TEXT("%s.archive"), *LocTargetName), ProjectMeta->baseLanguage, Cultures, nullptr);
-
-    FText OutError;
-    // if (!LocTextHelper.LoadManifest(ELocTextHelperLoadFlags::LoadOrCreate, &OutError))
-    if (!LocTextHelper.LoadAll(ELocTextHelperLoadFlags::Create, &OutError))
-    {
-        YS_ERR("Could not create manifest & archive files for localisation target '%s': %s", *LocTargetName, *OutError.ToString());
-    }
-    else
-    {
-        FLocKey NamespaceKey {LocTargetName};
-        
-        // Add lines to source text manifest
-        for (auto Pair : CompilerOutput.strings())
-        {
-            FString LineID = FString(Pair.first.c_str());
-            FString LineText = FString(Pair.second.text().c_str());
-            FManifestContext ManifestContext {FLocKey(LineID)};
-            ManifestContext.SourceLocation = YarnProject->GetPathName();
-            LocTextHelper.AddSourceText(NamespaceKey, FLocItem(LineText), ManifestContext);
-        }
-        
-        // Add translations to archives
-        for (auto Loc : ProjectMeta->localisation)
-        {
-            FString Culture = Loc.Key;
-            FYarnProjectLocalizationData LocData = Loc.Value;
-            FString LocFile = FPaths::Combine(YarnProject->YarnProjectPath(), LocData.strings);
-            FPaths::NormalizeFilename(LocFile);
-            FPaths::CollapseRelativeDirectories(LocFile);
-            FPaths::RemoveDuplicateSlashes(LocFile);
-            FString LocFileData;
-            
-            if (!FFileHelper::LoadFileToString(LocFileData, *LocFile))
-            {
-                YS_WARN("Couldn't load strings file: %s", *LocFile)
-                continue;
-            }
-
-            const FCsvParser Parser(LocFileData);
-            const FCsvParser::FRows& Rows = Parser.GetRows();
-            if (Rows.Num() < 2)
-            {
-                YS_WARN("Empty strings file: %s", *LocFile)
-                continue;
-            }
-            
-            const auto& HeaderRow = Rows[0];
-            TMap<FString, int32> HeaderMap;
-            for (int32 I = 0; I < HeaderRow.Num(); ++I)
-            {
-                HeaderMap.Add(WCHAR_TO_TCHAR(HeaderRow[I]), I);
-            }
-            // Test for required columns
-            if (!HeaderMap.Contains(TEXT("character")) || !HeaderMap.Contains(TEXT("text")) || !HeaderMap.Contains(TEXT("id")))
-            {
-                YS_ERR("Missing required column 'id', 'text' or 'character' in strings file: %s", *LocFile)
-                continue;
-            }
-
-            for (int32 I = 1; I < Rows.Num(); ++I)
-            {
-                const auto& Row = Rows[I];
-                const FString& LineID = WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("id")]]);
-                const FString& LineText = WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("text")]]);
-                const FString& LineCharacter = WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("character")]]);
-
-                auto Source = LocTextHelper.FindSourceText(NamespaceKey, FLocKey(LineID));
-
-                FLocItem SourceText = Source.IsValid() ? Source->Source : FLocItem();
-                FLocItem Translation((!LineCharacter.IsEmpty() ? LineCharacter + TEXT(": ") : TEXT("")) + LineText);
-
-                const auto LocEntry = MakeShared<FArchiveEntry>(NamespaceKey, FLocKey(LineID), SourceText, Translation, nullptr, false);
-
-                LocTextHelper.AddTranslation(Culture, LocEntry);
-            }
-        }
-
-        LocTextHelper.SaveAll();
-
-        // TODO: update word counts
-        // auto TimeStamp = FDateTime::UtcNow();
-        // FLocTextWordCounts WordCountReport = LocTextHelper.GetWordCountReport(TimeStamp);
-        // LocTextHelper.SaveWordCountReport(TimeStamp, LocTarget->Ge);
-        // LocTarget->UpdateWordCountsFromCSV();
-        
-        // TODO: compile text
-    }
+    BuildLocalizationTarget(YarnProject, CompilerOutput);
 
     //    YarnAsset->PostEditChange();
     //    YarnAsset->MarkPackageDirty();
@@ -315,7 +161,7 @@ bool UYarnAssetFactory::FactoryCanImport(const FString& Filename)
 EReimportResult::Type UYarnAssetFactory::Reimport(UYarnProject* YarnProject)
 {
     YS_LOG_FUNCSIG
-    
+
     const FString Path = YarnProject->AssetImportData->GetFirstFilename();
 
     if (Path.IsEmpty() == false)
@@ -420,4 +266,338 @@ bool UYarnAssetFactory::GetSourcesForProject(const UYarnProject* YarnProjectAsse
         return false;
     }
     return GetSourcesForProject(*YarnProjectAsset->AssetImportData->GetFirstFilename(), SourceFiles);
+}
+
+
+void UYarnAssetFactory::BuildLocalizationTarget(const UYarnProject* YarnProject, const Yarn::CompilerOutput& CompilerOutput) const
+{
+
+    TOptional<FYarnProjectMetaData> ProjectMeta = FYarnProjectMetaData::FromAsset(YarnProject);
+    if (!ProjectMeta.IsSet())
+    {
+        YS_ERR("Failed to get project metadata from .yarnproject file.  Could not create/update localisation target.");
+        return;
+    }
+
+    const FString LocTargetName = YarnProject->GetName();
+    const FString LocTargetPath = FPaths::ProjectContentDir() / TEXT("Localization") / LocTargetName;
+
+    TArray<FString> Cultures;
+    ProjectMeta->localisation.GetKeys(Cultures);
+
+    // Find/create localisation target config, ensuring we add it to the correct target set
+    ULocalizationTarget* LocTarget = nullptr;
+    for (ULocalizationTarget* Target : ULocalizationSettings::GetGameTargetSet()->TargetObjects)
+    {
+        if (Target && Target->GetName() == LocTargetName)
+        {
+            LocTarget = Target;
+            break;
+        }
+    }
+    if (!LocTarget)
+    {
+        YS_LOG("Did not find existing localisation target for '%s', creating new one", *LocTargetName)
+        LocTarget = NewObject<ULocalizationTarget>(ULocalizationSettings::GetGameTargetSet());
+        // Register with game target set
+        ULocalizationSettings::GetGameTargetSet()->TargetObjects.Add(LocTarget);
+    }
+
+    if (!LocTarget)
+    {
+        YS_ERR("Failed to create localisation target object for '%s'", *LocTargetName);
+        return;
+    }
+
+    // Set up config
+    FLocalizationTargetSettings& Settings = LocTarget->Settings;
+    Settings.Name = LocTargetName;
+    Settings.NativeCultureIndex = 0;
+    Settings.SupportedCulturesStatistics.Reset();
+    Settings.SupportedCulturesStatistics.Add({ProjectMeta->baseLanguage});
+    for (auto Culture : Cultures)
+    {
+        if (Culture != ProjectMeta->baseLanguage)
+        {
+            Settings.SupportedCulturesStatistics.Add({Culture});
+        }
+    }
+    Settings.CompileSettings.SkipSourceCheck = true;
+    Settings.GatherFromPackages.IsEnabled = false;
+    Settings.GatherFromMetaData.IsEnabled = false;
+    Settings.GatherFromTextFiles.IsEnabled = false;
+
+    // Generate config files (Config/Localization/MyTarget_*.ini)
+    LocTarget->SaveConfig();
+    LocalizationConfigurationScript::GenerateAllConfigFiles(LocTarget);
+
+    // Set loading policy
+    SetLoadingPolicy(LocTarget, ELocalizationTargetLoadingPolicy::Always);
+
+    // TODO: register in DefaultEngine.ini
+
+    // Notify parent of change, which triggers loading the target settings in relevant caches and updating editor config and DefaultEditor.ini
+    FProperty* SettingsProp = LocTarget->GetClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(ULocalizationTarget, Settings));
+    FPropertyChangedEvent ChangeEvent(SettingsProp, EPropertyChangeType::ValueSet);
+    LocTarget->PostEditChangeProperty(ChangeEvent);
+
+    // Set up localisation data (keys, source text and translations) as a localisation target manifest (source) and archives (translations)
+
+    FLocTextHelper LocTextHelper(LocTargetPath, FString::Printf(TEXT("%s.manifest"), *LocTargetName), FString::Printf(TEXT("%s.archive"), *LocTargetName), ProjectMeta->baseLanguage, Cultures, nullptr);
+
+    FText OutError;
+    // if (!LocTextHelper.LoadManifest(ELocTextHelperLoadFlags::LoadOrCreate, &OutError))
+    if (!LocTextHelper.LoadAll(ELocTextHelperLoadFlags::Create, &OutError))
+    {
+        YS_ERR("Could not create manifest & archive files for localisation target '%s': %s", *LocTargetName, *OutError.ToString());
+    }
+    else
+    {
+        FLocKey NamespaceKey{LocTargetName};
+
+        // Add lines to source text manifest
+        for (auto Pair : CompilerOutput.strings())
+        {
+            FString LineID = FString(Pair.first.c_str());
+            FString LineText = FString(Pair.second.text().c_str());
+            FManifestContext ManifestContext{FLocKey(LineID)};
+            ManifestContext.SourceLocation = YarnProject->GetPathName();
+            LocTextHelper.AddSourceText(NamespaceKey, FLocItem(LineText), ManifestContext);
+        }
+
+        // Add translations to archives
+        for (auto Loc : ProjectMeta->localisation)
+        {
+            FString Culture = Loc.Key;
+            FYarnProjectLocalizationData LocData = Loc.Value;
+            FString LocFile = FPaths::Combine(YarnProject->YarnProjectPath(), LocData.strings);
+            FPaths::NormalizeFilename(LocFile);
+            FPaths::CollapseRelativeDirectories(LocFile);
+            FPaths::RemoveDuplicateSlashes(LocFile);
+            FString LocFileData;
+
+            if (!FFileHelper::LoadFileToString(LocFileData, *LocFile))
+            {
+                YS_WARN("Couldn't load strings file: %s", *LocFile)
+                continue;
+            }
+
+            const FCsvParser Parser(LocFileData);
+            const FCsvParser::FRows& Rows = Parser.GetRows();
+            if (Rows.Num() < 2)
+            {
+                YS_WARN("Empty strings file: %s", *LocFile)
+                continue;
+            }
+
+            const auto& HeaderRow = Rows[0];
+            TMap<FString, int32> HeaderMap;
+            for (int32 I = 0; I < HeaderRow.Num(); ++I)
+            {
+                HeaderMap.Add(WCHAR_TO_TCHAR(HeaderRow[I]), I);
+            }
+            // Test for required columns
+            if (!HeaderMap.Contains(TEXT("character")) || !HeaderMap.Contains(TEXT("text")) || !HeaderMap.Contains(TEXT("id")))
+            {
+                YS_ERR("Missing required column 'id', 'text' or 'character' in strings file: %s", *LocFile)
+                continue;
+            }
+
+            for (int32 I = 1; I < Rows.Num(); ++I)
+            {
+                const auto& Row = Rows[I];
+                const FString& LineID = WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("id")]]);
+                const FString& LineText = WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("text")]]);
+                const FString& LineCharacter = WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("character")]]);
+
+                auto Source = LocTextHelper.FindSourceText(NamespaceKey, FLocKey(LineID));
+
+                FLocItem SourceText = Source.IsValid() ? Source->Source : FLocItem();
+                FLocItem Translation((!LineCharacter.IsEmpty() ? LineCharacter + TEXT(": ") : TEXT("")) + LineText);
+
+                const auto LocEntry = MakeShared<FArchiveEntry>(NamespaceKey, FLocKey(LineID), SourceText, Translation, nullptr, false);
+
+                LocTextHelper.AddTranslation(Culture, LocEntry);
+            }
+        }
+
+        LocTextHelper.SaveAll();
+
+        // TODO: update word counts
+        // auto TimeStamp = FDateTime::UtcNow();
+        // FLocTextWordCounts WordCountReport = LocTextHelper.GetWordCountReport(TimeStamp);
+        // LocTextHelper.SaveWordCountReport(TimeStamp, LocTarget->Ge);
+        // LocTarget->UpdateWordCountsFromCSV();
+
+        // TODO: compile text
+    }
+}
+
+
+namespace
+{
+    struct FLocalizationTargetLoadingPolicyConfig
+    {
+        FLocalizationTargetLoadingPolicyConfig(ELocalizationTargetLoadingPolicy InLoadingPolicy, FString InSectionName, FString InKeyName, FString InConfigName, FString InConfigPath)
+            : LoadingPolicy(InLoadingPolicy)
+              , SectionName(MoveTemp(InSectionName))
+              , KeyName(MoveTemp(InKeyName))
+              , BaseConfigName(MoveTemp(InConfigName))
+              , ConfigPath(MoveTemp(InConfigPath))
+        {
+            DefaultConfigName = FString::Printf(TEXT("Default%s"), *BaseConfigName);
+            DefaultConfigFilePath = FString::Printf(TEXT("%s%s.ini"), *FPaths::SourceConfigDir(), *DefaultConfigName);
+        }
+
+
+        ELocalizationTargetLoadingPolicy LoadingPolicy;
+        FString SectionName;
+        FString KeyName;
+        FString BaseConfigName;
+        FString DefaultConfigName;
+        FString DefaultConfigFilePath;
+        FString ConfigPath;
+    };
+
+
+    static const TArray<FLocalizationTargetLoadingPolicyConfig> LoadingPolicyConfigs = []()
+    {
+        TArray<FLocalizationTargetLoadingPolicyConfig> Array;
+        Array.Emplace(ELocalizationTargetLoadingPolicy::Always, TEXT("Internationalization"), TEXT("LocalizationPaths"), TEXT("Engine"), GEngineIni);
+        Array.Emplace(ELocalizationTargetLoadingPolicy::Editor, TEXT("Internationalization"), TEXT("LocalizationPaths"), TEXT("Editor"), GEditorIni);
+        Array.Emplace(ELocalizationTargetLoadingPolicy::Game, TEXT("Internationalization"), TEXT("LocalizationPaths"), TEXT("Game"), GGameIni);
+        Array.Emplace(ELocalizationTargetLoadingPolicy::PropertyNames, TEXT("Internationalization"), TEXT("PropertyNameLocalizationPaths"), TEXT("Editor"), GEditorIni);
+        Array.Emplace(ELocalizationTargetLoadingPolicy::ToolTips, TEXT("Internationalization"), TEXT("ToolTipLocalizationPaths"), TEXT("Editor"), GEditorIni);
+        return Array;
+    }();
+}
+
+
+// SetLoadingPolicy and FLocalizationTargetLoadingPolicyConfig are verbatim copies from LocalizationTargetDetailCustomization.cpp in the engine's LocalizationDashboard module.
+void UYarnAssetFactory::SetLoadingPolicy(const TWeakObjectPtr<ULocalizationTarget> LocalizationTarget, const ELocalizationTargetLoadingPolicy LoadingPolicy) const
+{
+    const FString DataDirectory = LocalizationConfigurationScript::GetDataDirectory(LocalizationTarget.Get());
+    const FString CollapsedDataDirectory = FConfigValue::CollapseValue(DataDirectory);
+
+    enum class EDefaultConfigOperation : uint8
+    {
+        AddExclusion,
+        RemoveExclusion,
+        AddAddition,
+        RemoveAddition,
+    };
+
+    ISourceControlProvider& SourceControlProvider = ISourceControlModule::Get().GetProvider();
+
+    auto ProcessDefaultConfigOperation = [&](const FLocalizationTargetLoadingPolicyConfig& LoadingPolicyConfig, const EDefaultConfigOperation OperationToPerform)
+    {
+        // We test the coalesced config data first, as we may be inheriting this target path from a base config.
+        TArray<FString> LocalizationPaths;
+        GConfig->GetArray(*LoadingPolicyConfig.SectionName, *LoadingPolicyConfig.KeyName, LocalizationPaths, LoadingPolicyConfig.ConfigPath);
+        const bool bHasTargetPath = LocalizationPaths.Contains(DataDirectory);
+
+        // Work out whether we need to do work with the default config...
+        switch (OperationToPerform)
+        {
+        case EDefaultConfigOperation::AddExclusion:
+        case EDefaultConfigOperation::RemoveAddition:
+            if (!bHasTargetPath)
+            {
+                return; // No point removing a target that doesn't exist
+            }
+            break;
+        case EDefaultConfigOperation::AddAddition:
+        case EDefaultConfigOperation::RemoveExclusion:
+            if (bHasTargetPath)
+            {
+                return; // No point adding a target that already exists
+            }
+            break;
+        default:
+            break;
+        }
+
+        FConfigFile IniFile;
+        FConfigCacheIni::LoadLocalIniFile(IniFile, *LoadingPolicyConfig.DefaultConfigName, /*bIsBaseIniName*/false);
+
+        FConfigSection* IniSection = IniFile.Find(*LoadingPolicyConfig.SectionName);
+        if (!IniSection)
+        {
+            IniSection = &IniFile.Add(*LoadingPolicyConfig.SectionName);
+        }
+
+        switch (OperationToPerform)
+        {
+        case EDefaultConfigOperation::AddExclusion:
+            IniSection->Add(*FString::Printf(TEXT("-%s"), *LoadingPolicyConfig.KeyName), FConfigValue(*CollapsedDataDirectory));
+            break;
+        case EDefaultConfigOperation::RemoveExclusion:
+            IniSection->RemoveSingle(*FString::Printf(TEXT("-%s"), *LoadingPolicyConfig.KeyName), FConfigValue(*CollapsedDataDirectory));
+            break;
+        case EDefaultConfigOperation::AddAddition:
+            IniSection->Add(*FString::Printf(TEXT("+%s"), *LoadingPolicyConfig.KeyName), FConfigValue(*CollapsedDataDirectory));
+            break;
+        case EDefaultConfigOperation::RemoveAddition:
+            IniSection->RemoveSingle(*FString::Printf(TEXT("+%s"), *LoadingPolicyConfig.KeyName), FConfigValue(*CollapsedDataDirectory));
+            break;
+        default:
+            break;
+        }
+
+        // Make sure the file is checked out (if needed).
+        if (SourceControlProvider.IsEnabled())
+        {
+            FSourceControlStatePtr ConfigFileState = SourceControlProvider.GetState(LoadingPolicyConfig.DefaultConfigFilePath, EStateCacheUsage::Use);
+            if (!ConfigFileState.IsValid() || ConfigFileState->IsUnknown())
+            {
+                ConfigFileState = SourceControlProvider.GetState(LoadingPolicyConfig.DefaultConfigFilePath, EStateCacheUsage::ForceUpdate);
+            }
+            if (ConfigFileState.IsValid() && ConfigFileState->IsSourceControlled() && !(ConfigFileState->IsCheckedOut() || ConfigFileState->IsAdded()) && ConfigFileState->CanCheckout())
+            {
+                SourceControlProvider.Execute(ISourceControlOperation::Create<FCheckOut>(), LoadingPolicyConfig.DefaultConfigFilePath);
+            }
+        }
+        else
+        {
+            IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+            if (PlatformFile.FileExists(*LoadingPolicyConfig.DefaultConfigFilePath) && PlatformFile.IsReadOnly(*LoadingPolicyConfig.DefaultConfigFilePath))
+            {
+                PlatformFile.SetReadOnly(*LoadingPolicyConfig.DefaultConfigFilePath, false);
+            }
+        }
+
+        // Write out the new config.
+        IniFile.Dirty = true;
+        IniFile.UpdateSections(*LoadingPolicyConfig.DefaultConfigFilePath);
+
+        // Make sure to add the file now (if needed).
+        if (SourceControlProvider.IsEnabled())
+        {
+            FSourceControlStatePtr ConfigFileState = SourceControlProvider.GetState(LoadingPolicyConfig.DefaultConfigFilePath, EStateCacheUsage::Use);
+            if (ConfigFileState.IsValid() && !ConfigFileState->IsSourceControlled() && ConfigFileState->CanAdd())
+            {
+                SourceControlProvider.Execute(ISourceControlOperation::Create<FMarkForAdd>(), LoadingPolicyConfig.DefaultConfigFilePath);
+            }
+        }
+
+        // Reload the updated file into the config system.
+        FString FinalIniFileName;
+        GConfig->LoadGlobalIniFile(FinalIniFileName, *LoadingPolicyConfig.BaseConfigName, nullptr, /*bForceReload*/true);
+    };
+
+    for (const FLocalizationTargetLoadingPolicyConfig& LoadingPolicyConfig : LoadingPolicyConfigs)
+    {
+        if (LoadingPolicyConfig.LoadingPolicy == LoadingPolicy)
+        {
+            // We need to remove any exclusions for this path, and add the path if needed.
+            ProcessDefaultConfigOperation(LoadingPolicyConfig, EDefaultConfigOperation::RemoveExclusion);
+            ProcessDefaultConfigOperation(LoadingPolicyConfig, EDefaultConfigOperation::AddAddition);
+        }
+        else
+        {
+            // We need to remove any additions for this path, and exclude the path is needed.
+            ProcessDefaultConfigOperation(LoadingPolicyConfig, EDefaultConfigOperation::RemoveAddition);
+            ProcessDefaultConfigOperation(LoadingPolicyConfig, EDefaultConfigOperation::AddExclusion);
+        }
+    }
 }
