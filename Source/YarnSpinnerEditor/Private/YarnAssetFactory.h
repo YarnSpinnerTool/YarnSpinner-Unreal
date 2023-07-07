@@ -55,4 +55,6 @@ private:
     void BuildLocalizationTarget(const UYarnProject* YarnProject, const Yarn::CompilerOutput& CompilerOutput) const;
     // Set localization target loading policy & register in DefaultEngine.ini
     void SetLoadingPolicy(TWeakObjectPtr<ULocalizationTarget> LocalizationTarget, ELocalizationTargetLoadingPolicy LoadingPolicy) const;
+    // Compile all texts
+    void CompileTexts(const ULocalizationTarget* LocalizationTarget, const FLocTextHelper& LocTextHelper) const;
 };

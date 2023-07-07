@@ -20,7 +20,10 @@
 
 #include "ReimportYarnAssetFactory.h"
 #include "SourceControlOperations.h"
+#include "TextLocalizationResourceGenerator.h"
 #include "YarnProjectMeta.h"
+#include "Commandlets/GenerateTextLocalizationResourceCommandlet.h"
+#include "Internationalization/TextLocalizationResource.h"
 #include "Misc/YSLogging.h"
 #include "Serialization/Csv/CsvParser.h"
 
@@ -430,15 +433,27 @@ void UYarnAssetFactory::BuildLocalizationTarget(const UYarnProject* YarnProject,
         LocTarget->UpdateWordCountsFromCSV();
 
         // Compile text -- runs the GenerateTextLocalizationResource commandlet in a modal dialog, generating the .locmeta and .locres files for the project
-        const auto ParentWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
-        if (!ParentWindow)
-        {
-            YS_WARN("Could not get parent window for localization commandlet task")
-            return;
-        }
-        LocalizationCommandletTasks::CompileTextForTarget(ParentWindow.ToSharedRef(), LocTarget);
+        // const auto ParentWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
+        // if (!ParentWindow)
+        // {
+        //     YS_WARN("Could not get parent window for localization commandlet task")
+        //     return;
+        // }
+        // LocalizationCommandletTasks::CompileTextForTarget(ParentWindow.ToSharedRef(), LocTarget);
+
+        // To compile without the modal dialog, we can do something like this:
+        // FString Params;
+        // Params = TEXT("\"D:/dev/YarnSpinner/YSUEDemo/YSUEDemo.uproject\" -run=GatherText -config=\"Config/Localization/SimpleTest_Compile.ini\"");
+        // // ... setup as per CompileTextForTarget ...
+        // auto CompileCommandlet = NewObject<UGenerateTextLocalizationResourceCommandlet>();
+        // auto Result = CompileCommandlet->Main(Params);
+
+        CompileTexts(LocTarget, LocTextHelper);
+        
+        // YS_LOG("Text compile result: %d", Result)
 
         // Done!
+        YS_LOG("Localisation target '%s' created successfully", *LocTargetName)
     }
 }
 
@@ -610,3 +625,74 @@ void UYarnAssetFactory::SetLoadingPolicy(const TWeakObjectPtr<ULocalizationTarge
         }
     }
 }
+
+
+// Compile texts -- based on the GenerateTextLocalizationResource commandlet
+void UYarnAssetFactory::CompileTexts(const ULocalizationTarget* LocalizationTarget, const FLocTextHelper& LocTextHelper) const
+{
+    // could maybe just launch the commandlet process without the UI component instead of implementing our own solution here, which could be more consistent at applying the compilation settings we set in the loc target settings... but I suspect that if we compress this down it will be fairly straightforward and easier to test and debug
+    
+    
+    // Generate the LocMeta file for all cultures
+    {
+        const FString TextLocalizationMetaDataResourcePath = DestinationPath / FPaths::GetBaseFilename(ResourceName) + TEXT(".locmeta");
+
+        const bool bLocMetaFileSaved = FLocalizedAssetSCCUtil::SaveFileWithSCC(SourceControlInfo, TextLocalizationMetaDataResourcePath, [&LocTextHelper, &ResourceName](const FString& InSaveFileName) -> bool
+        {
+            FTextLocalizationMetaDataResource LocMeta;
+            return FTextLocalizationResourceGenerator::GenerateLocMeta(LocTextHelper, ResourceName, LocMeta) && LocMeta.SaveToFile(InSaveFileName);
+        });
+
+        if (!bLocMetaFileSaved)
+        {
+            YS_ERR("Could not write file %s", *TextLocalizationMetaDataResourcePath);
+            return;
+        }
+    }
+
+    // Generate the LocRes file for each culture
+    for (const FString& CultureName : CulturesToGenerate)
+    {
+        auto GenerateSingleLocRes = [this, &DestinationPath, &CultureName, &ResourceName](const FTextLocalizationResource& InLocRes, const FName InPlatformName) -> bool
+        {
+            FString TextLocalizationResourcePath;
+            if (InPlatformName.IsNone())
+            {
+                TextLocalizationResourcePath = DestinationPath / CultureName / ResourceName;
+            }
+            else
+            {
+                TextLocalizationResourcePath = DestinationPath / FPaths::GetPlatformLocalizationFolderName() / InPlatformName.ToString() / CultureName / ResourceName;
+            }
+
+            const bool bLocResFileSaved = FLocalizedAssetSCCUtil::SaveFileWithSCC(SourceControlInfo, TextLocalizationResourcePath, [&InLocRes](const FString& InSaveFileName) -> bool
+            {
+                return InLocRes.SaveToFile(InSaveFileName);
+            });
+
+            if (!bLocResFileSaved)
+            {
+                UE_LOG(LogGenerateTextLocalizationResourceCommandlet, Error, TEXT("Could not write file %s"), *TextLocalizationResourcePath);
+                return false;
+            }
+
+            return true;
+        };
+
+        FTextLocalizationResource PlatformAgnosticLocRes;
+        TMap<FName, TSharedRef<FTextLocalizationResource>> PerPlatformLocRes;
+        const FTextKey LocResId = DestinationPath / CultureName / ResourceName;
+        if (!FTextLocalizationResourceGenerator::GenerateLocRes(LocTextHelper, CultureName, GenerateFlags, LocResId, PlatformAgnosticLocRes, PerPlatformLocRes))
+        {
+            UE_LOG(LogGenerateTextLocalizationResourceCommandlet, Error, TEXT("Failed to generate LocRes %s"), LocResId.GetChars());
+            return false;
+        }
+    
+        bool bSuccess = GenerateSingleLocRes(PlatformAgnosticLocRes, FName());
+        for (const auto& PerPlatformLocResPair : PerPlatformLocRes)
+        {
+            bSuccess &= GenerateSingleLocRes(*PerPlatformLocResPair.Value, PerPlatformLocResPair.Key);
+        }
+    }
+}
+
