@@ -6,6 +6,7 @@
 #include "ISourceControlOperation.h"
 #include "ISourceControlProvider.h"
 #include "ISourceControlState.h"
+#include "LocalizationCommandletTasks.h"
 #include "LocalizationConfigurationScript.h"
 #include "LocalizationSettings.h"
 #include "LocalizationSourceControlUtil.h"
@@ -289,8 +290,9 @@ void UYarnAssetFactory::BuildLocalizationTarget(const UYarnProject* YarnProject,
     ULocalizationTarget* LocTarget = nullptr;
     for (ULocalizationTarget* Target : ULocalizationSettings::GetGameTargetSet()->TargetObjects)
     {
-        if (Target && Target->GetName() == LocTargetName)
+        if (Target && Target->Settings.Name == LocTargetName)
         {
+            YS_LOG("Found existing localisation target, updating...")
             LocTarget = Target;
             break;
         }
@@ -331,10 +333,8 @@ void UYarnAssetFactory::BuildLocalizationTarget(const UYarnProject* YarnProject,
     LocTarget->SaveConfig();
     LocalizationConfigurationScript::GenerateAllConfigFiles(LocTarget);
 
-    // Set loading policy
+    // Set loading policy & register in DefaultEngine.ini
     SetLoadingPolicy(LocTarget, ELocalizationTargetLoadingPolicy::Always);
-
-    // TODO: register in DefaultEngine.ini
 
     // Notify parent of change, which triggers loading the target settings in relevant caches and updating editor config and DefaultEditor.ini
     FProperty* SettingsProp = LocTarget->GetClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(ULocalizationTarget, Settings));
@@ -423,13 +423,50 @@ void UYarnAssetFactory::BuildLocalizationTarget(const UYarnProject* YarnProject,
 
         LocTextHelper.SaveAll();
 
-        // TODO: update word counts
-        // auto TimeStamp = FDateTime::UtcNow();
-        // FLocTextWordCounts WordCountReport = LocTextHelper.GetWordCountReport(TimeStamp);
-        // LocTextHelper.SaveWordCountReport(TimeStamp, LocTarget->Ge);
-        // LocTarget->UpdateWordCountsFromCSV();
+        // Update word count
+        auto TimeStamp = FDateTime::UtcNow();
+        FLocTextWordCounts WordCountReport = LocTextHelper.GetWordCountReport(TimeStamp);
+        LocTextHelper.SaveWordCountReport(TimeStamp, LocalizationConfigurationScript::GetWordCountCSVPath(LocTarget));
+        LocTarget->UpdateWordCountsFromCSV();
 
-        // TODO: compile text
+        // Compile text
+        
+        
+
+        // if (!GetWorld())
+        // {
+        //     YS_WARN("No world available to use for localization commandlet task")
+        //     return;
+        // }
+
+        // FTimerHandle TimerHandle;
+
+        // auto LT = LocTarget->ref
+
+        // TODO: create a method on the UYarnProject for this, use that for the callback
+        // GEditor->GetTimerManager()->SetTimerForNextTick([]()
+        // {
+        //     YS_LOG("Running localization commandlet tasks for target '%s'", *LocTargetName)
+        //     
+        //     const auto ParentWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
+        //     if (!ParentWindow)
+        //     {
+        //         YS_WARN("Could not get parent window for localization commandlet task")
+        //         return;
+        //     }
+        //     
+        //     if (!LocTarget)
+        //     {
+        //         YS_WARN("Localization target '%s' is null", *LocTargetName)
+        //         return;
+        //     }
+        //
+        //     // Update word counts
+        //     LocalizationCommandletTasks::GenerateWordCountReportForTarget(ParentWindow.ToSharedRef(), LocTarget);
+        //     
+        //     // Compile text
+        //     LocalizationCommandletTasks::CompileTextForTarget(ParentWindow.ToSharedRef(), LocTarget);
+        // });
     }
 }
 

@@ -46,28 +46,28 @@ void FYarnSpinnerEditor::StartupModule()
 		CreatedAssetTypeActions.Add(Action);
 	}
 
-	LocFileImporter = NewObject<UCSVImportFactory>();
-	LocFileImporter->AddToRoot();
-	UDataTable* ImportOptions = NewObject<UDataTable>();
-	ImportOptions->RowStruct = FDisplayLine::StaticStruct();
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 1
-    ImportOptions->RowStructPathName = FDisplayLine::StaticStruct()->GetStructPathName();
-#else
-	ImportOptions->RowStructName = FDisplayLine::StaticStruct()->GetFName();
-#endif
-	ImportOptions->bIgnoreExtraFields = true;
-	ImportOptions->bIgnoreMissingFields = false;
-	ImportOptions->ImportKeyField = "id"; // becomes the Name field of the DataTable
-	LocFileImporter->DataTableImportOptions = ImportOptions;
-	// The FCSVImportSettings struct is not part of the dll export so we have to use the JSON API to set it up
-	TSharedRef<FJsonObject> CSVImportSettings = MakeShareable(new FJsonObject());
-	CSVImportSettings->SetField("ImportType", MakeShareable(new FJsonValueNumber(static_cast<uint8>(ECSVImportType::ECSV_DataTable))));
-	CSVImportSettings->SetField("ImportRowStruct", MakeShareable(new FJsonValueString(FDisplayLine::StaticStruct()->GetName())));
-	
-	LocFileImporter->ParseFromJson(CSVImportSettings);
+// 	LocFileImporter = NewObject<UCSVImportFactory>();
+// 	LocFileImporter->AddToRoot();
+// 	UDataTable* ImportOptions = NewObject<UDataTable>();
+// 	ImportOptions->RowStruct = FDisplayLine::StaticStruct();
+// #if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 1
+//     ImportOptions->RowStructPathName = FDisplayLine::StaticStruct()->GetStructPathName();
+// #else
+// 	ImportOptions->RowStructName = FDisplayLine::StaticStruct()->GetFName();
+// #endif
+// 	ImportOptions->bIgnoreExtraFields = true;
+// 	ImportOptions->bIgnoreMissingFields = false;
+// 	ImportOptions->ImportKeyField = "id"; // becomes the Name field of the DataTable
+// 	LocFileImporter->DataTableImportOptions = ImportOptions;
+// 	// The FCSVImportSettings struct is not part of the dll export so we have to use the JSON API to set it up
+// 	TSharedRef<FJsonObject> CSVImportSettings = MakeShareable(new FJsonObject());
+// 	CSVImportSettings->SetField("ImportType", MakeShareable(new FJsonValueNumber(static_cast<uint8>(ECSVImportType::ECSV_DataTable))));
+// 	CSVImportSettings->SetField("ImportRowStruct", MakeShareable(new FJsonValueString(FDisplayLine::StaticStruct()->GetName())));
+// 	
+// 	LocFileImporter->ParseFromJson(CSVImportSettings);
 
 	YarnProjectSynchronizer = MakeUnique<FYarnProjectSynchronizer>();
-	YarnProjectSynchronizer->SetLocFileImporter(LocFileImporter);
+	// YarnProjectSynchronizer->SetLocFileImporter(LocFileImporter);
 
 
 	FCsvParser Parser("col1,col2,col3\n1,2,3\n4,5,6");
@@ -99,11 +99,11 @@ void FYarnSpinnerEditor::ShutdownModule()
 
 	YarnProjectSynchronizer.Reset();
 
-    if (LocFileImporter)
-    {
-        LocFileImporter->RemoveFromRoot();
-        LocFileImporter = nullptr;
-    }
+    // if (LocFileImporter && LocFileImporter->IsRooted() && !LocFileImporter->IsPendingKill())
+    // {
+    //     LocFileImporter->RemoveFromRoot();
+    //     LocFileImporter = nullptr;
+    // }
 
 	IYarnSpinnerModuleInterface::ShutdownModule();
 }

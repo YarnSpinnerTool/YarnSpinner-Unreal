@@ -51,7 +51,8 @@ public:
 	static bool GetSourcesForProject(const UYarnProject* YarnProjectAsset, TArray<FString>& SourceFiles);
     
 private:
-    // Set up localisation target for the Yarn project
+    // Set up localization target for the Yarn project
     void BuildLocalizationTarget(const UYarnProject* YarnProject, const Yarn::CompilerOutput& CompilerOutput) const;
+    // Set localization target loading policy & register in DefaultEngine.ini
     void SetLoadingPolicy(TWeakObjectPtr<ULocalizationTarget> LocalizationTarget, ELocalizationTargetLoadingPolicy LoadingPolicy) const;
 };

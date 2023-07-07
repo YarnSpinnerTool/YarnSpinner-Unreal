@@ -53,7 +53,8 @@ public class YarnSpinnerEditor : ModuleRules
 				"YSProtobuf", 
 				"Json",
 				"JsonUtilities",
-				"Localization",
+				"Localization", 
+				"LocalizationCommandletExecution",
 			});
 	}
 	
