@@ -429,44 +429,16 @@ void UYarnAssetFactory::BuildLocalizationTarget(const UYarnProject* YarnProject,
         LocTextHelper.SaveWordCountReport(TimeStamp, LocalizationConfigurationScript::GetWordCountCSVPath(LocTarget));
         LocTarget->UpdateWordCountsFromCSV();
 
-        // Compile text
-        
-        
+        // Compile text -- runs the GenerateTextLocalizationResource commandlet in a modal dialog, generating the .locmeta and .locres files for the project
+        const auto ParentWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
+        if (!ParentWindow)
+        {
+            YS_WARN("Could not get parent window for localization commandlet task")
+            return;
+        }
+        LocalizationCommandletTasks::CompileTextForTarget(ParentWindow.ToSharedRef(), LocTarget);
 
-        // if (!GetWorld())
-        // {
-        //     YS_WARN("No world available to use for localization commandlet task")
-        //     return;
-        // }
-
-        // FTimerHandle TimerHandle;
-
-        // auto LT = LocTarget->ref
-
-        // TODO: create a method on the UYarnProject for this, use that for the callback
-        // GEditor->GetTimerManager()->SetTimerForNextTick([]()
-        // {
-        //     YS_LOG("Running localization commandlet tasks for target '%s'", *LocTargetName)
-        //     
-        //     const auto ParentWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
-        //     if (!ParentWindow)
-        //     {
-        //         YS_WARN("Could not get parent window for localization commandlet task")
-        //         return;
-        //     }
-        //     
-        //     if (!LocTarget)
-        //     {
-        //         YS_WARN("Localization target '%s' is null", *LocTargetName)
-        //         return;
-        //     }
-        //
-        //     // Update word counts
-        //     LocalizationCommandletTasks::GenerateWordCountReportForTarget(ParentWindow.ToSharedRef(), LocTarget);
-        //     
-        //     // Compile text
-        //     LocalizationCommandletTasks::CompileTextForTarget(ParentWindow.ToSharedRef(), LocTarget);
-        // });
+        // Done!
     }
 }
 
