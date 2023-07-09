@@ -150,8 +150,6 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
 
 bool UYarnAssetFactory::FactoryCanImport(const FString& Filename)
 {
-    // return FPaths::GetExtension(Filename).Equals(TEXT("yarnc"));
-    // return FPaths::GetExtension(Filename).Equals(TEXT("yarn"));
     return FPaths::GetExtension(Filename).Equals(TEXT("yarnproject"));
 }
 
@@ -331,7 +329,7 @@ void UYarnAssetFactory::BuildLocalizationTarget(const UYarnProject* YarnProject,
     LocalizationConfigurationScript::GenerateAllConfigFiles(LocTarget);
 
     // Set loading policy & register in DefaultEngine.ini
-    SetLoadingPolicy(LocTarget, ELocalizationTargetLoadingPolicy::Always);
+    SetLoadingPolicy(LocTarget, ELocalizationTargetLoadingPolicy::Game);
 
     // Notify parent of change, which triggers loading the target settings in relevant caches and updating editor config and DefaultEditor.ini
     FProperty* SettingsProp = LocTarget->GetClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(ULocalizationTarget, Settings));

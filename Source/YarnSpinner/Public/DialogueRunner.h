@@ -55,7 +55,7 @@ public:
     void SelectOption(UOption* Option);
     
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Dialogue Runner")
-    UYarnProject* YarnAsset;
+    UYarnProject* YarnProject;
 
 private:
     TUniquePtr<Yarn::VirtualMachine> VirtualMachine;
@@ -82,5 +82,5 @@ private:
 
     class UYarnSubsystem* YarnSubsystem;
     
-    void GetDisplayTextForLine(class ULine* Line, Yarn::Line& YarnLine);
+    void GetDisplayTextForLine(class ULine* Line, const Yarn::Line& YarnLine);
 };

@@ -28,14 +28,14 @@ void ADialogueRunner::PreInitializeComponents()
     Super::PreInitializeComponents();
 
 
-    if (!YarnAsset) {
+    if (!YarnProject) {
         UE_LOG(LogYarnSpinner, Error, TEXT("DialogueRunner can't initialize, because it doesn't have a Yarn Asset."));
         return;
     }
 
     Yarn::Program Program{};
 
-    bool bParseSuccess = Program.ParsePartialFromArray(YarnAsset->Data.GetData(), YarnAsset->Data.Num());
+    bool bParseSuccess = Program.ParsePartialFromArray(YarnProject->Data.GetData(), YarnProject->Data.Num());
 
     if (!bParseSuccess) {
         UE_LOG(LogYarnSpinner, Error, TEXT("DialogueRunner can't initialize, because its Yarn Asset failed to load."));
@@ -271,7 +271,7 @@ void ADialogueRunner::ClearValue(std::string Name) {
 }
 
 
-void ADialogueRunner::GetDisplayTextForLine(ULine* Line, Yarn::Line& YarnLine)
+void ADialogueRunner::GetDisplayTextForLine(ULine* Line, const Yarn::Line& YarnLine)
 {
     // FIXME: Currently, we store the text of lines directly in the
     // YarnAsset. This will eventually be replaced with string tables.
@@ -279,7 +279,7 @@ void ADialogueRunner::GetDisplayTextForLine(ULine* Line, Yarn::Line& YarnLine)
     const FName LineID = FName(YarnLine.LineID.c_str());
 
     // This assumes that we only ever care about lines that actually exist in .yarn files (rather than allowing extra lines in .csv files)
-    if (!YarnAsset || !YarnAsset->Lines.Contains(LineID))
+    if (!YarnProject || !YarnProject->Lines.Contains(LineID))
     {
         Line->DisplayText = FText::FromString(TEXT("(missing line!)"));
         return;
@@ -292,27 +292,33 @@ void ADialogueRunner::GetDisplayTextForLine(ULine* Line, Yarn::Line& YarnLine)
 
     // FString CurrentLanguage = FTextLocalizationManager::Get().GetRequestedLanguageName();
 
-    FString CurrentLanguage = UKismetInternationalizationLibrary::GetCurrentLanguage();
-    YS_LOG("Current language: %s", *CurrentLanguage)
-    FString CurrentCulture = UKismetInternationalizationLibrary::GetCurrentCulture();
-    YS_LOG("Current culture: %s", *CurrentCulture)
-    
-    FString NonLocalisedDisplayText;
-    if (YarnSubsystem)
-        // TODO: look up the correct language
-        NonLocalisedDisplayText = YarnSubsystem->GetLocText(YarnAsset, FName(CurrentLanguage), LineID);
-    else
-        NonLocalisedDisplayText = YarnAsset->Lines[LineID];
+    // FString CurrentLanguage = UKismetInternationalizationLibrary::GetCurrentLanguage();
+    // YS_LOG("Current language: %s", *CurrentLanguage)
+    // FString CurrentCulture = UKismetInternationalizationLibrary::GetCurrentCulture();
+    // YS_LOG("Current culture: %s", *CurrentCulture)
+    //
+    // FString NonLocalisedDisplayText;
+    // if (YarnSubsystem)
+    //     // TODO: look up the correct language
+    //     NonLocalisedDisplayText = YarnSubsystem->GetLocText(YarnAsset, FName(CurrentLanguage), LineID);
+    // else
+    //     NonLocalisedDisplayText = YarnAsset->Lines[LineID];
+
+    const FText LocalisedDisplayText = FText::FromString(FTextLocalizationManager::Get().GetDisplayString({YarnProject->GetName()}, {LineID.ToString()}, nullptr).Get());
 
     // Apply substitutions
-    TArray<FStringFormatArg> FormatArguments;
+    FFormatOrderedArguments FormatArgs;
+    // TArray<FStringFormatArg> FormatArguments;
     for (auto Substitution : YarnLine.Substitutions)
     {
-        FormatArguments.Add(FStringFormatArg(UTF8_TO_TCHAR(Substitution.c_str())));
+        // FormatArguments.Add(FStringFormatArg(UTF8_TO_TCHAR(Substitution.c_str())));
+        FormatArgs.Emplace(FText::FromString(UTF8_TO_TCHAR(Substitution.c_str())));
     }
 
-    const FString TextWithSubstitutions = FString::Format(*NonLocalisedDisplayText, FormatArguments);
+    const FText TextWithSubstitutions = FText::Format(LocalisedDisplayText, FormatArgs);
+    // const FString TextWithSubstitutions = FString::Format(*LocalisedDisplayText, FormatArguments);
 
-    Line->DisplayText = FText::FromString(TextWithSubstitutions);
+    // Line->DisplayText = FText::FromString(TextWithSubstitutions);
+    Line->DisplayText = TextWithSubstitutions;
 }
 
