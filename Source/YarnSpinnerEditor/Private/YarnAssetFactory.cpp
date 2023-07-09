@@ -6,10 +6,9 @@
 #include "ISourceControlOperation.h"
 #include "ISourceControlProvider.h"
 #include "ISourceControlState.h"
-#include "LocalizationCommandletTasks.h"
+#include "LocalizationCommandletExecution.h"
 #include "LocalizationConfigurationScript.h"
 #include "LocalizationSettings.h"
-#include "LocalizationSourceControlUtil.h"
 #include "LocalizationTargetTypes.h"
 #include "LocTextHelper.h"
 #include "YarnSpinnerEditor.h"
@@ -20,10 +19,7 @@
 
 #include "ReimportYarnAssetFactory.h"
 #include "SourceControlOperations.h"
-#include "TextLocalizationResourceGenerator.h"
 #include "YarnProjectMeta.h"
-#include "Commandlets/GenerateTextLocalizationResourceCommandlet.h"
-#include "Internationalization/TextLocalizationResource.h"
 #include "Misc/YSLogging.h"
 #include "Serialization/Csv/CsvParser.h"
 
@@ -41,8 +37,6 @@ UYarnAssetFactory::UYarnAssetFactory(const FObjectInitializer& ObjectInitializer
     : Super(ObjectInitializer)
 {
     Formats.Add(FString(TEXT("yarnproject;")) + NSLOCTEXT("UYarnAssetFactory", "FormatTxt", "Yarn Project File").ToString());
-    // Formats.Add(FString(TEXT("yarnc;")) + NSLOCTEXT("UYarnAssetFactory", "FormatTxt", "Compiled Yarn File").ToString());
-    // Formats.Add(FString(TEXT("yarnproject;")) + NSLOCTEXT("UYarnAssetFactory", "FormatTxt", "Yarn Project").ToString());
     SupportedClass = UYarnProject::StaticClass();
     bCreateNew = false;
     bEditorImport = true;
@@ -353,108 +347,94 @@ void UYarnAssetFactory::BuildLocalizationTarget(const UYarnProject* YarnProject,
     if (!LocTextHelper.LoadAll(ELocTextHelperLoadFlags::Create, &OutError))
     {
         YS_ERR("Could not create manifest & archive files for localisation target '%s': %s", *LocTargetName, *OutError.ToString());
+        return;
     }
-    else
+    
+    FLocKey NamespaceKey{LocTargetName};
+
+    // Add lines to source text manifest
+    for (auto Pair : CompilerOutput.strings())
     {
-        FLocKey NamespaceKey{LocTargetName};
-
-        // Add lines to source text manifest
-        for (auto Pair : CompilerOutput.strings())
-        {
-            FString LineID = FString(Pair.first.c_str());
-            FString LineText = FString(Pair.second.text().c_str());
-            FManifestContext ManifestContext{FLocKey(LineID)};
-            ManifestContext.SourceLocation = YarnProject->GetPathName();
-            LocTextHelper.AddSourceText(NamespaceKey, FLocItem(LineText), ManifestContext);
-        }
-
-        // Add translations to archives
-        for (auto Loc : ProjectMeta->localisation)
-        {
-            FString Culture = Loc.Key;
-            FYarnProjectLocalizationData LocData = Loc.Value;
-            FString LocFile = FPaths::Combine(YarnProject->YarnProjectPath(), LocData.strings);
-            FPaths::NormalizeFilename(LocFile);
-            FPaths::CollapseRelativeDirectories(LocFile);
-            FPaths::RemoveDuplicateSlashes(LocFile);
-            FString LocFileData;
-
-            if (!FFileHelper::LoadFileToString(LocFileData, *LocFile))
-            {
-                YS_WARN("Couldn't load strings file: %s", *LocFile)
-                continue;
-            }
-
-            const FCsvParser Parser(LocFileData);
-            const FCsvParser::FRows& Rows = Parser.GetRows();
-            if (Rows.Num() < 2)
-            {
-                YS_WARN("Empty strings file: %s", *LocFile)
-                continue;
-            }
-
-            const auto& HeaderRow = Rows[0];
-            TMap<FString, int32> HeaderMap;
-            for (int32 I = 0; I < HeaderRow.Num(); ++I)
-            {
-                HeaderMap.Add(WCHAR_TO_TCHAR(HeaderRow[I]), I);
-            }
-            // Test for required columns
-            if (!HeaderMap.Contains(TEXT("character")) || !HeaderMap.Contains(TEXT("text")) || !HeaderMap.Contains(TEXT("id")))
-            {
-                YS_ERR("Missing required column 'id', 'text' or 'character' in strings file: %s", *LocFile)
-                continue;
-            }
-
-            for (int32 I = 1; I < Rows.Num(); ++I)
-            {
-                const auto& Row = Rows[I];
-                const FString& LineID = WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("id")]]);
-                const FString& LineText = WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("text")]]);
-                const FString& LineCharacter = WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("character")]]);
-
-                auto Source = LocTextHelper.FindSourceText(NamespaceKey, FLocKey(LineID));
-
-                FLocItem SourceText = Source.IsValid() ? Source->Source : FLocItem();
-                FLocItem Translation((!LineCharacter.IsEmpty() ? LineCharacter + TEXT(": ") : TEXT("")) + LineText);
-
-                const auto LocEntry = MakeShared<FArchiveEntry>(NamespaceKey, FLocKey(LineID), SourceText, Translation, nullptr, false);
-
-                LocTextHelper.AddTranslation(Culture, LocEntry);
-            }
-        }
-
-        LocTextHelper.SaveAll();
-
-        // Update word count
-        auto TimeStamp = FDateTime::UtcNow();
-        FLocTextWordCounts WordCountReport = LocTextHelper.GetWordCountReport(TimeStamp);
-        LocTextHelper.SaveWordCountReport(TimeStamp, LocalizationConfigurationScript::GetWordCountCSVPath(LocTarget));
-        LocTarget->UpdateWordCountsFromCSV();
-
-        // Compile text -- runs the GenerateTextLocalizationResource commandlet in a modal dialog, generating the .locmeta and .locres files for the project
-        // const auto ParentWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
-        // if (!ParentWindow)
-        // {
-        //     YS_WARN("Could not get parent window for localization commandlet task")
-        //     return;
-        // }
-        // LocalizationCommandletTasks::CompileTextForTarget(ParentWindow.ToSharedRef(), LocTarget);
-
-        // To compile without the modal dialog, we can do something like this:
-        // FString Params;
-        // Params = TEXT("\"D:/dev/YarnSpinner/YSUEDemo/YSUEDemo.uproject\" -run=GatherText -config=\"Config/Localization/SimpleTest_Compile.ini\"");
-        // // ... setup as per CompileTextForTarget ...
-        // auto CompileCommandlet = NewObject<UGenerateTextLocalizationResourceCommandlet>();
-        // auto Result = CompileCommandlet->Main(Params);
-
-        CompileTexts(LocTarget, LocTextHelper);
-        
-        // YS_LOG("Text compile result: %d", Result)
-
-        // Done!
-        YS_LOG("Localisation target '%s' created successfully", *LocTargetName)
+        FString LineID = FString(Pair.first.c_str());
+        FString LineText = FString(Pair.second.text().c_str());
+        FManifestContext ManifestContext{FLocKey(LineID)};
+        ManifestContext.SourceLocation = YarnProject->GetPathName();
+        LocTextHelper.AddSourceText(NamespaceKey, FLocItem(LineText), ManifestContext);
     }
+
+    // Add translations to archives
+    for (auto Loc : ProjectMeta->localisation)
+    {
+        FString Culture = Loc.Key;
+        FYarnProjectLocalizationData LocData = Loc.Value;
+        FString LocFile = FPaths::Combine(YarnProject->YarnProjectPath(), LocData.strings);
+        FPaths::NormalizeFilename(LocFile);
+        FPaths::CollapseRelativeDirectories(LocFile);
+        FPaths::RemoveDuplicateSlashes(LocFile);
+        FString LocFileData;
+
+        if (!FFileHelper::LoadFileToString(LocFileData, *LocFile))
+        {
+            YS_WARN("Couldn't load strings file: %s", *LocFile)
+            continue;
+        }
+
+        const FCsvParser Parser(LocFileData);
+        const FCsvParser::FRows& Rows = Parser.GetRows();
+        if (Rows.Num() < 2)
+        {
+            YS_WARN("Empty strings file: %s", *LocFile)
+            continue;
+        }
+
+        const auto& HeaderRow = Rows[0];
+        TMap<FString, int32> HeaderMap;
+        for (int32 I = 0; I < HeaderRow.Num(); ++I)
+        {
+            HeaderMap.Add(WCHAR_TO_TCHAR(HeaderRow[I]), I);
+        }
+        // Test for required columns
+        if (!HeaderMap.Contains(TEXT("character")) || !HeaderMap.Contains(TEXT("text")) || !HeaderMap.Contains(TEXT("id")))
+        {
+            YS_ERR("Missing required column 'id', 'text' or 'character' in strings file: %s", *LocFile)
+            continue;
+        }
+
+        for (int32 I = 1; I < Rows.Num(); ++I)
+        {
+            const auto& Row = Rows[I];
+            const FString& LineID = WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("id")]]);
+            const FString& LineText = WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("text")]]);
+            const FString& LineCharacter = WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("character")]]);
+
+            auto Source = LocTextHelper.FindSourceText(NamespaceKey, FLocKey(LineID));
+
+            FLocItem SourceText = Source.IsValid() ? Source->Source : FLocItem();
+            FLocItem Translation((!LineCharacter.IsEmpty() ? LineCharacter + TEXT(": ") : TEXT("")) + LineText);
+
+            const auto LocEntry = MakeShared<FArchiveEntry>(NamespaceKey, FLocKey(LineID), SourceText, Translation, nullptr, false);
+
+            LocTextHelper.AddTranslation(Culture, LocEntry);
+        }
+    }
+
+    FText OutErr;
+    if (!LocTextHelper.SaveAll(&OutErr))
+    {
+        YS_ERR("Could not save localization target text data '%s': %s", *LocTargetName, *OutErr.ToString());
+        return;
+    }
+
+    // Update word count
+    auto TimeStamp = FDateTime::UtcNow();
+    FLocTextWordCounts WordCountReport = LocTextHelper.GetWordCountReport(TimeStamp);
+    LocTextHelper.SaveWordCountReport(TimeStamp, LocalizationConfigurationScript::GetWordCountCSVPath(LocTarget));
+    LocTarget->UpdateWordCountsFromCSV();
+
+    CompileTexts(LocTarget);
+    
+    // Done!
+    YS_LOG("Localisation target '%s' created successfully", *LocTargetName)
 }
 
 
@@ -627,72 +607,54 @@ void UYarnAssetFactory::SetLoadingPolicy(const TWeakObjectPtr<ULocalizationTarge
 }
 
 
-// Compile texts -- based on the GenerateTextLocalizationResource commandlet
-void UYarnAssetFactory::CompileTexts(const ULocalizationTarget* LocalizationTarget, const FLocTextHelper& LocTextHelper) const
+void UYarnAssetFactory::CompileTexts(const ULocalizationTarget* LocalizationTarget)
 {
-    // could maybe just launch the commandlet process without the UI component instead of implementing our own solution here, which could be more consistent at applying the compilation settings we set in the loc target settings... but I suspect that if we compress this down it will be fairly straightforward and easier to test and debug
+    // This version launches the text compilation commandlet in a separate process.  To implement this directly instead, see GenerateTextLocalizationResourceCommandlet.cpp
     
+    YS_LOG("Compiling texts for localization target %s...", *LocalizationTarget->Settings.Name);
     
-    // Generate the LocMeta file for all cultures
+    const FString ConfigFilePath = FPaths::Combine(FPaths::SourceConfigDir(), TEXT("Localization"), FString::Printf(TEXT("%s_Compile.ini"), *LocalizationTarget->Settings.Name));
+
+    TSharedPtr<FLocalizationCommandletProcess> CommandletProcessHandle = FLocalizationCommandletProcess::Execute(ConfigFilePath, !LocalizationTarget->IsMemberOfEngineTargetSet());
+
+    if (!CommandletProcessHandle.IsValid())
     {
-        const FString TextLocalizationMetaDataResourcePath = DestinationPath / FPaths::GetBaseFilename(ResourceName) + TEXT(".locmeta");
-
-        const bool bLocMetaFileSaved = FLocalizedAssetSCCUtil::SaveFileWithSCC(SourceControlInfo, TextLocalizationMetaDataResourcePath, [&LocTextHelper, &ResourceName](const FString& InSaveFileName) -> bool
-        {
-            FTextLocalizationMetaDataResource LocMeta;
-            return FTextLocalizationResourceGenerator::GenerateLocMeta(LocTextHelper, ResourceName, LocMeta) && LocMeta.SaveToFile(InSaveFileName);
-        });
-
-        if (!bLocMetaFileSaved)
-        {
-            YS_ERR("Could not write file %s", *TextLocalizationMetaDataResourcePath);
-            return;
-        }
+        YS_ERR("Failed to launch GenerateTextLocalizationResource commandlet");
+        return;
     }
 
-    // Generate the LocRes file for each culture
-    for (const FString& CultureName : CulturesToGenerate)
+    FString Out;
+    // Wait for the process to complete
+    for(;;)
     {
-        auto GenerateSingleLocRes = [this, &DestinationPath, &CultureName, &ResourceName](const FTextLocalizationResource& InLocRes, const FName InPlatformName) -> bool
+        // Read from pipe.
+        const FString PipeString = FPlatformProcess::ReadPipe(CommandletProcessHandle->GetReadPipe());
+
+        // Process buffer.
+        if (!PipeString.IsEmpty())
         {
-            FString TextLocalizationResourcePath;
-            if (InPlatformName.IsNone())
-            {
-                TextLocalizationResourcePath = DestinationPath / CultureName / ResourceName;
-            }
-            else
-            {
-                TextLocalizationResourcePath = DestinationPath / FPaths::GetPlatformLocalizationFolderName() / InPlatformName.ToString() / CultureName / ResourceName;
-            }
-
-            const bool bLocResFileSaved = FLocalizedAssetSCCUtil::SaveFileWithSCC(SourceControlInfo, TextLocalizationResourcePath, [&InLocRes](const FString& InSaveFileName) -> bool
-            {
-                return InLocRes.SaveToFile(InSaveFileName);
-            });
-
-            if (!bLocResFileSaved)
-            {
-                UE_LOG(LogGenerateTextLocalizationResourceCommandlet, Error, TEXT("Could not write file %s"), *TextLocalizationResourcePath);
-                return false;
-            }
-
-            return true;
-        };
-
-        FTextLocalizationResource PlatformAgnosticLocRes;
-        TMap<FName, TSharedRef<FTextLocalizationResource>> PerPlatformLocRes;
-        const FTextKey LocResId = DestinationPath / CultureName / ResourceName;
-        if (!FTextLocalizationResourceGenerator::GenerateLocRes(LocTextHelper, CultureName, GenerateFlags, LocResId, PlatformAgnosticLocRes, PerPlatformLocRes))
-        {
-            UE_LOG(LogGenerateTextLocalizationResourceCommandlet, Error, TEXT("Failed to generate LocRes %s"), LocResId.GetChars());
-            return false;
+            Out += PipeString;
         }
-    
-        bool bSuccess = GenerateSingleLocRes(PlatformAgnosticLocRes, FName());
-        for (const auto& PerPlatformLocResPair : PerPlatformLocRes)
+
+        // If the process isn't running and there's no data in the pipe, we're done.
+        if (!FPlatformProcess::IsProcRunning(CommandletProcessHandle->GetHandle()) && PipeString.IsEmpty())
         {
-            bSuccess &= GenerateSingleLocRes(*PerPlatformLocResPair.Value, PerPlatformLocResPair.Key);
+            break;
         }
+
+        // Sleep.
+        FPlatformProcess::Sleep(0.0f);
     }
+    
+    YS_LOG("GenerateTextLocalizationResourceCommandlet output log:\n%s", *Out)
+    
+    int32 ReturnCode = 0;
+    if (!FPlatformProcess::GetProcReturnCode(CommandletProcessHandle->GetHandle(), &ReturnCode) || ReturnCode != 0)
+    {
+        YS_ERR("Failed to compile texts for %s", *LocalizationTarget->Settings.Name);
+        return;
+    }
+    
+    YS_LOG("%s texts compiled successfully", *LocalizationTarget->Settings.Name);
 }
 

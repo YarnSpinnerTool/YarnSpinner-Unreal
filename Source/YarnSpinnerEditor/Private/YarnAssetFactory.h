@@ -56,5 +56,5 @@ private:
     // Set localization target loading policy & register in DefaultEngine.ini
     void SetLoadingPolicy(TWeakObjectPtr<ULocalizationTarget> LocalizationTarget, ELocalizationTargetLoadingPolicy LoadingPolicy) const;
     // Compile all texts
-    void CompileTexts(const ULocalizationTarget* LocalizationTarget, const FLocTextHelper& LocTextHelper) const;
+    static void CompileTexts(const ULocalizationTarget* LocalizationTarget);
 };
