@@ -242,32 +242,44 @@ void ADialogueRunner::Log(std::string Message, Type Severity) {
 }
 
 void ADialogueRunner::SetValue(std::string Name, bool bValue) {
-    UE_LOG(LogYarnSpinner, Error, TEXT("Setting Yarn variables is not currently supported. (Attempted to set set %s to bool %i)"), UTF8_TO_TCHAR(Name.c_str()), bValue);
+    YS_LOG("Setting variable %s to bool %i", UTF8_TO_TCHAR(Name.c_str()), bValue)
+    YarnSubsystem()->SetValue(Name, bValue);
 }
 
 void ADialogueRunner::SetValue(std::string Name, float Value) {
-    UE_LOG(LogYarnSpinner, Error, TEXT("Setting Yarn variables is not currently supported.  (Attempted to set %s to float %f)"), UTF8_TO_TCHAR(Name.c_str()), Value);
+    YS_LOG("Setting variable %s to float %f", UTF8_TO_TCHAR(Name.c_str()), Value)
+    YarnSubsystem()->SetValue(Name, Value);
 }
 
 void ADialogueRunner::SetValue(std::string Name, std::string Value) {
-    UE_LOG(LogYarnSpinner, Error, TEXT("Setting Yarn variables is not currently supported. (Attempted to set %s to string \"%s\")"), 
-        UTF8_TO_TCHAR(Name.c_str()), 
-        UTF8_TO_TCHAR(Value.c_str()));
+    YS_LOG("Setting variable %s to string %s", UTF8_TO_TCHAR(Name.c_str()), UTF8_TO_TCHAR(Value.c_str()))
+    YarnSubsystem()->SetValue(Name, Value);
 }
 
 bool ADialogueRunner::HasValue(std::string Name) {
-    return false;
+    return YarnSubsystem()->HasValue(Name);
 }
 
 Yarn::Value ADialogueRunner::GetValue(std::string Name) {
-    UE_LOG(LogYarnSpinner, Error, TEXT("Getting Yarn variables is not currently supported. (%s)"), UTF8_TO_TCHAR(Name.c_str()));
-
-    return Yarn::Value(0);
+    Yarn::Value Value = YarnSubsystem()->GetValue(Name);
+    YS_LOG("Retrieving variable %s with value %s", UTF8_TO_TCHAR(Name.c_str()), UTF8_TO_TCHAR(Value.ConvertToString().c_str()))
+    return Value;
 }
 
 void ADialogueRunner::ClearValue(std::string Name) {
-    UE_LOG(LogYarnSpinner, Error, TEXT("Clearing Yarn variables is not currently supported. (%s)"), UTF8_TO_TCHAR(Name.c_str()));
+    YS_LOG("Clearing variable %s", UTF8_TO_TCHAR(Name.c_str()))
+    YarnSubsystem()->ClearValue(Name);
+}
 
+
+UYarnSubsystem* ADialogueRunner::YarnSubsystem() const
+{
+    if (!GetGameInstance())
+    {
+        YS_WARN("Could not retrieve YarnSubsystem because GetGameInstance() returned null")
+        return nullptr;
+    }
+    return GetGameInstance()->GetSubsystem<UYarnSubsystem>();
 }
 
 
@@ -283,11 +295,6 @@ void ADialogueRunner::GetDisplayTextForLine(ULine* Line, const Yarn::Line& YarnL
     {
         Line->DisplayText = FText::FromString(TEXT("(missing line!)"));
         return;
-    }
-
-    if (!YarnSubsystem)
-    {
-        YarnSubsystem = GetGameInstance()->GetSubsystem<UYarnSubsystem>();
     }
 
     // FString CurrentLanguage = FTextLocalizationManager::Get().GetRequestedLanguageName();

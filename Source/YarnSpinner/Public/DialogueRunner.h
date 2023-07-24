@@ -80,7 +80,7 @@ private:
     UPROPERTY()
     FString Blah;
 
-    class UYarnSubsystem* YarnSubsystem;
+    class UYarnSubsystem* YarnSubsystem() const;
     
     void GetDisplayTextForLine(class ULine* Line, const Yarn::Line& YarnLine);
 };

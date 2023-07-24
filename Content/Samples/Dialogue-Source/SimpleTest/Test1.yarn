@@ -1,5 +1,6 @@
 title: Start
 ---
+
 A: Hey, here's a line! #line:test1_1
 B: Here's another line! #line:test1_2
 
@@ -11,8 +12,50 @@ B: Here's another line! #line:test1_2
 -> Neat! #line:test1_7
     A: I know! #line:test1_8
 
+<<jump Variables>>
+
+===
+title: Variables
+---
+
+<<declare $explainCount = 1>>
+
+Ok, listen up because I'm only going to say this {$explainCount} {$explainCount}|plural(one=time,other=times): you can use *variables* in your Yarn scripts! #line:test1_9
+-> Sorry, could you please repeat that? #line:test1_10
+    // Had to add the following line because the current runner needs the user to press "Continue" for *every* line, including commands.
+    Ughh... fine. #line:test1_11
+    <<set $explainCount = $explainCount + 1>>
+    <<jump Variables>>
+-> Got it! #line:test1_12
+    Good! #line:test1_13
+
+<<jump Expressions>>
+
+===
+title: Expressions
+---
+
+So what about expressions, then?  Can we do maths?  Like 3.2 + 6.7 + 18 = {3.2 + 6.7 + 18}?  #line:test1_14
+Ok, and can we do expressions with variables? I explained variables to you {$explainCount} times, but it felt like {$explainCount * 1000} times!  So let's just say 'yes' for now and leave it at that. #line:test1_15
+
+
+<<jump Commands>>
+
+===
+title: Commands
+---
+
+Wanna see something cool? Gonna run a command now. Ready, set... #line:test1_16
+
 // Run a command
 <<do_something_cool param1 param2>>
 
-A: All done! #line:test1_9
+<<jump Summary>>
+
+===
+title: Summary
+---
+
+A: All done! #line:test1_17
+
 ===

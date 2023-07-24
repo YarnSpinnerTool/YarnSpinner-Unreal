@@ -24,33 +24,40 @@ void UYarnSubsystem::Deinitialize()
 }
 
 
-// TODO: should maybe stick to FText, supposedly better for localization?
-FString UYarnSubsystem::GetLocText(const UYarnProject* YarnProject, const FName& Language, const FName& LineID)
+void UYarnSubsystem::SetValue(std::string name, bool value)
 {
-    if (!YarnProject)
-        return "";
-
-    // Test if the yarn project even contains this line
-    if (!YarnProject->Lines.Contains(LineID))
-        return "";
-
-    const FName ProjectLocID = FName(YarnProject->GetName() + "_" + Language.ToString());
-
-    if (!LocTextDataTables.Contains(ProjectLocID))
-    {
-        LocTextDataTables.Emplace(ProjectLocID, YarnProject->GetLocTextDataTable(Language));
-    }
-    if (!LocTextDataTables[ProjectLocID])
-    {
-        LocTextDataTables[ProjectLocID] = YarnProject->GetLocTextDataTable(Language);
-    }
-    if (LocTextDataTables[ProjectLocID])
-    if (LocTextDataTables[ProjectLocID] && LocTextDataTables[ProjectLocID]->GetRowMap().Contains(LineID))
-    {
-        return LocTextDataTables[ProjectLocID]->FindRow<FDisplayLine>(LineID, "", true)->Text.ToString();
-    }
-    
-    // TODO: lookup default language instead before returning the base line data
-    return YarnProject->Lines[LineID];
+    Variables.FindOrAdd(FString(UTF8_TO_TCHAR(name.c_str()))) = Yarn::Value(value);
 }
+
+
+void UYarnSubsystem::SetValue(std::string name, float value)
+{
+    Variables.FindOrAdd(FString(UTF8_TO_TCHAR(name.c_str()))) = Yarn::Value(value);
+}
+
+
+void UYarnSubsystem::SetValue(std::string name, std::string value)
+{
+    Variables.FindOrAdd(FString(UTF8_TO_TCHAR(name.c_str()))) = Yarn::Value(value);
+}
+
+
+bool UYarnSubsystem::HasValue(std::string name)
+{
+    return Variables.Contains(FString(UTF8_TO_TCHAR(name.c_str())));
+}
+
+
+Yarn::Value UYarnSubsystem::GetValue(std::string name)
+{
+    return Variables.FindOrAdd(FString(UTF8_TO_TCHAR(name.c_str())));
+}
+
+
+void UYarnSubsystem::ClearValue(std::string name)
+{
+    Variables.Remove(FString(UTF8_TO_TCHAR(name.c_str())));
+}
+
+
 

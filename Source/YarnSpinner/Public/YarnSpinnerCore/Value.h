@@ -23,6 +23,8 @@ namespace Yarn
         double number;
         bool boolean;
 
+        Value() : type(ValueType::NUMBER), number(0) {}
+
         Value(const char *string) : type(ValueType::STRING), stringValue(std::string(string)) {}
 
         Value(const std::string &string) : type(ValueType::STRING), stringValue(string) {}
