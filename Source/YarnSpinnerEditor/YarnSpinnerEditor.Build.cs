@@ -55,6 +55,9 @@ public class YarnSpinnerEditor : ModuleRules
 				"JsonUtilities",
 				"Localization", 
 				"LocalizationCommandletExecution",
+				"EditorSubsystem",
+				"Kismet",
+				"BlueprintGraph",
 			});
 	}
 	

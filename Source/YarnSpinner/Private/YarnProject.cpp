@@ -26,7 +26,7 @@ UDataTable* UYarnProject::GetLocTextDataTable(const FName Language) const
 {
     const FString LocalisedAssetPackage = GetLocAssetPackage(Language);
     
-    TArray<FAssetData> AssetData = FYarnAssetHelpers::FindAssetsInRegistry<UDataTable>(LocalisedAssetPackage);
+    TArray<FAssetData> AssetData = FYarnAssetHelpers::FindAssetsInRegistryByPackagePath<UDataTable>(LocalisedAssetPackage);
 
     if (AssetData.Num() == 0)
         return nullptr;

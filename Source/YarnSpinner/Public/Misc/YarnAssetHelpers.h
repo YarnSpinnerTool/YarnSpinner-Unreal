@@ -11,9 +11,11 @@ public:
     template <class AssetClass>
     static TArray<FAssetData> FindAssetsInRegistry(const TSubclassOf<UObject> BaseClass = AssetClass::StaticClass());
     template <class AssetClass>
-    static TArray<FAssetData> FindAssetsInRegistry(const FName SearchPackage, const TSubclassOf<UObject> BaseClass = AssetClass::StaticClass());
+    static TArray<FAssetData> FindAssetsInRegistryByPackageName(const FName SearchPackage, const TSubclassOf<UObject> BaseClass = AssetClass::StaticClass());
     template <class AssetClass>
-    static TArray<FAssetData> FindAssetsInRegistry(const FString SearchPackage, const TSubclassOf<UObject> BaseClass = AssetClass::StaticClass());
+    static TArray<FAssetData> FindAssetsInRegistryByPackagePath(const FName SearchPackage, const TSubclassOf<UObject> BaseClass = AssetClass::StaticClass());
+    template <class AssetClass>
+    static TArray<FAssetData> FindAssetsInRegistryByPackagePath(const FString SearchPackage, const TSubclassOf<UObject> BaseClass = AssetClass::StaticClass());
 
 private:
     template <class AssetClass>
@@ -30,7 +32,16 @@ TArray<FAssetData> FYarnAssetHelpers::FindAssetsInRegistry(const TSubclassOf<UOb
 
 
 template <class AssetClass>
-TArray<FAssetData> FYarnAssetHelpers::FindAssetsInRegistry(const FName SearchPackage, const TSubclassOf<UObject> BaseClass)
+TArray<FAssetData> FYarnAssetHelpers::FindAssetsInRegistryByPackageName(const FName SearchPackage, const TSubclassOf<UObject> BaseClass)
+{
+    FARFilter AssetFilter = GetClassPathFilter<AssetClass>(BaseClass);
+    AssetFilter.PackageNames.Add(SearchPackage);
+    return FindAssets(AssetFilter);
+}
+
+
+template <class AssetClass>
+TArray<FAssetData> FYarnAssetHelpers::FindAssetsInRegistryByPackagePath(const FName SearchPackage, const TSubclassOf<UObject> BaseClass)
 {
     FARFilter AssetFilter = GetClassPathFilter<AssetClass>(BaseClass);
     AssetFilter.PackagePaths.Add(SearchPackage);
@@ -39,9 +50,9 @@ TArray<FAssetData> FYarnAssetHelpers::FindAssetsInRegistry(const FName SearchPac
 
 
 template <class AssetClass>
-TArray<FAssetData> FYarnAssetHelpers::FindAssetsInRegistry(const FString SearchPackage, const TSubclassOf<UObject> BaseClass)
+TArray<FAssetData> FYarnAssetHelpers::FindAssetsInRegistryByPackagePath(const FString SearchPackage, const TSubclassOf<UObject> BaseClass)
 {
-    return FindAssetsInRegistry<AssetClass>(FName(SearchPackage), BaseClass);
+    return FindAssetsInRegistryByPackagePath<AssetClass>(FName(SearchPackage), BaseClass);
 }
 
 

@@ -24,7 +24,7 @@ YARNSPINNER_API DECLARE_LOG_CATEGORY_EXTERN(YSLogFuncSig, Log, All);
 	#define YS_FUNCSIG __PRETTY_FUNCTION__
 #endif
 
-#define YS_LOG_FUNCSIG UE_LOG(YSLogFuncSig, Log, TEXT("%s"), *FString(YS_FUNCSIG))
+#define YS_LOG_FUNCSIG UE_LOG(LogYarnSpinner, Log, TEXT("%s"), *FString(YS_FUNCSIG))
 
 #define YS_LOG(Format, ...) \
 { \

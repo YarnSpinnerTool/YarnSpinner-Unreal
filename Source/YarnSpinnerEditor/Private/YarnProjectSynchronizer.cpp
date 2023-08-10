@@ -367,7 +367,7 @@ void FYarnProjectSynchronizer::UpdateYarnProjectAssets(const UYarnProject* YarnP
     }
 
     // Find existing assets of the correct type in the expected package so we can check if they need to be updated/removed 
-    TArray<FAssetData> ExistingAssets = FYarnAssetHelpers::FindAssetsInRegistry<AssetClass>(LocalisedAssetPackage);
+    TArray<FAssetData> ExistingAssets = FYarnAssetHelpers::FindAssetsInRegistryByPackagePath<AssetClass>(LocalisedAssetPackage);
 
     TMap<FString, FAssetData> ExistingAssetsMap;
     TMap<FString, bool> ExistingAssetSourceSeen;
