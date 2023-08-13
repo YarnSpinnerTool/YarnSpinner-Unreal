@@ -24,7 +24,7 @@ YARNSPINNER_API DECLARE_LOG_CATEGORY_EXTERN(YSLogFuncSig, Log, All);
 	#define YS_FUNCSIG __PRETTY_FUNCTION__
 #endif
 
-#define YS_LOG_FUNCSIG UE_LOG(LogYarnSpinner, Log, TEXT("%s"), *FString(YS_FUNCSIG))
+#define YS_LOG_FUNCSIG UE_LOG(LogYarnSpinner, Log, TEXT("%s:%d"), *FString(YS_FUNCSIG), __LINE__)
 
 #define YS_LOG(Format, ...) \
 { \
@@ -34,7 +34,7 @@ YARNSPINNER_API DECLARE_LOG_CATEGORY_EXTERN(YSLogFuncSig, Log, All);
 #define YS_LOG_FUNC(Format, ...) \
 { \
 	const FString _Msg = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
-	UE_LOG(LogYarnSpinner, Log, TEXT("%s: %s"), *FString(YS_FUNCNAME), *_Msg) \
+	UE_LOG(LogYarnSpinner, Log, TEXT("%s:%d: %s"), *FString(YS_FUNCNAME), __LINE__, *_Msg) \
 }
 
 #define YS_DISPLAY(Format, ...) \
@@ -50,7 +50,7 @@ YARNSPINNER_API DECLARE_LOG_CATEGORY_EXTERN(YSLogFuncSig, Log, All);
 #define YS_VERBOSE_FUNC(Format, ...) \
 { \
 	const FString _Msg = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
-	UE_LOG(LogYarnSpinner, Verbose, TEXT("%s: %s"), *FString(YS_FUNCNAME), *_Msg) \
+	UE_LOG(LogYarnSpinner, Verbose, TEXT("%s:%d: %s"), *FString(YS_FUNCNAME), __LINE__, *_Msg) \
 }
 
 #define YS_WARN(Format, ...) \
@@ -61,7 +61,7 @@ YARNSPINNER_API DECLARE_LOG_CATEGORY_EXTERN(YSLogFuncSig, Log, All);
 #define YS_WARN_FUNC(Format, ...) \
 { \
 	const FString _Msg = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
-	UE_LOG(LogYarnSpinner, Warning, TEXT("%s: %s"), *FString(YS_FUNCNAME), *_Msg) \
+	UE_LOG(LogYarnSpinner, Warning, TEXT("%s:%d: %s"), *FString(YS_FUNCNAME), __LINE__, *_Msg) \
 }
 
 #define YS_ERR(Format, ...) \
@@ -72,5 +72,5 @@ YARNSPINNER_API DECLARE_LOG_CATEGORY_EXTERN(YSLogFuncSig, Log, All);
 #define YS_ERR_FUNC(Format, ...) \
 { \
 	const FString _Msg = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
-	UE_LOG(LogYarnSpinner, Error, TEXT("%s: %s"), *FString(YS_FUNCNAME), *_Msg) \
+	UE_LOG(LogYarnSpinner, Error, TEXT("%s:%d: %s"), *FString(YS_FUNCNAME), __LINE__, *_Msg) \
 }

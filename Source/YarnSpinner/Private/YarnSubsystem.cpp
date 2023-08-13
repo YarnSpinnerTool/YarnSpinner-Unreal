@@ -5,6 +5,7 @@
 
 #include "DisplayLine.h"
 #include "YarnFunctionLibrary.h"
+#include "Misc/OutputDeviceHelper.h"
 #include "Misc/OutputDeviceNull.h"
 #include "Misc/YarnAssetHelpers.h"
 #include "Misc/YSLogging.h"
@@ -15,18 +16,133 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     YS_LOG_FUNCSIG
     Super::Initialize(Collection);
 
+    TArray<FAssetData> ExistingAssets = FYarnAssetHelpers::FindAssetsInRegistryByPackagePath<UBlueprint>(FPaths::GetPath("/Game/"));
+    YS_LOG_FUNC("Found %d assets using asset hlepers", ExistingAssets.Num())
+    for (auto Asset : ExistingAssets)
+    {
+        YS_LOG_CLEAN("%s", *Asset.GetFullName())
+        auto Lib = Cast<UBlueprint>(Asset.GetAsset());
+        // auto Func = Lib->FindFunction(FName("NewFunction_0"));
+        auto Func = Lib->GetClass()->FindFunctionByName(FName("NewFunction_0"));
+        if (Func)
+        {
+            YS_LOG_FUNC("Found function: %s", *Func->GetName())
+        }
+        FOutputDeviceNull OutDevice;
+        Lib->CallFunctionByNameWithArguments(TEXT("NewFunction_0"), OutDevice, nullptr);
+        if (Lib->GetBlueprintClass()->FindFunctionByName(FName("NewFunction_0")))
+        {
+            YS_LOG_FUNC("FOUND ITTTTTTTTT")
+        }
+
+        // if (Asset)
+        if (Lib->ParentClass->IsChildOf<AYarnFunctionLibrary>())
+        {
+            YS_LOG_FUNC("IS A YARN FUNCTION LIB")
+            // TSubclassOf<AYarnFunctionLibrary> BPA = NewObject<AYarnFunctionLibrary>(this, Lib->GetBlueprintClass()));
+            // TSubclassOf<AYarnFunctionLibrary> BPA = NewObject<AYarnFunctionLibrary>(this, Lib->OriginalClass));
+            // auto BPA = NewObject<TSubclassOf<AYarnFunctionLibrary>>(this, Lib->GetClass());
+            // if (BPA)
+            // {
+            //     YS_LOG_FUNC("got a BPA")
+            // }
+
+            // Lib->getblueprint
+            
+            //TSubclassOf<AYarnFunctionLibrary> BPA = Lib->GeneratedClass->GetDefaultObject<UBlueprintGeneratedClass>();
+            //TSubclassOf<UBlueprintGeneratedClass> BPA = Lib->GeneratedClass->GetDefaultObject<UBlueprintGeneratedClass>();
+            auto BPA = Lib->GetBlueprintClass()->GetDefaultObject<UBlueprintGeneratedClass>();
+            if (BPA)
+            {
+                YS_LOG_FUNC("got a BPA")
+                // if (BPA->FindFunctionByName(FName("NewFunction_0")))
+                if (BPA->FindFunctionByName(FName("MyQuickActorFunction")))
+                {
+                    YS_LOG_FUNC("FOUND ITTTTTTTTT")
+                }
+                // BPA->GenerateFunctionList()
+            }
+            else
+            {
+                YS_LOG_FUNC("NO BPA")
+            }
+            // AYarnFunctionLibrary* YFL = Cast<AYarnFunctionLibrary>(Lib->GetBlueprintClass());
+            // AYarnFunctionLibrary* YFL = Cast<AYarnFunctionLibrary>(Lib->GeneratedClass);
+            // AYarnFunctionLibrary* YFL = Cast<AYarnFunctionLibrary>(BPA);
+            // AYarnFunctionLibrary* YFL = Cast<AYarnFunctionLibrary>(Lib);
+            AYarnFunctionLibrary* YFL = Cast<AYarnFunctionLibrary>(Lib->StaticClass());
+            if (YFL)
+            {
+                YS_LOG_FUNC("ok, we created a YFL.... ..... asdfjlaskfjladskl")
+            }
+            // auto BP = ConstructorHelpers::FObjectFinder(Lib->GetPathName());
+            // auto BP = ConstructorHelpers::FObjectFinder<UObject>(Lib->GetPathName());
+            // auto BP = ConstructorHelpers::FObjectFinder<UBlueprint>(*Lib->GetPathName());
+            FStringAssetReference BPRef(Lib->GetPathName());
+            // if (BP.Succeeded())
+            if (auto BP = BPRef.TryLoad())
+            {
+                YFL = Cast<AYarnFunctionLibrary>(BP);
+                if (YFL)
+                {
+                    YS_LOG_FUNC("ok, we created a YFL.... ..... asdfjlaskfjladskl")
+                }
+            }
+        }
+        if (Lib->IsA<AYarnFunctionLibrary>())
+        {
+            YS_LOG_FUNC("IS A YARN FUNCTION LIB")
+        }
+    }
+
+    return;
+    
+    const FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+    IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
+
+    OnAssetRegistryFilesLoadedHandle = AssetRegistry.OnFilesLoaded().AddUObject(this, &UYarnSubsystem::OnAssetRegistryFilesLoaded);
+    
+    TArray<FAssetData> AllAssets;
+    FAssetRegistryModule::GetRegistry().GetAllAssets(AllAssets, true);
+    YS_LOG_FUNC("Found %d assets from GetAllAssets", AllAssets.Num())
+    for (auto Asset : AllAssets)
+    {
+        // YS_LOG_CLEAN("%s", *Asset.GetFullName())
+    }
+
+    TArray<FAssetData> AssetsByPath;
+    FAssetRegistryModule::GetRegistry().GetAssetsByPath(TEXT("/Game"), AssetsByPath, true);
+    YS_LOG_FUNC("Found %d assets from GetAssetsByPath(\"/Game\")", AssetsByPath.Num())
+    for (auto Asset : AssetsByPath)
+    {
+        YS_LOG_CLEAN("%s", *Asset.GetFullName())
+    }
+
+    TArray<FAssetData> ClassAssets;
+    // AssetRegistryModule.Get().GetAssetsByClass(AYarnFunctionLibrary::StaticClass()->GetFName(),ClassAssets,true);
+    AssetRegistry.GetAssetsByClass(FName("YarnFunctionLibrary"),ClassAssets,true);
+    YS_LOG_FUNC("Found %d assets from GetAssetsByClass", ClassAssets.Num())
+
+    TArray<FAssetData> AssetData;
+    FARFilter Filter;
+    AssetRegistry.GetAssets(Filter, AssetData);
+    YS_LOG_FUNC("Found %d assets with empty/default filter", AssetData.Num())
+
     if (FAssetRegistryModule::GetRegistry().IsLoadingAssets())
     {
         YS_WARN_FUNC("Asset registry still loading assets...")
     }
 
-    FARFilter Filter;
+    FAssetRegistryModule::GetRegistry().OnFilesLoaded().AddUObject(this, &UYarnSubsystem::OnAssetRegistryFilesLoaded);
+    
+
+    // FARFilter Filter;
     // Filter.PackageNames.Add(TEXT("NewFunctionLibrary"));
     // Filter.PackageNames.Add(TEXT("/Game/NewFunctionLibrary.NewFunctionLibrary"));
     // Filter.PackageNames.Add(TEXT("D:/dev/YarnSpinner/YSUEDemo4.27/Content/NewFunctionLibrary.uasset"));
     // Filter.PackageNames.Add(TEXT("/Game/NewFunctionLibrary"));
     Filter.PackageNames.Add(TEXT("/Game"));
-    TArray<FAssetData> AssetData;
+    // TArray<FAssetData> AssetData;
     FAssetRegistryModule::GetRegistry().GetAssets(Filter, AssetData);
     if (AssetData.Num() == 0)
     {
@@ -94,7 +210,7 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
         }
     }
 
-    FWorldDelegates::OnWorldInitializedActors.AddLambda([this](const UWorld::FActorsInitializedParams& Params) //UWorld* World, const UWorld::InitializationValues IVS)
+    OnWorldInitializedActorsHandle = FWorldDelegates::OnWorldInitializedActors.AddLambda([this](const UWorld::FActorsInitializedParams& Params) //UWorld* World, const UWorld::InitializationValues IVS)
     {
         YS_LOG_FUNC("World initialized")
         // YarnFunctionLibrary = GetWorld()->SpawnActor<AYarnFunctionLibrary>();
@@ -111,9 +227,39 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
         // {
         //     YS_WARN_FUNC("Could not find blueprint class to create yarnfunction actor")
         // }
+        
+        FARFilter Filter;
+        // Filter.PackageNames.Add(TEXT("NewFunctionLibrary"));
+        // Filter.PackageNames.Add(TEXT("/Game/NewFunctionLibrary.NewFunctionLibrary"));
+        // Filter.PackageNames.Add(TEXT("D:/dev/YarnSpinner/YSUEDemo4.27/Content/NewFunctionLibrary.uasset"));
+        // Filter.PackageNames.Add(TEXT("/Game/NewFunctionLibrary"));
+        // Filter.PackageNames.Add(TEXT("/Game"));
+        // Filter.ClassNames.Add(AYarnFunctionLibrary::StaticClass()->GetFName());
+        // Filter.ClassNames.Add("AYarnFunctionLibrary");
+        Filter.ClassNames.Add("UBlueprint");
+        TArray<FAssetData> AssetData;
+        FAssetRegistryModule::GetRegistry().GetAssets(Filter, AssetData);
+        if (AssetData.Num() == 0)
+        {
+            YS_WARN_FUNC("Asset search did not find any yarn function libraries")
+            return;
+        }
+
+        for (auto Asset : AssetData)
+        {
+            auto YFL = Cast<AYarnFunctionLibrary>(Asset.GetAsset());
+            if (YFL)
+            {
+                YS_LOG_FUNC("Found yarn function library: %s", *YFL->GetName())
+                YarnFunctionLibrary = YFL;
+                break;
+            }
+        }
     });
 
     // YS_LOG("function output device: %s", *Ar)
+
+    OnLevelAddedToWorldHandle = FWorldDelegates::LevelAddedToWorld.AddUObject(this, &UYarnSubsystem::OnLevelAddedToWorld);
 }
 
 
@@ -157,4 +303,45 @@ Yarn::Value UYarnSubsystem::GetValue(std::string name)
 void UYarnSubsystem::ClearValue(std::string name)
 {
     Variables.Remove(FString(UTF8_TO_TCHAR(name.c_str())));
+}
+
+
+void UYarnSubsystem::OnAssetRegistryFilesLoaded()
+{
+    YS_LOG_FUNCSIG
+    FARFilter Filter;
+    // Filter.PackageNames.Add(TEXT("NewFunctionLibrary"));
+    // Filter.PackageNames.Add(TEXT("/Game/NewFunctionLibrary.NewFunctionLibrary"));
+    // Filter.PackageNames.Add(TEXT("D:/dev/YarnSpinner/YSUEDemo4.27/Content/NewFunctionLibrary.uasset"));
+    // Filter.PackageNames.Add(TEXT("/Game/NewFunctionLibrary"));
+    Filter.PackageNames.Add(TEXT("/Game"));
+    Filter.ClassNames.Add(AYarnFunctionLibrary::StaticClass()->GetFName());
+    TArray<FAssetData> AssetData;
+    FAssetRegistryModule::GetRegistry().GetAssets(Filter, AssetData);
+    if (AssetData.Num() == 0)
+    {
+        YS_WARN_FUNC("COULD NOT FIND ANY YARN FUNCTION LIBRARIES")
+    }
+    else
+    {
+        YS_LOG_FUNC("Found %d yarn function libraries", AssetData.Num())
+    }
+    
+    // FARFilter Filter;
+    // // Filter.PackageNames.Add(TEXT("NewFunctionLibrary"));
+    // // Filter.PackageNames.Add(TEXT("/Game/NewFunctionLibrary.NewFunctionLibrary"));
+    // // Filter.PackageNames.Add(TEXT("D:/dev/YarnSpinner/YSUEDemo4.27/Content/NewFunctionLibrary.uasset"));
+    // // Filter.PackageNames.Add(TEXT("/Game/NewFunctionLibrary"));
+    // Filter.PackageNames.Add(TEXT("/Game"));
+    // Filter.ClassNames.Add(AYarnFunctionLibrary::StaticClass()->GetFName());
+    // TArray<FAssetData> AssetData;
+    // FAssetRegistryModule::GetRegistry().GetAssets(Filter, AssetData);
+}
+
+
+void UYarnSubsystem::OnLevelAddedToWorld(ULevel* Level, UWorld* World)
+{
+    YS_LOG_FUNCSIG
+
+    OnAssetRegistryFilesLoaded();
 }

@@ -46,6 +46,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Category="File Path")
 	TMap<FString, FYarnSourceMeta> YarnFiles;
 
+    // UPROPERTY(EditDefaultsOnly, Category = "Yarn Spinner")
+    // TArray<TSubclassOf<class AYarnFunctionLibrary>> FunctionLibraries;
+
     FString GetLocAssetPackage() const;
     FString GetLocAssetPackage(FName Language) const;
     class UDataTable* GetLocTextDataTable(FName Language) const;

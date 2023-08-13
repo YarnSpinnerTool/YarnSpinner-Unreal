@@ -20,7 +20,6 @@ class YARNSPINNER_API UYarnSubsystem : public UGameInstanceSubsystem, public Yar
 {
     GENERATED_BODY()
 public:
-
     virtual void Initialize(FSubsystemCollectionBase& Collection) override;
     virtual void Deinitialize() override;
 
@@ -41,6 +40,13 @@ private:
     class AYarnFunctionLibrary* YarnFunctionLibrary;
 
     TMap<FString, Yarn::Value> Variables;
+    
+    FDelegateHandle OnAssetRegistryFilesLoadedHandle;
+    FDelegateHandle OnLevelAddedToWorldHandle;
+    FDelegateHandle OnWorldInitializedActorsHandle;
+
+    void OnAssetRegistryFilesLoaded();
+    void OnLevelAddedToWorld(ULevel* Level, UWorld* World);
 };
 
 

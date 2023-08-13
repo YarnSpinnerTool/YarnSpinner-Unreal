@@ -117,7 +117,7 @@ void UYarnEditorSubsystem::OnAssetRegistryFilesLoaded()
 
     for (auto Asset : ExistingAssets)
     {
-        YS_LOG("Found asset: %s (%s) %s", *Asset.GetFullName(), *Asset.GetPackage()->GetName(), *Asset.GetAsset()->GetPathName())
+        YS_LOG_FUNC("Found asset: %s (%s) %s", *Asset.GetFullName(), *Asset.GetPackage()->GetName(), *Asset.GetAsset()->GetPathName())
         auto Lib = Cast<UBlueprint>(Asset.GetAsset());
         // Lib->CallFunctionByNameWithArguments(TEXT("DoStuff"))
         // Lib->
