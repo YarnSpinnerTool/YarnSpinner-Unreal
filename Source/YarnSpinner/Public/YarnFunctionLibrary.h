@@ -4,7 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "YarnSpinnerCore/Value.h"
 #include "YarnFunctionLibrary.generated.h"
+
+
+struct FYarnBlueprintArg
+{
+    FName Name;
+    Yarn::Value Value;
+};
+
 
 
 UCLASS(Blueprintable, ClassGroup = (YarnSpinner))
@@ -15,6 +24,8 @@ class YARNSPINNER_API AYarnFunctionLibrary : public AActor
 public:
     // Sets default values for this actor's properties
     AYarnFunctionLibrary();
+
+    TOptional<Yarn::Value> CallFunction(FName FunctionName, TArray<FYarnBlueprintArg> Args, TOptional<FYarnBlueprintArg> ReturnValue);
 
 protected:
     // Called when the game starts or when spawned
