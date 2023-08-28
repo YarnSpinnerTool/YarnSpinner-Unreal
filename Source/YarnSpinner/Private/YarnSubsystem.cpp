@@ -16,6 +16,74 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     YS_LOG_FUNCSIG
     Super::Initialize(Collection);
 
+
+    TArray<TSubclassOf<AYarnFunctionLibrary>> LibRefs;
+    TArray<FAssetData> Blueprints;
+
+    FARFilter Filter;
+    Filter.ClassNames.Add(UBlueprint::StaticClass()->GetFName());
+    Filter.ClassNames.Add(UBlueprintGeneratedClass::StaticClass()->GetFName());
+    FAssetRegistryModule::GetRegistry().GetAssets(Filter, Blueprints);
+
+    for (auto Asset : Blueprints)
+    {
+        if (UObject* BPObj = Cast<UObject>(Asset.GetAsset()))
+        {
+            UBlueprint* BP = Cast<UBlueprint>(StaticLoadObject(UBlueprint::StaticClass(), nullptr, *BPObj->GetPathName()));
+            if (BP && BP->GeneratedClass && BP->GeneratedClass->GetDefaultObject())
+            {
+                // if (BP->GetBlueprintClass()->IsChildOf<AYarnFunctionLibrary>())
+                if (auto YFL = Cast<AYarnFunctionLibrary>(BP->GeneratedClass->GetDefaultObject()))//GetBlueprintClass()->IsChildOf<AYarnFunctionLibrary>())
+                {
+                    YS_LOG_FUNC("FOUNDDDD OOOONNNNEEE")
+                    LibRefs.Add(*BP->GeneratedClass);
+                }
+            }
+        }
+    }
+
+    for (auto Lib : LibRefs)
+    {
+        if (Lib->FindFunctionByName(FName("MyQuickActorFunction")))
+        {
+            YS_LOG_FUNC("FOUND MyQuickActorFunction")
+            auto YFL = Cast<AYarnFunctionLibrary>(Lib->GetDefaultObject());//GetBlueprintClass()->IsChildOf<AYarnFunctionLibrary>())
+            auto Result1 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintArg{"InParam", Yarn::Value(12.345)}}, {{"OutParam", Yarn::Value(true)}});
+            auto Result2 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintArg{"InParam", Yarn::Value(1234.5)}}, {{"OutParam", Yarn::Value(true)}});
+
+            YS_LOG_FUNC("Did we succeed? %d, %d", Result1.IsSet() && Result1->GetBooleanValue(), Result2.IsSet() && Result2->GetBooleanValue())
+        }
+        if (Lib->FindFunctionByName(FName("AwesomeFunction")))
+        {
+            YS_LOG_FUNC("calling YarnFunctionLibrary %s->AwesomeFunction()", *Lib->GetName())
+            auto YFL = Cast<AYarnFunctionLibrary>(Lib->GetDefaultObject());
+            auto Result = YFL->CallFunction("AwesomeFunction", {FYarnBlueprintArg{"MyFirstInputParam", Yarn::Value(true)}, FYarnBlueprintArg{"MySecondInputParam", Yarn::Value(12.345)}}, {{"MyOutParam", Yarn::Value(0.0)}});
+            if (Result.IsSet())
+            {
+                YS_LOG_FUNC("Function returned: %f", Result->GetNumberValue())
+            }
+        }
+    }
+
+    return;
+    
+    /*
+    TArray<FAssetData> ExistingBAssets = FYarnAssetHelpers::FindAssetsInRegistryByPackagePath<AYarnFunctionLibrary>(FPaths::GetPath("/Game/"));
+    YS_LOG_FUNC("Found %d ACTOR assets using asset hlepers", ExistingBAssets.Num()) // 0
+    for (auto Asset : ExistingBAssets)
+    {
+        YS_LOG_CLEAN("ACTOR %s", *Asset.GetFullName())
+    }
+
+    
+    
+    TArray<FAssetData> ExistingAAssets = FYarnAssetHelpers::FindAssetsInRegistryByPackagePath<AYarnFunctionLibrary>(FPaths::GetPath("/Game/"));
+    YS_LOG_FUNC("Found %d ACTOR assets using asset hlepers", ExistingAAssets.Num()) // 0
+    for (auto Asset : ExistingAAssets)
+    {
+        YS_LOG_CLEAN("ACTOR %s", *Asset.GetFullName())
+    }
+    
     TArray<FAssetData> ExistingAssets = FYarnAssetHelpers::FindAssetsInRegistryByPackagePath<UBlueprint>(FPaths::GetPath("/Game/"));
     YS_LOG_FUNC("Found %d assets using asset hlepers", ExistingAssets.Num())
     for (auto Asset : ExistingAssets)
@@ -35,10 +103,53 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
             YS_LOG_FUNC("FOUND ITTTTTTTTT")
         }
 
+        AActor* Thing = GetWorld()->SpawnActor<AYarnFunctionLibrary>();
+        if (Thing)
+        {
+            YS_LOG_FUNC("Ok, got a THING")
+        }
+        else
+        {
+            YS_LOG_FUNC("NO THING")
+        }
+
         // if (Asset)
         if (Lib->ParentClass->IsChildOf<AYarnFunctionLibrary>())
         {
             YS_LOG_FUNC("IS A YARN FUNCTION LIB")
+            
+            // OK, so... how do we get an actor from this???
+
+            // AActor* A = GetWorld()->SpawnActor(Asset.GetClass());
+            AActor* A = GetWorld()->SpawnActor(Asset.GetAsset()->GetClass());
+            if (A)
+            {
+                YS_LOG_FUNC("GOT AN ACCCTOORRRRR")
+            }
+
+            AYarnFunctionLibrary* A2 = Asset.GetAsset()->GetClass();
+            
+            
+            // AYarnFunctionLibrary* BPA2 = (AYarnFunctionLibrary*) GetWorld()->SpawnActor(Lib->GetBlueprintClass()->GetAuthoritativeClass());
+            AYarnFunctionLibrary* BPA2 = GetWorld()->SpawnActor<AYarnFunctionLibrary>(Lib->GetBlueprintClass());
+            // AYarnFunctionLibrary* BPA2 = GetWorld()->SpawnActor<AYarnFunctionLibrary>(Asset.GetAsset());
+            if (BPA2)
+            {
+                YS_LOG_FUNC("MAYBE WE ARE MAKING PROGRESS BUT I'M SO EASILY DISTRACTED2")
+            }
+            
+            // auto Blah = Cast<TSubclassOf<AYarnFunctionLibrary>>(Lib);
+            AYarnFunctionLibrary* Blah = Cast<AYarnFunctionLibrary>(Lib);
+            if (Blah)
+            {
+                YS_LOG_FUNC("CAST THTE THING")
+                // TSubclassOf<AYarnFunctionLibrary> BPA = GetWorld()->SpawnActor(Blah->Get()->GetClass());
+                AYarnFunctionLibrary* BPA = GetWorld()->SpawnActor<AYarnFunctionLibrary>(Blah->GetClass());
+                if (BPA)
+                {
+                    YS_LOG_FUNC("MAYBE WE ARE MAKING PROGRESS BUT I'M SO EASILY DISTRACTED")
+                }
+            }
             // TSubclassOf<AYarnFunctionLibrary> BPA = NewObject<AYarnFunctionLibrary>(this, Lib->GetBlueprintClass()));
             // TSubclassOf<AYarnFunctionLibrary> BPA = NewObject<AYarnFunctionLibrary>(this, Lib->OriginalClass));
             // auto BPA = NewObject<TSubclassOf<AYarnFunctionLibrary>>(this, Lib->GetClass());
@@ -95,7 +206,6 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
         }
     }
 
-    return;
     
     const FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
     IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
@@ -122,6 +232,14 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     // AssetRegistryModule.Get().GetAssetsByClass(AYarnFunctionLibrary::StaticClass()->GetFName(),ClassAssets,true);
     AssetRegistry.GetAssetsByClass(FName("YarnFunctionLibrary"),ClassAssets,true);
     YS_LOG_FUNC("Found %d assets from GetAssetsByClass", ClassAssets.Num())
+    
+    TArray<FAssetData> ClassAssets2;
+    // AssetRegistryModule.Get().GetAssetsByClass(AYarnFunctionLibrary::StaticClass()->GetFName(),ClassAssets,true);
+    AssetRegistry.GetAssetsByClass(FName("AYarnFunctionLibrary"),ClassAssets2,true);
+    // AssetRegistry.GetDerivedClassNames()
+    // AssetRegistry.GetAncestorClassNames()
+    // AssetRegistry.get
+    YS_LOG_FUNC("Found %d assets from GetAssetsByClass", ClassAssets2.Num())
 
     TArray<FAssetData> AssetData;
     FARFilter Filter;
@@ -251,15 +369,17 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
             if (YFL)
             {
                 YS_LOG_FUNC("Found yarn function library: %s", *YFL->GetName())
-                YarnFunctionLibrary = YFL;
+                YarnFunctionLibraries.Add(YFL);
                 break;
             }
         }
     });
 
     // YS_LOG("function output device: %s", *Ar)
+    */
 
     OnLevelAddedToWorldHandle = FWorldDelegates::LevelAddedToWorld.AddUObject(this, &UYarnSubsystem::OnLevelAddedToWorld);
+    
 }
 
 

@@ -21,29 +21,29 @@ AYarnFunctionLibrary::AYarnFunctionLibrary()
 
     // Attempt to create subobjects from Blueprint-defined Blueprint Function Libraries
 
-    FARFilter Filter;
-    // Filter.PackageNames.Add(TEXT("/Game/NewFunctionLibrary"));
-    Filter.PackageNames.Add(TEXT("/Game"));
-    TArray<FAssetData> AssetData;
-    FAssetRegistryModule::GetRegistry().GetAssets(Filter, AssetData);
-    if (AssetData.Num() == 0)
-    {
-        YS_WARN_FUNC("Asset search found nothing")
-    }
-    for (auto Asset : AssetData)
-    {
-        // CreateDefaultSubobject<UWidgetComponent>()
-        
-        YS_LOG_FUNC("Found asset: %s", *Asset.AssetName.ToString())
-        // Asset.GetClass()->CreateDefaultSubobject<UBlueprintFunctionLibrary>()
-        // Asset.GetClass()->
-        // NewObject<UBlueprintFunctionLibrary>(Asset.GetClass());
-        // CreateDefaultSubobject<UBlueprintFunctionLibrary>(Asset.AssetName, false);
-        // Create
-
-        // NewObject
-        
-    }
+    // FARFilter Filter;
+    // // Filter.PackageNames.Add(TEXT("/Game/NewFunctionLibrary"));
+    // Filter.PackageNames.Add(TEXT("/Game"));
+    // TArray<FAssetData> AssetData;
+    // FAssetRegistryModule::GetRegistry().GetAssets(Filter, AssetData);
+    // if (AssetData.Num() == 0)
+    // {
+    //     YS_WARN_FUNC("Asset search found nothing")
+    // }
+    // for (auto Asset : AssetData)
+    // {
+    //     // CreateDefaultSubobject<UWidgetComponent>()
+    //     
+    //     YS_LOG_FUNC("Found asset: %s", *Asset.AssetName.ToString())
+    //     // Asset.GetClass()->CreateDefaultSubobject<UBlueprintFunctionLibrary>()
+    //     // Asset.GetClass()->
+    //     // NewObject<UBlueprintFunctionLibrary>(Asset.GetClass());
+    //     // CreateDefaultSubobject<UBlueprintFunctionLibrary>(Asset.AssetName, false);
+    //     // Create
+    //
+    //     // NewObject
+    //     
+    // }
 }
 
 
@@ -62,38 +62,41 @@ TOptional<Yarn::Value> AYarnFunctionLibrary::CallFunction(FName FunctionName, TA
 
     // Set up the parameters
     FStructOnScope FuncParams(Function);
-
+    FBoolProperty* BoolParam;
+    FFloatProperty* FloatParam;
+    FStrProperty* StringParam;
+    
     for (auto Arg : Args)
     {
         // Set input properties
         switch (Arg.Value.GetType())
         {
         case Yarn::Value::ValueType::BOOL:
-            FBoolProperty* InBoolParam = CastField<FBoolProperty>(Function->FindPropertyByName(Arg.Name));
-            if (!InBoolParam)
+            BoolParam = CastField<FBoolProperty>(Function->FindPropertyByName(Arg.Name));
+            if (!BoolParam)
             {
                 YS_WARN_FUNC("Could not create function parameter %s for function %s from given values", *Arg.Name.ToString(), *FunctionName.ToString())
                 return Result;
             }
-            InBoolParam->SetPropertyValue_InContainer(FuncParams.GetStructMemory(), Arg.Value.GetBooleanValue());
+            BoolParam->SetPropertyValue_InContainer(FuncParams.GetStructMemory(), Arg.Value.GetBooleanValue());
             break;
         case Yarn::Value::ValueType::NUMBER:
-            FDoubleProperty* InDoubleParam = CastField<FDoubleProperty>(Function->FindPropertyByName(Arg.Name));
-            if (!InDoubleParam)
+            FloatParam = CastField<FFloatProperty>(Function->FindPropertyByName(Arg.Name));
+            if (!FloatParam)
             {
                 YS_WARN_FUNC("Could not create function parameter %s for function %s from given values", *Arg.Name.ToString(), *FunctionName.ToString())
                 return Result;
             }
-            InDoubleParam->SetPropertyValue_InContainer(FuncParams.GetStructMemory(), Arg.Value.GetNumberValue());
+            FloatParam->SetPropertyValue_InContainer(FuncParams.GetStructMemory(), Arg.Value.GetNumberValue());
             break;
         case Yarn::Value::ValueType::STRING:
-            FStrProperty* InStringParam = CastField<FStrProperty>(Function->FindPropertyByName(Arg.Name));
-            if (!InStringParam)
+            StringParam = CastField<FStrProperty>(Function->FindPropertyByName(Arg.Name));
+            if (!StringParam)
             {
                 YS_WARN_FUNC("Could not create function parameter %s for function %s from given values", *Arg.Name.ToString(), *FunctionName.ToString())
                 return Result;
             }
-            InStringParam->SetPropertyValue_InContainer(FuncParams.GetStructMemory(), FString(Arg.Value.GetStringValue().c_str()));
+            StringParam->SetPropertyValue_InContainer(FuncParams.GetStructMemory(), FString(Arg.Value.GetStringValue().c_str()));
             break;
         }
     }
@@ -107,31 +110,31 @@ TOptional<Yarn::Value> AYarnFunctionLibrary::CallFunction(FName FunctionName, TA
         switch (ReturnValue->Value.GetType())
         {
         case Yarn::Value::ValueType::BOOL:
-            FBoolProperty* OutBoolParam = CastField<FBoolProperty>(Function->FindPropertyByName(ReturnValue->Name));
-            if (!OutBoolParam)
+            BoolParam = CastField<FBoolProperty>(Function->FindPropertyByName(ReturnValue->Name));
+            if (!BoolParam)
             {
                 YS_WARN_FUNC("Could not get return parameter %s for function %s", *ReturnValue->Name.ToString(), *FunctionName.ToString())
                 return Result;
             }
-            Result = Yarn::Value(OutBoolParam->GetPropertyValue_InContainer(FuncParams.GetStructMemory()));
+            Result = Yarn::Value(BoolParam->GetPropertyValue_InContainer(FuncParams.GetStructMemory()));
             break;
         case Yarn::Value::ValueType::NUMBER:
-            FDoubleProperty* OutDoubleParam = CastField<FDoubleProperty>(Function->FindPropertyByName(ReturnValue->Name));
-            if (!OutDoubleParam)
+            FloatParam = CastField<FFloatProperty>(Function->FindPropertyByName(ReturnValue->Name));
+            if (!FloatParam)
             {
                 YS_WARN_FUNC("Could not get return parameter %s for function %s", *ReturnValue->Name.ToString(), *FunctionName.ToString())
                 return Result;
             }
-            Result = Yarn::Value(OutDoubleParam->GetPropertyValue_InContainer(FuncParams.GetStructMemory()));
+            Result = Yarn::Value(FloatParam->GetPropertyValue_InContainer(FuncParams.GetStructMemory()));
             break;
         case Yarn::Value::ValueType::STRING:
-            FStrProperty* OutStringParam = CastField<FStrProperty>(Function->FindPropertyByName(ReturnValue->Name));
-            if (!OutStringParam)
+            StringParam = CastField<FStrProperty>(Function->FindPropertyByName(ReturnValue->Name));
+            if (!StringParam)
             {
                 YS_WARN_FUNC("Could not get return parameter %s for function %s", *ReturnValue->Name.ToString(), *FunctionName.ToString())
                 return Result;
             }
-            Result = Yarn::Value(TCHAR_TO_UTF8(*OutStringParam->GetPropertyValue_InContainer(FuncParams.GetStructMemory())));
+            Result = Yarn::Value(TCHAR_TO_UTF8(*StringParam->GetPropertyValue_InContainer(FuncParams.GetStructMemory())));
             break;
         }
     }
@@ -146,6 +149,7 @@ void AYarnFunctionLibrary::BeginPlay()
     YS_LOG_FUNCSIG
     Super::BeginPlay();
 
+    /*
     // Method #1 -- Does nothing.
     auto Ar = FOutputDeviceNull();
     CallFunctionByNameWithArguments(TEXT("MyQuickActorFunction 3.14"), Ar, nullptr, true);
@@ -200,7 +204,7 @@ void AYarnFunctionLibrary::BeginPlay()
     {
         YS_LOG_FUNC("RETURENEEDD FAALSLSLKESEEEE")
     }
-
+    */
 }
 
 

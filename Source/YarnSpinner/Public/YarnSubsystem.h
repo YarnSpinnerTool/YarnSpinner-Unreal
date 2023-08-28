@@ -37,7 +37,7 @@ private:
     // TMap<UYarnProjectAsset*, TMap<FName, UDataTable*>> LocTextDataTables;
 
     UPROPERTY()
-    class AYarnFunctionLibrary* YarnFunctionLibrary;
+    TArray<class AYarnFunctionLibrary*> YarnFunctionLibraries;
 
     TMap<FString, Yarn::Value> Variables;
     
