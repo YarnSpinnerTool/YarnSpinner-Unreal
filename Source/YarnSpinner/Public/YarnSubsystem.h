@@ -50,9 +50,6 @@ private:
     FDelegateHandle OnAssetRegistryFilesLoadedHandle;
     FDelegateHandle OnLevelAddedToWorldHandle;
     FDelegateHandle OnWorldInitializedActorsHandle;
-
-    void OnAssetRegistryFilesLoaded();
-    void OnLevelAddedToWorld(ULevel* Level, UWorld* World);
 };
 
 
