@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "YarnFunctionRegistry.h"
 #include "AssetRegistry/ARFilter.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 
@@ -20,6 +21,8 @@ class YARNSPINNER_API UYarnSubsystem : public UGameInstanceSubsystem, public Yar
 {
     GENERATED_BODY()
 public:
+    UYarnSubsystem();
+    
     virtual void Initialize(FSubsystemCollectionBase& Collection) override;
     virtual void Deinitialize() override;
 
@@ -37,7 +40,10 @@ private:
     // TMap<UYarnProjectAsset*, TMap<FName, UDataTable*>> LocTextDataTables;
 
     UPROPERTY()
-    TArray<class AYarnFunctionLibrary*> YarnFunctionLibraries;
+    UYarnFunctionRegistry* YarnFunctionRegistry;
+    
+    UPROPERTY()
+    TArray<class UYarnFunctionLibrary*> YarnFunctionLibraries;
 
     TMap<FString, Yarn::Value> Variables;
     

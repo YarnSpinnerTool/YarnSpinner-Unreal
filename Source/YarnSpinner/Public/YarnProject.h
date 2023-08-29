@@ -30,7 +30,7 @@ struct FYarnSourceMeta
 /**
  * 
  */
-UCLASS(Blueprintable, AutoExpandCategories = "ImportOptions")
+UCLASS(AutoExpandCategories = "ImportOptions")
 class YARNSPINNER_API UYarnProject : public UObject
 {
 	GENERATED_BODY()

@@ -17,21 +17,21 @@ struct FYarnBlueprintArg
 
 
 UCLASS(Blueprintable, ClassGroup = (YarnSpinner))
-class YARNSPINNER_API AYarnFunctionLibrary : public AActor
+class YARNSPINNER_API UYarnFunctionLibrary : public UObject
 {
     GENERATED_BODY()
 
 public:
     // Sets default values for this actor's properties
-    AYarnFunctionLibrary();
+    UYarnFunctionLibrary();
 
     TOptional<Yarn::Value> CallFunction(FName FunctionName, TArray<FYarnBlueprintArg> Args, TOptional<FYarnBlueprintArg> ReturnValue);
 
 protected:
     // Called when the game starts or when spawned
-    virtual void BeginPlay() override;
+    // virtual void BeginPlay() override;
 
 public:
     // Called every frame
-    virtual void Tick(float DeltaTime) override;
+    // virtual void Tick(float DeltaTime) override;
 };

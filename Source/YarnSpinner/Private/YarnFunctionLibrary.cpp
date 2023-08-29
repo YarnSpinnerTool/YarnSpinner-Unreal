@@ -12,12 +12,12 @@
 
 
 // Sets default values
-AYarnFunctionLibrary::AYarnFunctionLibrary()
+UYarnFunctionLibrary::UYarnFunctionLibrary()
 {
     YS_LOG_FUNCSIG
     
     // Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-    PrimaryActorTick.bCanEverTick = true;
+    // PrimaryActorTick.bCanEverTick = true;
 
     // Attempt to create subobjects from Blueprint-defined Blueprint Function Libraries
 
@@ -47,7 +47,7 @@ AYarnFunctionLibrary::AYarnFunctionLibrary()
 }
 
 
-TOptional<Yarn::Value> AYarnFunctionLibrary::CallFunction(FName FunctionName, TArray<FYarnBlueprintArg> Args, TOptional<FYarnBlueprintArg> ReturnValue)
+TOptional<Yarn::Value> UYarnFunctionLibrary::CallFunction(FName FunctionName, TArray<FYarnBlueprintArg> Args, TOptional<FYarnBlueprintArg> ReturnValue)
 {
     TOptional<Yarn::Value> Result;
     
@@ -144,74 +144,74 @@ TOptional<Yarn::Value> AYarnFunctionLibrary::CallFunction(FName FunctionName, TA
 
 
 // Called when the game starts or when spawned
-void AYarnFunctionLibrary::BeginPlay()
-{
-    YS_LOG_FUNCSIG
-    Super::BeginPlay();
-
-    /*
-    // Method #1 -- Does nothing.
-    auto Ar = FOutputDeviceNull();
-    CallFunctionByNameWithArguments(TEXT("MyQuickActorFunction 3.14"), Ar, nullptr, true);
-
-    auto Function = FindFunction("MyQuickActorFunction");
-    if (Function)
-    {
-        YS_LOG_FUNC("FOUND IT")
-    }
-    else
-    {
-        YS_LOG_FUNC("NOT FOUND")
-    }
-
-
-    // Method #2 -- Works
-    struct FLocalParameters
-    {
-        float InParam = 12;
-    };
-    FLocalParameters Parameters;
-    ProcessEvent(Function, &Parameters);
-    
-
-    // Method #3 -- Works, gives return value
-    float InFloat = 76.0;
-    FStructOnScope FuncParam(Function);
-
-    // Set input properties
-    FFloatProperty* InParam = CastField<FFloatProperty>(Function->FindPropertyByName(TEXT("InParam")));
-    if (!InParam)
-    {
-        YS_WARN_FUNC("Could not create InProp")
-        return;
-    }
-    InParam->SetPropertyValue_InContainer(FuncParam.GetStructMemory(), InFloat);
-
-    ProcessEvent(Function, FuncParam.GetStructMemory());
-
-    FBoolProperty* OutParam = CastField<FBoolProperty>(Function->FindPropertyByName(TEXT("OutParam")));
-    if (!OutParam)
-    {
-        YS_WARN_FUNC("Could not create OutProp")
-        return;
-    }
-    bool OutBool = OutParam->GetPropertyValue_InContainer(FuncParam.GetStructMemory());
-    if (OutBool == true)
-    {
-        YS_LOG_FUNC("REUTRNEDD TRUEEEEE")
-    }
-    else
-    {
-        YS_LOG_FUNC("RETURENEEDD FAALSLSLKESEEEE")
-    }
-    */
-}
+// void UYarnFunctionLibrary::BeginPlay()
+// {
+//     YS_LOG_FUNCSIG
+//     Super::BeginPlay();
+//
+//     /*
+//     // Method #1 -- Does nothing.
+//     auto Ar = FOutputDeviceNull();
+//     CallFunctionByNameWithArguments(TEXT("MyQuickActorFunction 3.14"), Ar, nullptr, true);
+//
+//     auto Function = FindFunction("MyQuickActorFunction");
+//     if (Function)
+//     {
+//         YS_LOG_FUNC("FOUND IT")
+//     }
+//     else
+//     {
+//         YS_LOG_FUNC("NOT FOUND")
+//     }
+//
+//
+//     // Method #2 -- Works
+//     struct FLocalParameters
+//     {
+//         float InParam = 12;
+//     };
+//     FLocalParameters Parameters;
+//     ProcessEvent(Function, &Parameters);
+//     
+//
+//     // Method #3 -- Works, gives return value
+//     float InFloat = 76.0;
+//     FStructOnScope FuncParam(Function);
+//
+//     // Set input properties
+//     FFloatProperty* InParam = CastField<FFloatProperty>(Function->FindPropertyByName(TEXT("InParam")));
+//     if (!InParam)
+//     {
+//         YS_WARN_FUNC("Could not create InProp")
+//         return;
+//     }
+//     InParam->SetPropertyValue_InContainer(FuncParam.GetStructMemory(), InFloat);
+//
+//     ProcessEvent(Function, FuncParam.GetStructMemory());
+//
+//     FBoolProperty* OutParam = CastField<FBoolProperty>(Function->FindPropertyByName(TEXT("OutParam")));
+//     if (!OutParam)
+//     {
+//         YS_WARN_FUNC("Could not create OutProp")
+//         return;
+//     }
+//     bool OutBool = OutParam->GetPropertyValue_InContainer(FuncParam.GetStructMemory());
+//     if (OutBool == true)
+//     {
+//         YS_LOG_FUNC("REUTRNEDD TRUEEEEE")
+//     }
+//     else
+//     {
+//         YS_LOG_FUNC("RETURENEEDD FAALSLSLKESEEEE")
+//     }
+//     */
+// }
 
 
 // Called every frame
-void AYarnFunctionLibrary::Tick(float DeltaTime)
-{
-    Super::Tick(DeltaTime);
-
-}
+// void UYarnFunctionLibrary::Tick(float DeltaTime)
+// {
+//     Super::Tick(DeltaTime);
+//
+// }
 

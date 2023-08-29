@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "EditorSubsystem.h"
+#include "YarnFunctionLibrary.h"
 #include "YarnEditorSubsystem.generated.h"
 
 USTRUCT()
@@ -51,13 +52,16 @@ class YARNSPINNEREDITOR_API UYarnEditorSubsystem : public UEditorSubsystem
     virtual void Deinitialize() override;
 
 private:
+    UPROPERTY()
+    UYarnFunctionLibrary* YarnFunctionRegistry;
+
     class FFindInBlueprintSearchManager* BlueprintSearchManager;
 	FDelegateHandle OnAssetRegistryFilesLoadedHandle;
 	FDelegateHandle OnAssetAddedHandle;
 	FDelegateHandle OnAssetRemovedHandle;
 	FDelegateHandle OnAssetRenamedHandle;
     
-	// Callback for when the asset registry has finished scanning assets on Unreal Editor load.
+    // Callback for when the asset registry has finished scanning assets on Unreal Editor load.
 	void OnAssetRegistryFilesLoaded();
 	void OnAssetAdded(const FAssetData& AssetData) const;
 	void OnAssetRemoved(const FAssetData& AssetData) const;

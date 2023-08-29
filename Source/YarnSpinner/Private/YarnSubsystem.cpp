@@ -5,10 +5,19 @@
 
 #include "DisplayLine.h"
 #include "YarnFunctionLibrary.h"
+#include "YarnFunctionRegistry.h"
 #include "Misc/OutputDeviceHelper.h"
 #include "Misc/OutputDeviceNull.h"
 #include "Misc/YarnAssetHelpers.h"
 #include "Misc/YSLogging.h"
+
+
+UYarnSubsystem::UYarnSubsystem()
+{
+    YS_LOG_FUNCSIG
+
+    YarnFunctionRegistry = NewObject<UYarnFunctionRegistry>(this, "YarnFunctionRegistry");
+}
 
 
 void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -17,7 +26,7 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     Super::Initialize(Collection);
 
 
-    TArray<TSubclassOf<AYarnFunctionLibrary>> LibRefs;
+    TArray<TSubclassOf<UYarnFunctionLibrary>> LibRefs;
     TArray<FAssetData> Blueprints;
 
     FARFilter Filter;
@@ -33,7 +42,7 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
             if (BP && BP->GeneratedClass && BP->GeneratedClass->GetDefaultObject())
             {
                 // if (BP->GetBlueprintClass()->IsChildOf<AYarnFunctionLibrary>())
-                if (auto YFL = Cast<AYarnFunctionLibrary>(BP->GeneratedClass->GetDefaultObject()))//GetBlueprintClass()->IsChildOf<AYarnFunctionLibrary>())
+                if (auto YFL = Cast<UYarnFunctionLibrary>(BP->GeneratedClass->GetDefaultObject()))//GetBlueprintClass()->IsChildOf<AYarnFunctionLibrary>())
                 {
                     YS_LOG_FUNC("FOUNDDDD OOOONNNNEEE")
                     LibRefs.Add(*BP->GeneratedClass);
@@ -47,17 +56,17 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
         if (Lib->FindFunctionByName(FName("MyQuickActorFunction")))
         {
             YS_LOG_FUNC("FOUND MyQuickActorFunction")
-            auto YFL = Cast<AYarnFunctionLibrary>(Lib->GetDefaultObject());//GetBlueprintClass()->IsChildOf<AYarnFunctionLibrary>())
+            auto YFL = Cast<UYarnFunctionLibrary>(Lib->GetDefaultObject());//GetBlueprintClass()->IsChildOf<AYarnFunctionLibrary>())
             auto Result1 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintArg{"InParam", Yarn::Value(12.345)}}, {{"OutParam", Yarn::Value(true)}});
             auto Result2 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintArg{"InParam", Yarn::Value(1234.5)}}, {{"OutParam", Yarn::Value(true)}});
 
             YS_LOG_FUNC("Did we succeed? %d, %d", Result1.IsSet() && Result1->GetBooleanValue(), Result2.IsSet() && Result2->GetBooleanValue())
         }
-        if (Lib->FindFunctionByName(FName("AwesomeFunction")))
+        if (Lib->FindFunctionByName(FName("MyAwesomeFunc")))
         {
-            YS_LOG_FUNC("calling YarnFunctionLibrary %s->AwesomeFunction()", *Lib->GetName())
-            auto YFL = Cast<AYarnFunctionLibrary>(Lib->GetDefaultObject());
-            auto Result = YFL->CallFunction("AwesomeFunction", {FYarnBlueprintArg{"MyFirstInputParam", Yarn::Value(true)}, FYarnBlueprintArg{"MySecondInputParam", Yarn::Value(12.345)}}, {{"MyOutParam", Yarn::Value(0.0)}});
+            YS_LOG_FUNC("calling YarnFunctionLibrary %s->MyAwesomeFunc()", *Lib->GetName())
+            auto YFL = Cast<UYarnFunctionLibrary>(Lib->GetDefaultObject());
+            auto Result = YFL->CallFunction("MyAwesomeFunc", {FYarnBlueprintArg{"FirstInParam", Yarn::Value(true)}, FYarnBlueprintArg{"SecondInParam", Yarn::Value(12.345)}}, {{"OutParam", Yarn::Value(0.0)}});
             if (Result.IsSet())
             {
                 YS_LOG_FUNC("Function returned: %f", Result->GetNumberValue())
@@ -435,7 +444,7 @@ void UYarnSubsystem::OnAssetRegistryFilesLoaded()
     // Filter.PackageNames.Add(TEXT("D:/dev/YarnSpinner/YSUEDemo4.27/Content/NewFunctionLibrary.uasset"));
     // Filter.PackageNames.Add(TEXT("/Game/NewFunctionLibrary"));
     Filter.PackageNames.Add(TEXT("/Game"));
-    Filter.ClassNames.Add(AYarnFunctionLibrary::StaticClass()->GetFName());
+    Filter.ClassNames.Add(UYarnFunctionLibrary::StaticClass()->GetFName());
     TArray<FAssetData> AssetData;
     FAssetRegistryModule::GetRegistry().GetAssets(Filter, AssetData);
     if (AssetData.Num() == 0)
