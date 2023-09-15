@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+// #include "Engine/Blueprint.h"
 #include "YarnSpinnerCore/Value.h"
 #include "YarnFunctionLibrary.generated.h"
 
