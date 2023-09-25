@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "YarnFunctionRegistry.h"
+#include "Library/YarnLibraryRegistry.h"
 #include "AssetRegistry/ARFilter.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 
@@ -35,16 +35,15 @@ public:
 
     virtual void ClearValue(std::string name);
 
+    const UYarnLibraryRegistry* GetYarnLibraryRegistry() const { return YarnFunctionRegistry; }
+
 private:
     // UPROPERTY()
     // TMap<UYarnProjectAsset*, TMap<FName, UDataTable*>> LocTextDataTables;
 
     UPROPERTY()
-    UYarnFunctionRegistry* YarnFunctionRegistry;
+    UYarnLibraryRegistry* YarnFunctionRegistry;
     
-    UPROPERTY()
-    TArray<class UYarnFunctionLibrary*> YarnFunctionLibraries;
-
     TMap<FString, Yarn::Value> Variables;
     
     FDelegateHandle OnAssetRegistryFilesLoadedHandle;

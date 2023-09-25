@@ -4,8 +4,8 @@
 #include "YarnSubsystem.h"
 
 #include "DisplayLine.h"
-#include "YarnFunctionLibrary.h"
-#include "YarnFunctionRegistry.h"
+#include "Library/YarnFunctionLibrary.h"
+#include "Library/YarnLibraryRegistry.h"
 #include "Misc/OutputDeviceHelper.h"
 #include "Misc/OutputDeviceNull.h"
 #include "Misc/YarnAssetHelpers.h"
@@ -16,7 +16,7 @@ UYarnSubsystem::UYarnSubsystem()
 {
     YS_LOG_FUNCSIG
 
-    YarnFunctionRegistry = NewObject<UYarnFunctionRegistry>(this, "YarnFunctionRegistry");
+    YarnFunctionRegistry = NewObject<UYarnLibraryRegistry>(this, "YarnFunctionRegistry");
 }
 
 
@@ -57,8 +57,8 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
         {
             YS_LOG_FUNC("FOUND MyQuickActorFunction")
             auto YFL = Cast<UYarnFunctionLibrary>(Lib->GetDefaultObject());
-            auto Result1 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintArg{"InParam", Yarn::Value(12.345)}}, {{"OutParam", Yarn::Value(true)}});
-            auto Result2 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintArg{"InParam", Yarn::Value(1234.5)}}, {{"OutParam", Yarn::Value(true)}});
+            auto Result1 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintFuncParam{"InParam", Yarn::Value(12.345)}}, {{"OutParam", Yarn::Value(true)}});
+            auto Result2 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintFuncParam{"InParam", Yarn::Value(1234.5)}}, {{"OutParam", Yarn::Value(true)}});
 
             YS_LOG_FUNC("Did we succeed? %d, %d", Result1.IsSet() && Result1->GetBooleanValue(), Result2.IsSet() && Result2->GetBooleanValue())
         }
@@ -66,7 +66,7 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
         {
             YS_LOG_FUNC("calling YarnFunctionLibrary %s->MyAwesomeFunc()", *Lib->GetName())
             auto YFL = Cast<UYarnFunctionLibrary>(Lib->GetDefaultObject());
-            auto Result = YFL->CallFunction("MyAwesomeFunc", {FYarnBlueprintArg{"FirstInParam", Yarn::Value(true)}, FYarnBlueprintArg{"SecondInParam", Yarn::Value(12.345)}}, {{"OutParam", Yarn::Value(0.0)}});
+            auto Result = YFL->CallFunction("MyAwesomeFunc", {FYarnBlueprintFuncParam{"FirstInParam", Yarn::Value(true)}, FYarnBlueprintFuncParam{"SecondInParam", Yarn::Value(12.345)}}, {{"OutParam", Yarn::Value(0.0)}});
             if (Result.IsSet())
             {
                 YS_LOG_FUNC("Function returned: %f", Result->GetNumberValue())

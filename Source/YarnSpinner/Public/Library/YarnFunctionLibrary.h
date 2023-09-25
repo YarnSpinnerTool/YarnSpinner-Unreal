@@ -8,12 +8,7 @@
 #include "YarnFunctionLibrary.generated.h"
 
 
-struct FYarnBlueprintArg
-{
-    FName Name;
-    Yarn::Value Value;
-};
-
+struct FYarnBlueprintFuncParam;
 
 
 UCLASS(Blueprintable, ClassGroup = (YarnSpinner))
@@ -25,7 +20,7 @@ public:
     // Sets default values for this actor's properties
     UYarnFunctionLibrary();
 
-    TOptional<Yarn::Value> CallFunction(FName FunctionName, TArray<FYarnBlueprintArg> Args, TOptional<FYarnBlueprintArg> ReturnValue);
+    TOptional<Yarn::Value> CallFunction(FName FunctionName, TArray<FYarnBlueprintFuncParam> Args, TOptional<FYarnBlueprintFuncParam> ReturnValue);
 
 protected:
     // Called when the game starts or when spawned

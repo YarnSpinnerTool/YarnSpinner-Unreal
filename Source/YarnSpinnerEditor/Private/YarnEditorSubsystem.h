@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "EditorSubsystem.h"
-#include "YarnFunctionLibrary.h"
+#include "Library/YarnFunctionLibrary.h"
 #include "YarnEditorSubsystem.generated.h"
 
 USTRUCT()

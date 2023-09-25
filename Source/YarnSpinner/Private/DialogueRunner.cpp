@@ -45,6 +45,16 @@ void ADialogueRunner::PreInitializeComponents()
     // Create the Library
     Library = TUniquePtr<Yarn::Library>(new Yarn::Library(*this));
 
+    // TODO
+    // Library->AddFunction();
+
+    auto Registry = YarnSubsystem()->GetYarnLibraryRegistry();
+    for (auto F : Registry->GetFunctions())
+    {
+        Library->AddFunction(F.Key, )
+        F.Value->
+    }
+
     // Create the VirtualMachine, supplying it with the loaded Program and
     // configuring it to use our library, plus use this ADialogueRunner as the
     // logger and the variable storage
@@ -182,7 +192,6 @@ void ADialogueRunner::StartDialogue(FName NodeName) {
     else {
         UE_LOG(LogYarnSpinner, Error, TEXT("DialogueRunner can't start node %s, because a node with that name was not found."), *NodeName.ToString());
         return;
-
     }
 
 }
@@ -285,9 +294,6 @@ UYarnSubsystem* ADialogueRunner::YarnSubsystem() const
 
 void ADialogueRunner::GetDisplayTextForLine(ULine* Line, const Yarn::Line& YarnLine)
 {
-    // FIXME: Currently, we store the text of lines directly in the
-    // YarnAsset. This will eventually be replaced with string tables.
-
     const FName LineID = FName(YarnLine.LineID.c_str());
 
     // This assumes that we only ever care about lines that actually exist in .yarn files (rather than allowing extra lines in .csv files)
@@ -297,35 +303,17 @@ void ADialogueRunner::GetDisplayTextForLine(ULine* Line, const Yarn::Line& YarnL
         return;
     }
 
-    // FString CurrentLanguage = FTextLocalizationManager::Get().GetRequestedLanguageName();
-
-    // FString CurrentLanguage = UKismetInternationalizationLibrary::GetCurrentLanguage();
-    // YS_LOG("Current language: %s", *CurrentLanguage)
-    // FString CurrentCulture = UKismetInternationalizationLibrary::GetCurrentCulture();
-    // YS_LOG("Current culture: %s", *CurrentCulture)
-    //
-    // FString NonLocalisedDisplayText;
-    // if (YarnSubsystem)
-    //     // TODO: look up the correct language
-    //     NonLocalisedDisplayText = YarnSubsystem->GetLocText(YarnAsset, FName(CurrentLanguage), LineID);
-    // else
-    //     NonLocalisedDisplayText = YarnAsset->Lines[LineID];
-
     const FText LocalisedDisplayText = FText::FromString(FTextLocalizationManager::Get().GetDisplayString({YarnProject->GetName()}, {LineID.ToString()}, nullptr).Get());
 
     // Apply substitutions
     FFormatOrderedArguments FormatArgs;
-    // TArray<FStringFormatArg> FormatArguments;
     for (auto Substitution : YarnLine.Substitutions)
     {
-        // FormatArguments.Add(FStringFormatArg(UTF8_TO_TCHAR(Substitution.c_str())));
         FormatArgs.Emplace(FText::FromString(UTF8_TO_TCHAR(Substitution.c_str())));
     }
 
     const FText TextWithSubstitutions = FText::Format(LocalisedDisplayText, FormatArgs);
-    // const FString TextWithSubstitutions = FString::Format(*LocalisedDisplayText, FormatArguments);
 
-    // Line->DisplayText = FText::FromString(TextWithSubstitutions);
     Line->DisplayText = TextWithSubstitutions;
 }
 

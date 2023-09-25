@@ -1,18 +1,19 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "YarnFunctionLibrary.h"
+#include "Library/YarnCommandLibrary.h"
 
 #include "AssetRegistry/ARFilter.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Components/WidgetComponent.h"
+#include "Library/YarnLibraryRegistry.h"
 #include "Misc/OutputDeviceNull.h"
 #include "Misc/YSLogging.h"
 
 
 
 // Sets default values
-UYarnFunctionLibrary::UYarnFunctionLibrary()
+UYarnCommandLibrary::UYarnCommandLibrary()
 {
     YS_LOG_FUNCSIG
     
@@ -22,7 +23,7 @@ UYarnFunctionLibrary::UYarnFunctionLibrary()
     // Attempt to create subobjects from Blueprint-defined Blueprint Function Libraries
 
     // FARFilter Filter;
-    // // Filter.PackageNames.Add(TEXT("/Game/NewFunctionLibrary"));
+    // // Filter.PackageNames.Add(TEXT("/Game/NewCommandLibrary"));
     // Filter.PackageNames.Add(TEXT("/Game"));
     // TArray<FAssetData> AssetData;
     // FAssetRegistryModule::GetRegistry().GetAssets(Filter, AssetData);
@@ -35,10 +36,10 @@ UYarnFunctionLibrary::UYarnFunctionLibrary()
     //     // CreateDefaultSubobject<UWidgetComponent>()
     //     
     //     YS_LOG_FUNC("Found asset: %s", *Asset.AssetName.ToString())
-    //     // Asset.GetClass()->CreateDefaultSubobject<UBlueprintFunctionLibrary>()
+    //     // Asset.GetClass()->CreateDefaultSubobject<UBlueprintCommandLibrary>()
     //     // Asset.GetClass()->
-    //     // NewObject<UBlueprintFunctionLibrary>(Asset.GetClass());
-    //     // CreateDefaultSubobject<UBlueprintFunctionLibrary>(Asset.AssetName, false);
+    //     // NewObject<UBlueprintCommandLibrary>(Asset.GetClass());
+    //     // CreateDefaultSubobject<UBlueprintCommandLibrary>(Asset.AssetName, false);
     //     // Create
     //
     //     // NewObject
@@ -47,7 +48,7 @@ UYarnFunctionLibrary::UYarnFunctionLibrary()
 }
 
 
-TOptional<Yarn::Value> UYarnFunctionLibrary::CallFunction(FName FunctionName, TArray<FYarnBlueprintArg> Args, TOptional<FYarnBlueprintArg> ReturnValue)
+TOptional<Yarn::Value> UYarnCommandLibrary::CallFunction(FName FunctionName, TArray<FYarnBlueprintFuncParam> Args, TOptional<FYarnBlueprintFuncParam> ReturnValue)
 {
     TOptional<Yarn::Value> Result;
     
@@ -144,7 +145,7 @@ TOptional<Yarn::Value> UYarnFunctionLibrary::CallFunction(FName FunctionName, TA
 
 
 // Called when the game starts or when spawned
-// void UYarnFunctionLibrary::BeginPlay()
+// void UYarnCommandLibrary::BeginPlay()
 // {
 //     YS_LOG_FUNCSIG
 //     Super::BeginPlay();
@@ -209,7 +210,7 @@ TOptional<Yarn::Value> UYarnFunctionLibrary::CallFunction(FName FunctionName, TA
 
 
 // Called every frame
-// void UYarnFunctionLibrary::Tick(float DeltaTime)
+// void UYarnCommandLibrary::Tick(float DeltaTime)
 // {
 //     Super::Tick(DeltaTime);
 //

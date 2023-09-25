@@ -7,7 +7,7 @@
 #include "FindInBlueprintManager.h"
 #include "K2Node_FunctionEntry.h"
 #include "K2Node_FunctionResult.h"
-#include "YarnFunctionLibrary.h"
+#include "Library/YarnFunctionLibrary.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetRegistry/IAssetRegistry.h"
 #include "Misc/YarnAssetHelpers.h"
