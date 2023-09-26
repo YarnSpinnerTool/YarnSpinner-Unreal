@@ -90,6 +90,9 @@ namespace Yarn
         std::function<void(std::string)> NodeStartHandler;
         std::function<void(std::string)> NodeCompleteHandler;
         std::function<void()> DialogueCompleteHandler;
+        std::function<bool(std::string)> DoesFunctionExist;
+        std::function<int(std::string)> GetExpectedFunctionParamCount;
+        std::function<Yarn::Value(std::string, std::vector<Yarn::Value>)> CallFunction;
 
         void SetSelectedOption(int selectedOptionIndex);
 

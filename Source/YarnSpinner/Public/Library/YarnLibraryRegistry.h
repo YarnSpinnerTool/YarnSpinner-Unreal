@@ -61,7 +61,10 @@ public:
 
     const TMap<FName, FYarnBlueprintLibFunction>& GetFunctions() const;
     const TMap<FName, FYarnBlueprintLibFunction>& GetCommands() const;
-    
+    bool HasFunction(const FName& Name) const;
+    int GetExpectedFunctionParamCount(const FName& Name) const;
+    Yarn::Value CallFunction(const FName& Name, TArray<Yarn::Value> Parameters) const;
+
 private:
     // Blueprints that extend YarnFunctionLibrary
     UPROPERTY()

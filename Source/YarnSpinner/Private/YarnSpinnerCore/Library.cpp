@@ -72,7 +72,7 @@ namespace Yarn
     {
         if (source.count(name) == 0)
         {
-            logger.Log(string_format("Unknown function %s", UTF8_TO_TCHAR(name.c_str())));
+            logger.Log(string_format("Can't get implementation for unknown function '%s'", UTF8_TO_TCHAR(name.c_str())));
             return FunctionInfo<T>();
         }
         return source[name];

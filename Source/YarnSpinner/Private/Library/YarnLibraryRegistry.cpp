@@ -14,6 +14,7 @@
 
 UYarnLibraryRegistry::UYarnLibraryRegistry()
 {
+    YS_LOG_FUNCSIG
     const FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
     IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
 
@@ -50,6 +51,74 @@ const TMap<FName, FYarnBlueprintLibFunction>& UYarnLibraryRegistry::GetFunctions
 const TMap<FName, FYarnBlueprintLibFunction>& UYarnLibraryRegistry::GetCommands() const
 {
     return AllCommands;
+}
+
+
+bool UYarnLibraryRegistry::HasFunction(const FName& Name) const
+{
+    if (!AllFunctions.Contains(Name))
+    {
+        FString S = "Could not find function '" + Name.ToString() + "'.  Known functions: ";
+        for (auto Func : AllFunctions)
+        {
+            S += "'" + Func.Key.ToString() + "', ";
+        }
+        YS_WARN("%s", *S)
+    }
+    
+    return AllFunctions.Contains(Name);
+}
+
+
+int UYarnLibraryRegistry::GetExpectedFunctionParamCount(const FName& Name) const
+{
+    if (!AllFunctions.Contains(Name))
+        return 0;
+    return AllFunctions[Name].InParams.Num();
+}
+
+
+Yarn::Value UYarnLibraryRegistry::CallFunction(const FName& Name, TArray<Yarn::Value> Parameters) const
+{
+    if (!AllFunctions.Contains(Name))
+    {
+        YS_WARN("Attempted to call non-existent function '%s'", *Name.ToString())
+        return Yarn::Value();
+    }
+
+    auto FuncDetail = AllFunctions[Name];
+
+    if (FuncDetail.InParams.Num() != Parameters.Num())
+    {
+        YS_WARN("Attempted to call function '%s' with incorrect number of arguments (expected %d).", *Name.ToString(), FuncDetail.InParams.Num())
+        return Yarn::Value();
+    }
+
+    auto Lib = Cast<UYarnFunctionLibrary>(FuncDetail.Library);
+    
+    if (!Lib)
+    {
+        YS_WARN("Couldn't create library for Blueprint containing function '%s'", *Name.ToString())
+        return Yarn::Value();
+    }
+
+    TArray<FYarnBlueprintFuncParam> InParams;
+    for (auto Param : FuncDetail.InParams)
+    {
+        FYarnBlueprintFuncParam InParam = Param;
+        InParam.Value = Parameters[InParams.Num()];
+        InParams.Add(InParam);
+    }
+
+    TOptional<FYarnBlueprintFuncParam> OutParam = FuncDetail.OutParam;
+
+    auto Result = Lib->CallFunction(Name, InParams, OutParam);
+    if (Result.IsSet())
+    {
+        return Result.GetValue();
+    }
+    YS_WARN("Function '%s' returned an invalid value.", *Name.ToString())
+    return Yarn::Value();
 }
 
 
@@ -103,13 +172,15 @@ UBlueprint* UYarnLibraryRegistry::GetYarnCommandLibraryBlueprint(const FAssetDat
 
 void UYarnLibraryRegistry::FindFunctionsAndCommands()
 {
+    YS_LOG_FUNCSIG
     YS_LOG("Project content dir: %s", *FPaths::ProjectContentDir());
 
-    TArray<FAssetData> ExistingAssets = FYarnAssetHelpers::FindAssetsInRegistryByPackagePath<UBlueprint>(FPaths::GetPath("/Game/"));
+    // TArray<FAssetData> ExistingAssets = FYarnAssetHelpers::FindAssetsInRegistryByPackagePath<UBlueprint>(FPaths::GetPath("/Game/"));
+    TArray<FAssetData> ExistingAssets = FYarnAssetHelpers::FindAssetsInRegistry<UBlueprint>();
 
     for (auto Asset : ExistingAssets)
     {
-        // YS_LOG_FUNC("Found asset: %s (%s) %s", *Asset.GetFullName(), *Asset.GetPackage()->GetName(), *Asset.GetAsset()->GetPathName())
+        YS_LOG_FUNC("Found Blueprint asset: %s (%s) %s", *Asset.GetFullName(), *Asset.GetPackage()->GetName(), *Asset.GetAsset()->GetPathName())
         if (UBlueprint* BP = GetYarnFunctionLibraryBlueprint(Asset))
         {
             ImportFunctions(BP);
@@ -321,6 +392,7 @@ void UYarnLibraryRegistry::ImportFunctions(UBlueprint* YarnFunctionLibrary)
             
             // TODO: check function name is valid
             // TODO: check function has no async nodes
+            // TODO: check function has exactly one return value (?)
             
             // Add to function sets
             if (bIsValid)
@@ -444,6 +516,7 @@ void UYarnLibraryRegistry::RemoveCommands(UBlueprint* YarnCommandLibrary)
 
 void UYarnLibraryRegistry::OnAssetRegistryFilesLoaded()
 {
+    YS_LOG_FUNCSIG
     bRegistryFilesLoaded = true;
     FindFunctionsAndCommands();
 }
@@ -451,6 +524,7 @@ void UYarnLibraryRegistry::OnAssetRegistryFilesLoaded()
 
 void UYarnLibraryRegistry::OnAssetAdded(const FAssetData& AssetData)
 {
+    YS_LOG_FUNCSIG
     // Ignore this until the registry has finished loading the first time.
     if (!bRegistryFilesLoaded)
         return;

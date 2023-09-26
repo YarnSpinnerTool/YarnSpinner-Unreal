@@ -12,6 +12,7 @@ B: Here's another line! #line:test1_2
 -> Neat! #line:test1_7
     A: I know! #line:test1_8
 
+<<jump Functions>>
 <<jump Variables>>
 
 ===
@@ -38,6 +39,14 @@ title: Expressions
 So what about expressions, then?  Can we do maths?  Like 3.2 + 6.7 + 18 = {3.2 + 6.7 + 18}?  #line:test1_14
 Ok, and can we do expressions with variables? I explained variables to you {$explainCount} times, but it felt like {$explainCount * 1000} times!  So let's just say 'yes' for now and leave it at that. #line:test1_15
 
+<<jump Functions>>
+
+===
+title: Functions
+---
+
+Let's call a function now.  MyAwesomeFunc returns: {MyAwesomeFunc()} #line:test1_16
+
 
 <<jump Commands>>
 
@@ -45,7 +54,7 @@ Ok, and can we do expressions with variables? I explained variables to you {$exp
 title: Commands
 ---
 
-Wanna see something cool? Gonna run a command now. Ready, set... #line:test1_16
+Wanna see something cool? Gonna run a command now. Ready, set... #line:test1_17
 
 // Run a command
 <<do_something_cool param1 param2>>
@@ -56,6 +65,6 @@ Wanna see something cool? Gonna run a command now. Ready, set... #line:test1_16
 title: Summary
 ---
 
-A: All done! #line:test1_17
+A: All done! #line:test1_18
 
 ===

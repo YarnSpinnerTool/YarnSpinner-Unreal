@@ -47,13 +47,13 @@ void ADialogueRunner::PreInitializeComponents()
 
     // TODO
     // Library->AddFunction();
-
-    auto Registry = YarnSubsystem()->GetYarnLibraryRegistry();
-    for (auto F : Registry->GetFunctions())
-    {
-        Library->AddFunction(F.Key, )
-        F.Value->
-    }
+    
+    // auto Registry = YarnSubsystem()->GetYarnLibraryRegistry();
+    // for (auto F : Registry->GetFunctions())
+    // {
+    //     Library->AddFunction(F.Key, )
+    //     F.Value->
+    // }
 
     // Create the VirtualMachine, supplying it with the loaded Program and
     // configuring it to use our library, plus use this ADialogueRunner as the
@@ -101,6 +101,24 @@ void ADialogueRunner::PreInitializeComponents()
         
     };
 
+    VirtualMachine->DoesFunctionExist = [this](const std::string& FunctionName) -> bool
+    {
+        return YarnSubsystem()->GetYarnLibraryRegistry()->HasFunction(FName(UTF8_TO_TCHAR(FunctionName.c_str())));
+    };
+
+    VirtualMachine->GetExpectedFunctionParamCount = [this](const std::string& FunctionName) -> int
+    {
+        return YarnSubsystem()->GetYarnLibraryRegistry()->GetExpectedFunctionParamCount(FName(UTF8_TO_TCHAR(FunctionName.c_str())));
+    };
+    
+    VirtualMachine->CallFunction = [this](const std::string& FunctionName, const std::vector<Yarn::Value>& Parameters) -> Yarn::Value
+    {
+        return YarnSubsystem()->GetYarnLibraryRegistry()->CallFunction(
+            FName(UTF8_TO_TCHAR(FunctionName.c_str())),
+            TArray<Yarn::Value>(Parameters.data(), Parameters.size())
+        );
+    };
+    
     VirtualMachine->CommandHandler = [this](Yarn::Command &Command)
     {
         UE_LOG(LogYarnSpinner, Log, TEXT("Received command \"%s\""), UTF8_TO_TCHAR(Command.Text.c_str()));
