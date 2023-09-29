@@ -323,6 +323,8 @@ void ADialogueRunner::GetDisplayTextForLine(ULine* Line, const Yarn::Line& YarnL
 
     const FText LocalisedDisplayText = FText::FromString(FTextLocalizationManager::Get().GetDisplayString({YarnProject->GetName()}, {LineID.ToString()}, nullptr).Get());
 
+    const FText NonLocalisedDisplayText = FText::FromString(YarnProject->Lines[LineID]);
+
     // Apply substitutions
     FFormatOrderedArguments FormatArgs;
     for (auto Substitution : YarnLine.Substitutions)
@@ -330,7 +332,7 @@ void ADialogueRunner::GetDisplayTextForLine(ULine* Line, const Yarn::Line& YarnL
         FormatArgs.Emplace(FText::FromString(UTF8_TO_TCHAR(Substitution.c_str())));
     }
 
-    const FText TextWithSubstitutions = FText::Format(LocalisedDisplayText, FormatArgs);
+    const FText TextWithSubstitutions = (LocalisedDisplayText.IsEmptyOrWhitespace()) ? FText::Format(NonLocalisedDisplayText, FormatArgs) : FText::Format(LocalisedDisplayText, FormatArgs);
 
     Line->DisplayText = TextWithSubstitutions;
 }
