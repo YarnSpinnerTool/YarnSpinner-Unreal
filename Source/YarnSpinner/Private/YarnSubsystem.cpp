@@ -1,9 +1,11 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "YarnSubsystem.h"
 
 #include "DisplayLine.h"
+#include "Engine/ObjectLibrary.h"
+#include "Library/YarnCommandLibrary.h"
 #include "Library/YarnFunctionLibrary.h"
 #include "Library/YarnLibraryRegistry.h"
 #include "Misc/OutputDeviceHelper.h"
@@ -16,6 +18,13 @@ UYarnSubsystem::UYarnSubsystem()
 {
     YS_LOG_FUNCSIG
 
+    YarnFunctionObjectLibrary = UObjectLibrary::CreateLibrary(UYarnFunctionLibrary::StaticClass(), true, true);
+    YarnFunctionObjectLibrary->AddToRoot();
+    YarnCommandObjectLibrary = UObjectLibrary::CreateLibrary(UYarnCommandLibrary::StaticClass(), true, true);
+    YarnCommandObjectLibrary->AddToRoot();
+    YarnFunctionObjectLibrary->LoadAssetDataFromPath(TEXT("/Game"));
+    YarnCommandObjectLibrary->LoadAssetDataFromPath(TEXT("/Game"));
+    
     YarnFunctionRegistry = NewObject<UYarnLibraryRegistry>(this, "YarnFunctionRegistry");
 }
 

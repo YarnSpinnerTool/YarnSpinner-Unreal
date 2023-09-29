@@ -9,6 +9,7 @@
 
 #include "YarnProject.h"
 #include "Engine/DataTable.h"
+#include "Engine/ObjectLibrary.h"
 #include "YarnSpinnerCore/VirtualMachine.h"
 
 #include "YarnSubsystem.generated.h"
@@ -43,12 +44,18 @@ private:
 
     UPROPERTY()
     UYarnLibraryRegistry* YarnFunctionRegistry;
+
+    UPROPERTY()
+    UObjectLibrary* YarnFunctionObjectLibrary;
+    UPROPERTY()
+    UObjectLibrary* YarnCommandObjectLibrary;
     
     TMap<FString, Yarn::Value> Variables;
     
     FDelegateHandle OnAssetRegistryFilesLoadedHandle;
     FDelegateHandle OnLevelAddedToWorldHandle;
     FDelegateHandle OnWorldInitializedActorsHandle;
+    
 };
 
 
