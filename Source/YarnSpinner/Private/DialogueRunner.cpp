@@ -218,7 +218,7 @@ void ADialogueRunner::StartDialogue(FName NodeName) {
 void ADialogueRunner::ContinueDialogue() {
 
     if (VirtualMachine->GetCurrentExecutionState() == Yarn::VirtualMachine::ExecutionState::ERROR) {
-        UE_LOG(LogYarnSpinner, Error, TEXT("VirtualMachine is in an error state, and cannot continue running."));
+        UE_LOG(LogYarnSpinner, Error, TEXT("VirtualMachine is in an error state and cannot continue running."));
         return;
     }
 
@@ -239,7 +239,7 @@ void ADialogueRunner::SelectOption(UOption* Option) {
     Yarn::VirtualMachine::ExecutionState State = this->VirtualMachine->GetCurrentExecutionState();    
 
     if (State != Yarn::VirtualMachine::ExecutionState::WAITING_ON_OPTION_SELECTION) {
-        UE_LOG(LogYarnSpinner, Error, TEXT("Dialogue Runner received a call to SelectOption, but it wasn't expecting a selection!"));
+        UE_LOG(LogYarnSpinner, Error, TEXT("Dialogue Runner received a call to SelectOption but it wasn't expecting a selection!"));
         return;
     }
 

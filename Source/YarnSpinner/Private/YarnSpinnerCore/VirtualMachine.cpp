@@ -459,7 +459,7 @@ namespace Yarn
 
                 if (expectedParamCount >= 0 && expectedParamCount != actualParamCount)
                 {
-                    logger.Log(string_format("Function '%s' expects %i parameters, but %i were provided", functionName.c_str(), actualParamCount), ILogger::ERROR);
+                    logger.Log(string_format("Function '%s' expects %i parameters, but %i were provided", functionName.c_str(), expectedParamCount, actualParamCount), ILogger::ERROR);
                     return false;
                 }
 
