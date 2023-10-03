@@ -48,6 +48,15 @@ UYarnFunctionLibrary::UYarnFunctionLibrary()
 }
 
 
+UYarnFunctionLibrary* UYarnFunctionLibrary::FromBlueprint(const UBlueprint* Blueprint)
+{
+    if (!Blueprint || !Blueprint->GeneratedClass || !Blueprint->GeneratedClass->GetDefaultObject())
+        return nullptr;
+
+    return Cast<UYarnFunctionLibrary>(Blueprint->GeneratedClass->GetDefaultObject());
+}
+
+
 TOptional<Yarn::Value> UYarnFunctionLibrary::CallFunction(FName FunctionName, TArray<FYarnBlueprintFuncParam> Args, TOptional<FYarnBlueprintFuncParam> ReturnValue)
 {
     TOptional<Yarn::Value> Result;

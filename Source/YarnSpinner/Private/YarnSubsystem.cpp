@@ -51,7 +51,7 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
             if (BP && BP->GeneratedClass && BP->GeneratedClass->GetDefaultObject())
             {
                 // if (BP->GetBlueprintClass()->IsChildOf<AYarnFunctionLibrary>())
-                if (auto YFL = Cast<UYarnFunctionLibrary>(BP->GeneratedClass->GetDefaultObject()))
+                if (auto YFL = UYarnFunctionLibrary::FromBlueprint(BP))
                 {
                     YS_LOG_FUNC("FOUNDDDD OOOONNNNEEE")
                     LibRefs.Add(*BP->GeneratedClass);

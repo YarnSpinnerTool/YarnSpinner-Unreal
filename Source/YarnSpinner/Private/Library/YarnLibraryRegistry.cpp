@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Library/YarnLibraryRegistry.h"
@@ -94,7 +94,7 @@ Yarn::Value UYarnLibraryRegistry::CallFunction(const FName& Name, TArray<Yarn::V
         return Yarn::Value();
     }
 
-    auto Lib = Cast<UYarnFunctionLibrary>(FuncDetail.Library);
+    auto Lib = UYarnFunctionLibrary::FromBlueprint(FuncDetail.Library);
     
     if (!Lib)
     {
