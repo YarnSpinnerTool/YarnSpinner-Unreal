@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "YarnSubsystem.h"
@@ -19,12 +19,14 @@ UYarnSubsystem::UYarnSubsystem()
     YS_LOG_FUNCSIG
 
     YarnFunctionObjectLibrary = UObjectLibrary::CreateLibrary(UYarnFunctionLibrary::StaticClass(), true, true);
-    YarnFunctionObjectLibrary->AddToRoot();
     YarnCommandObjectLibrary = UObjectLibrary::CreateLibrary(UYarnCommandLibrary::StaticClass(), true, true);
+    YarnFunctionObjectLibrary->AddToRoot();
     YarnCommandObjectLibrary->AddToRoot();
+    YarnFunctionObjectLibrary->bRecursivePaths = true;
+    YarnCommandObjectLibrary->bRecursivePaths = true;
     YarnFunctionObjectLibrary->LoadAssetDataFromPath(TEXT("/Game"));
     YarnCommandObjectLibrary->LoadAssetDataFromPath(TEXT("/Game"));
-    
+
     YarnFunctionRegistry = NewObject<UYarnLibraryRegistry>(this, "YarnFunctionRegistry");
 }
 
@@ -37,12 +39,12 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
     TArray<TSubclassOf<UYarnFunctionLibrary>> LibRefs;
     TArray<FAssetData> Blueprints;
-
+    
     FARFilter Filter;
     Filter.ClassNames.Add(UBlueprint::StaticClass()->GetFName());
     Filter.ClassNames.Add(UBlueprintGeneratedClass::StaticClass()->GetFName());
     FAssetRegistryModule::GetRegistry().GetAssets(Filter, Blueprints);
-
+    
     for (auto Asset : Blueprints)
     {
         if (UObject* BPObj = Cast<UObject>(Asset.GetAsset()))
@@ -59,7 +61,7 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
             }
         }
     }
-
+    
     for (auto Lib : LibRefs)
     {
         if (Lib->FindFunctionByName(FName("MyQuickActorFunction")))
@@ -68,7 +70,7 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
             auto YFL = Cast<UYarnFunctionLibrary>(Lib->GetDefaultObject());
             auto Result1 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintFuncParam{"InParam", Yarn::Value(12.345)}}, {{"OutParam", Yarn::Value(true)}});
             auto Result2 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintFuncParam{"InParam", Yarn::Value(1234.5)}}, {{"OutParam", Yarn::Value(true)}});
-
+    
             YS_LOG_FUNC("Did we succeed? %d, %d", Result1.IsSet() && Result1->GetBooleanValue(), Result2.IsSet() && Result2->GetBooleanValue())
         }
         if (Lib->FindFunctionByName(FName("MyAwesomeFunc")))

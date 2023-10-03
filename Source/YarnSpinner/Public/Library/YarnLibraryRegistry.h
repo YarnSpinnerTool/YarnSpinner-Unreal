@@ -47,6 +47,16 @@ struct FYarnBlueprintLibFunctionMeta
 };
 
 
+USTRUCT()
+struct FYarnStdLibFunction
+{
+    GENERATED_BODY()
+
+    FName Name;
+    int32 ExpectedParamCount = 0;
+    TFunction<Yarn::Value(TArray<Yarn::Value> Params)> Function;
+};
+
 /**
  * 
  */
@@ -59,10 +69,8 @@ public:
     UYarnLibraryRegistry();
     virtual void BeginDestroy() override;
 
-    const TMap<FName, FYarnBlueprintLibFunction>& GetFunctions() const;
-    const TMap<FName, FYarnBlueprintLibFunction>& GetCommands() const;
     bool HasFunction(const FName& Name) const;
-    int GetExpectedFunctionParamCount(const FName& Name) const;
+    int32 GetExpectedFunctionParamCount(const FName& Name) const;
     Yarn::Value CallFunction(const FName& Name, TArray<Yarn::Value> Parameters) const;
 
 private:
@@ -77,6 +85,7 @@ private:
     TMap<UBlueprint*, TArray<FName>> LibCommands;
     // A map of function names to lists of details of implementations
     TMap<FName, FYarnBlueprintLibFunction> AllFunctions;
+    TMap<FName, FYarnStdLibFunction> StdFunctions;
     TMap<FName, FYarnBlueprintLibFunction> AllCommands;
     
     FDelegateHandle OnAssetRegistryFilesLoadedHandle;
@@ -85,7 +94,7 @@ private:
     FDelegateHandle OnAssetUpdatedHandle;
     FDelegateHandle OnAssetRenamedHandle;
     bool bRegistryFilesLoaded = false;
-
+    
     static UBlueprint* GetYarnFunctionLibraryBlueprint(const FAssetData& AssetData);
     static UBlueprint* GetYarnCommandLibraryBlueprint(const FAssetData& AssetData);
     void FindFunctionsAndCommands();
@@ -109,4 +118,7 @@ private:
     void OnAssetUpdated(const FAssetData& AssetData);
     void OnAssetRenamed(const FAssetData& AssetData, const FString& String);
     void OnStartGameInstance(UGameInstance* GameInstance);
+
+    void AddStdFunction(const FYarnStdLibFunction& Func);
+    void LoadStdFunctions();
 };

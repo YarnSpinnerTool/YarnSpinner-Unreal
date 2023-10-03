@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 // #include "Engine/Blueprint.h"
+#include "YarnLibraryRegistry.h"
 #include "YarnSpinnerCore/Value.h"
 #include "YarnFunctionLibrary.generated.h"
 
@@ -19,6 +20,8 @@ class YARNSPINNER_API UYarnFunctionLibrary : public UObject
 public:
     // Sets default values for this actor's properties
     UYarnFunctionLibrary();
+
+    static UYarnFunctionLibrary* FromBlueprint(const UBlueprint* Blueprint);
 
     TOptional<Yarn::Value> CallFunction(FName FunctionName, TArray<FYarnBlueprintFuncParam> Args, TOptional<FYarnBlueprintFuncParam> ReturnValue);
 

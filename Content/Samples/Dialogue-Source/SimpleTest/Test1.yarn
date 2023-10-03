@@ -12,8 +12,8 @@ B: Here's another line! #line:test1_2
 -> Neat! #line:test1_7
     A: I know! #line:test1_8
 
-<<jump Functions>>
 <<jump Variables>>
+
 
 ===
 title: Variables
@@ -32,6 +32,7 @@ Ok, listen up because I'm only going to say this {$explainCount} {$explainCount}
 
 <<jump Expressions>>
 
+
 ===
 title: Expressions
 ---
@@ -41,30 +42,35 @@ Ok, and can we do expressions with variables? I explained variables to you {$exp
 
 <<jump Functions>>
 
+
 ===
 title: Functions
 ---
 
-Let's call a function now.  MyAwesomeFunc returns: {MyAwesomeFunc()} #line:test1_16
-
+Let's call a function now.  MyAwesomeFunc returns: {MyAwesomeFunc(true, 12.345)} #line:test1_16
+Nice!  Let's call another.  DoStuff returns: {DoStuff(true, 12.345, "a string")} #line:test1_17
+Last time, using standard YarnSpinner functions this time. 123 + 456 - 789 is {123 + 456 - 789}! #line:test1_18
+Ok, that's enough functions for now. Let's move on. #line:test1_19
 
 <<jump Commands>>
+
 
 ===
 title: Commands
 ---
 
-Wanna see something cool? Gonna run a command now. Ready, set... #line:test1_17
+Wanna see something cool? Gonna run a command now. Ready, set... #line:test1_20
 
 // Run a command
 <<do_something_cool param1 param2>>
 
 <<jump Summary>>
 
+
 ===
 title: Summary
 ---
 
-A: All done! #line:test1_18
+A: All done! #line:test1_21
 
 ===
