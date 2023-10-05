@@ -23,8 +23,9 @@ public class YarnSpinner : ModuleRules
                 "Engine",
                 "Slate",
                 "SlateCore",
-                "Kismet",
-                "BlueprintGraph",
+                "BlueprintGraph", 
+                "Json",
+                "JsonUtilities",
             });
     }
 }
