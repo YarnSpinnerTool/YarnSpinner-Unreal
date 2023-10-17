@@ -7,7 +7,7 @@
 #include "FindInBlueprintManager.h"
 #include "K2Node_FunctionEntry.h"
 #include "K2Node_FunctionResult.h"
-#include "Library/YarnFunctionLibrary.h"
+#include "YarnLibraryRegistryEditor.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetRegistry/IAssetRegistry.h"
 #include "Misc/YarnAssetHelpers.h"
@@ -19,7 +19,7 @@ void UYarnEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     YS_LOG_FUNCSIG
     Super::Initialize(Collection);
 
-    YarnFunctionRegistry = NewObject<UYarnFunctionLibrary>(this, "YarnFunctionRegistry");
+    YarnLibraryRegistryEditor = NewObject<UYarnLibraryRegistryEditor>(this, "YarnFunctionRegistryEditor");
 
 
     FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");

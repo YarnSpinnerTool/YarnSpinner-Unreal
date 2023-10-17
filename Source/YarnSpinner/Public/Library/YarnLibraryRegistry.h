@@ -3,14 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AssetRegistry/IAssetRegistry.h"
 #include "UObject/Object.h"
 #include "YarnSpinnerCore/Value.h"
 #include "YarnLibraryRegistry.generated.h"
 
 
+struct FYSLSAction;
+const FName GYSFunctionReturnParamName = TEXT("Out");
+
+
 USTRUCT()
-struct FYarnBlueprintFuncParam
+struct YARNSPINNER_API FYarnBlueprintFuncParam
 {
     GENERATED_BODY()
 
@@ -21,7 +24,7 @@ struct FYarnBlueprintFuncParam
 
 
 USTRUCT()
-struct FYarnBlueprintLibFunction
+struct YARNSPINNER_API FYarnBlueprintLibFunction
 {
     GENERATED_BODY()
 
@@ -34,7 +37,7 @@ struct FYarnBlueprintLibFunction
 
 
 USTRUCT()
-struct FYarnBlueprintLibFunctionMeta
+struct YARNSPINNER_API FYarnBlueprintLibFunctionMeta
 {
     GENERATED_BODY()
 
@@ -48,7 +51,7 @@ struct FYarnBlueprintLibFunctionMeta
 
 
 USTRUCT()
-struct FYarnStdLibFunction
+struct YARNSPINNER_API FYarnStdLibFunction
 {
     GENERATED_BODY()
 
@@ -76,47 +79,24 @@ public:
 private:
     // Blueprints that extend YarnFunctionLibrary
     UPROPERTY()
-    TSet<UBlueprint*> FunctionLibraries;
+    TSet<UBlueprint*> FunctionLibraries; 
     UPROPERTY()
     TSet<UBlueprint*> CommandLibraries;
 
     // A map of blueprints to a list of their function names
-    TMap<UBlueprint*, TArray<FName>> LibFunctions;
-    TMap<UBlueprint*, TArray<FName>> LibCommands;
+    // TMap<UBlueprint*, TArray<FName>> LibFunctions;
+    // TMap<UBlueprint*, TArray<FName>> LibCommands;
     // A map of function names to lists of details of implementations
     TMap<FName, FYarnBlueprintLibFunction> AllFunctions;
     TMap<FName, FYarnStdLibFunction> StdFunctions;
     TMap<FName, FYarnBlueprintLibFunction> AllCommands;
-    
-    FDelegateHandle OnAssetRegistryFilesLoadedHandle;
-    FDelegateHandle OnAssetAddedHandle;
-    FDelegateHandle OnAssetRemovedHandle;
-    FDelegateHandle OnAssetUpdatedHandle;
-    FDelegateHandle OnAssetRenamedHandle;
-    bool bRegistryFilesLoaded = false;
-    
+
     static UBlueprint* GetYarnFunctionLibraryBlueprint(const FAssetData& AssetData);
     static UBlueprint* GetYarnCommandLibraryBlueprint(const FAssetData& AssetData);
     void FindFunctionsAndCommands();
-    static void ExtractFunctionDataFromBlueprintGraph(UBlueprint* YarnFunctionLibrary, UEdGraph* Func, FYarnBlueprintLibFunction& FuncDetails, FYarnBlueprintLibFunctionMeta& FuncMeta);
-    // Import functions for a given Blueprint
-    void ImportFunctions(UBlueprint* YarnFunctionLibrary);
-    // Import functions for a given Blueprint
-    void ImportCommands(UBlueprint* YarnCommandLibrary);
-    // Update functions for a given Blueprint
-    void UpdateFunctions(UBlueprint* YarnFunctionLibrary);
-    // Update functions for a given Blueprint
-    void UpdateCommands(UBlueprint* YarnCommandLibrary);
-    // Clear functions and references for a given Blueprint
-    void RemoveFunctions(UBlueprint* YarnFunctionLibrary);
-    // Clear functions and references for a given Blueprint
-    void RemoveCommands(UBlueprint* YarnCommandLibrary);
+    void AddFunction(const FYSLSAction& Func);
+    void AddCommand(const FYSLSAction& Cmd);
     
-    void OnAssetRegistryFilesLoaded();
-    void OnAssetAdded(const FAssetData& AssetData);
-    void OnAssetRemoved(const FAssetData& AssetData);
-    void OnAssetUpdated(const FAssetData& AssetData);
-    void OnAssetRenamed(const FAssetData& AssetData, const FString& String);
     void OnStartGameInstance(UGameInstance* GameInstance);
 
     void AddStdFunction(const FYarnStdLibFunction& Func);

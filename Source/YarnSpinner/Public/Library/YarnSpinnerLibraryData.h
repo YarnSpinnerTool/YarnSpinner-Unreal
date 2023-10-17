@@ -65,7 +65,7 @@ struct YARNSPINNER_API FYSLSAction
 
     // Method parameters.\nNote that if you are overriding information for a method found via parsing code, setting this in json will completely override that parameter information.
     UPROPERTY()
-    TArray<struct FYSLSParameter> Parameters;
+    TArray<FYSLSParameter> Parameters;
 
     // A Yarn type; either 'string', 'number', 'boolean', 'any'.
     UPROPERTY()

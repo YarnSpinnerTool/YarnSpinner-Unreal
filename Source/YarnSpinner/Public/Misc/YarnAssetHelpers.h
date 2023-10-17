@@ -8,6 +8,11 @@
 class FYarnAssetHelpers
 {
 public:
+    static FString YSLSFilePath()
+    {
+        return FPaths::Combine(FPaths::ProjectContentDir(), TEXT("YarnSpinner"), TEXT("Library.ysls"));
+    }
+    
     template <class AssetClass>
     static TArray<FAssetData> FindAssetsInRegistry(const TSubclassOf<UObject> BaseClass = AssetClass::StaticClass());
     template <class AssetClass>

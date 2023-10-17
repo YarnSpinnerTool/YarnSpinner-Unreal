@@ -18,6 +18,7 @@ UYarnSubsystem::UYarnSubsystem()
 {
     YS_LOG_FUNCSIG
 
+    // TODO: move to editor?
     YarnFunctionObjectLibrary = UObjectLibrary::CreateLibrary(UYarnFunctionLibrary::StaticClass(), true, true);
     YarnCommandObjectLibrary = UObjectLibrary::CreateLibrary(UYarnCommandLibrary::StaticClass(), true, true);
     YarnFunctionObjectLibrary->AddToRoot();

@@ -35,7 +35,7 @@ namespace Yarn
 
         Value(bool boolean) : type(ValueType::BOOL), boolean(boolean) {}
 
-        ValueType GetType()
+        ValueType GetType() const
         {
             return this->type;
         }

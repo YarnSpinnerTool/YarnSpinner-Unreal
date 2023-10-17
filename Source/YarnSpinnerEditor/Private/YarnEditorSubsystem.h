@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "EditorSubsystem.h"
-#include "Library/YarnFunctionLibrary.h"
 #include "YarnEditorSubsystem.generated.h"
 
 USTRUCT()
@@ -53,7 +52,7 @@ class YARNSPINNEREDITOR_API UYarnEditorSubsystem : public UEditorSubsystem
 
 private:
     UPROPERTY()
-    UYarnFunctionLibrary* YarnFunctionRegistry;
+    class UYarnLibraryRegistryEditor* YarnLibraryRegistryEditor;
 
     class FFindInBlueprintSearchManager* BlueprintSearchManager;
 	FDelegateHandle OnAssetRegistryFilesLoadedHandle;
