@@ -27,11 +27,12 @@ void ADialogueRunner::PreInitializeComponents()
 {
     Super::PreInitializeComponents();
 
-
     if (!YarnProject) {
         UE_LOG(LogYarnSpinner, Error, TEXT("DialogueRunner can't initialize, because it doesn't have a Yarn Asset."));
         return;
     }
+
+    YarnProject->Init();
 
     Yarn::Program Program{};
 
@@ -69,7 +70,12 @@ void ADialogueRunner::PreInitializeComponents()
 
         GetDisplayTextForLine(LineObject, Line);
 
-        OnRunLine(LineObject);
+        // const TArray<TSoftObjectPtr<UObject>> LineAssets = YarnSubsystem()->GetLineAssets(LineObject->LineID);
+        const TArray<TSoftObjectPtr<UObject>> LineAssets = YarnProject->GetLineAssets(LineObject->LineID);
+
+        YS_LOG_FUNC("Got %d line assets for line %s", LineAssets.Num(), *LineObject->LineID.ToString())
+
+        OnRunLine(LineObject, LineAssets);
     };
 
     VirtualMachine->OptionsHandler = [this](Yarn::OptionSet &OptionSet)
@@ -174,7 +180,7 @@ void ADialogueRunner::OnDialogueEnded_Implementation() {
     // default = no-op
 }
 
-void ADialogueRunner::OnRunLine_Implementation(ULine* Line) {
+void ADialogueRunner::OnRunLine_Implementation(ULine* Line, const TArray<TSoftObjectPtr<UObject>>& LineAssets) {
     // default = log and immediately continue
     UE_LOG(LogYarnSpinner, Warning, TEXT("DialogueRunner received line with ID \"%s\". Implement OnRunLine to customise its behaviour."), *Line->LineID.ToString());
     ContinueDialogue();
@@ -333,6 +339,10 @@ void ADialogueRunner::GetDisplayTextForLine(ULine* Line, const Yarn::Line& YarnL
     }
 
     const FText TextWithSubstitutions = (LocalisedDisplayText.IsEmptyOrWhitespace()) ? FText::Format(NonLocalisedDisplayText, FormatArgs) : FText::Format(LocalisedDisplayText, FormatArgs);
+
+    // TODO: add support for markup & context (speaker, target)
+
+    YS_LOG_FUNC("Setting line %s to display text '%s'", *LineID.ToString(), *TextWithSubstitutions.ToString())
 
     Line->DisplayText = TextWithSubstitutions;
 }

@@ -23,7 +23,6 @@ public class YarnSpinner : ModuleRules
                 "Engine",
                 "Slate",
                 "SlateCore",
-                "BlueprintGraph", 
                 "Json",
                 "JsonUtilities",
             });

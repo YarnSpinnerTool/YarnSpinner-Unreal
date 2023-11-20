@@ -49,18 +49,25 @@ public:
     // UPROPERTY(EditDefaultsOnly, Category = "Yarn Spinner")
     // TArray<TSubclassOf<class AYarnFunctionLibrary>> FunctionLibraries;
 
+    void Init();
+
     FString GetLocAssetPackage() const;
     FString GetLocAssetPackage(FName Language) const;
     class UDataTable* GetLocTextDataTable(FName Language) const;
-    
+
+    TArray<TSoftObjectPtr<UObject>> GetLineAssets(FName Name);
+
 #if WITH_EDITORONLY_DATA
 	virtual void PostInitProperties() override;
 	void SetYarnSources(const TArray<FString>& NewYarnSources);
 	bool ShouldRecompile(const TArray<FString>& LatestYarnSources) const;
 	FString YarnProjectPath() const;
 
-	/** The file this data table was imported from, may be empty */
+    /** The file this data table was imported from, may be empty */
 	UPROPERTY(VisibleAnywhere, Instanced, Category=ImportSource)
 	class UAssetImportData* AssetImportData;
 #endif
+
+private:
+    TMap<FName, TArray<TSoftObjectPtr<UObject>>> LineAssets;
 };

@@ -7,7 +7,7 @@ YARNSPINNER_API DECLARE_LOG_CATEGORY_EXTERN(LogYarnSpinner, Log, All);
 
 // Disable for shipping builds
 #if NO_LOGGING
-    YARNSPINNEREDITOR_API DECLARE_LOG_CATEGORY_EXTERN(YSLogClean, Log, All);
+    YARNSPINNER_API DECLARE_LOG_CATEGORY_EXTERN(YSLogClean, Log, All);
 #else
     // Direct implementation of the DECLARE_LOG_CATEGORY_EXTERN macro
     YARNSPINNER_API extern struct FLogCategoryYSLogClean : public FLogCategory<ELogVerbosity::Log, ELogVerbosity::All> { FORCEINLINE FLogCategoryYSLogClean() : FLogCategory(TEXT("")) {} } YSLogClean;

@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "YarnSubsystem.h"
@@ -42,8 +42,13 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     TArray<FAssetData> Blueprints;
     
     FARFilter Filter;
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 2
+    Filter.ClassPaths.Add(UBlueprint::StaticClass());
+    Filter.ClassPaths.Add(UBlueprintGeneratedClass::StaticClass()->GetFName());
+#else
     Filter.ClassNames.Add(UBlueprint::StaticClass()->GetFName());
     Filter.ClassNames.Add(UBlueprintGeneratedClass::StaticClass()->GetFName());
+#endif
     FAssetRegistryModule::GetRegistry().GetAssets(Filter, Blueprints);
     
     for (auto Asset : Blueprints)

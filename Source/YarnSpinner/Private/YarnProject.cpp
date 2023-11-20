@@ -10,6 +10,28 @@
 #include "Misc/YSLogging.h"
 
 
+void UYarnProject::Init()
+{
+    // Find related line assets
+    LineAssets.Empty();
+    FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+    FARFilter Filter;
+    Filter.bRecursivePaths = true;
+    Filter.PackagePaths.Add("/Game");
+    TArray<FAssetData> AssetData;
+    AssetRegistryModule.Get().GetAssets(Filter, AssetData);
+    for (auto Asset : AssetData)
+    {
+        YS_LOG_FUNC("Found asset: %s", *Asset.AssetName.ToString());
+        auto LineId = FName(TEXT("line:") + Asset.AssetName.ToString());
+        if (Lines.Contains(LineId))
+        {
+            LineAssets.FindOrAdd(LineId).Add(TSoftObjectPtr<UObject>(Asset.ToSoftObjectPath()));
+        }
+    }
+}
+
+
 FString UYarnProject::GetLocAssetPackage() const
 {
     return FPaths::Combine(FPaths::GetPath(GetPathName()), GetName() + TEXT("_Loc"));
@@ -33,6 +55,14 @@ UDataTable* UYarnProject::GetLocTextDataTable(const FName Language) const
         
     UDataTable* DataTable = Cast<UDataTable>(AssetData[0].GetAsset());
     return DataTable;
+}
+
+
+TArray<TSoftObjectPtr<UObject>> UYarnProject::GetLineAssets(const FName Name)
+{
+    if (!LineAssets.Contains(Name))
+        return {};
+    return LineAssets[Name];
 }
 
 

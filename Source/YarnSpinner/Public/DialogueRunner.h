@@ -37,7 +37,7 @@ public:
     void OnDialogueEnded();
     
     UFUNCTION(BlueprintNativeEvent, Category="Dialogue Runner")
-    void OnRunLine(class ULine* Line);
+    void OnRunLine(class ULine* Line, const TArray<TSoftObjectPtr<UObject>>& LineAssets);
 
     UFUNCTION(BlueprintNativeEvent, Category="Dialogue Runner")
     void OnRunOptions(const TArray<class UOption*>& Options);

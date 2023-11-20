@@ -182,7 +182,11 @@ void UYarnLibraryRegistry::FindFunctionsAndCommands()
 void UYarnLibraryRegistry::AddFunction(const FYSLSAction& Func)
 {
     // Find the blueprint
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 2
+    auto Asset = FAssetRegistryModule::GetRegistry().GetAssetByObjectPath(FSoftObjectPath(Func.FileName));
+#else
     auto Asset = FAssetRegistryModule::GetRegistry().GetAssetByObjectPath(FName(Func.FileName));
+#endif
 
     YS_LOG_FUNC("Found asset %s for function %s (%s)", *Asset.GetFullName(), *Func.DefinitionName, *Func.FileName)
     Asset.PrintAssetData();
@@ -190,7 +194,7 @@ void UYarnLibraryRegistry::AddFunction(const FYSLSAction& Func)
     auto BP = GetYarnFunctionLibraryBlueprint(Asset);
     if (!BP)
     {
-        YS_WARN("Could not load Blueprint for Yarn function '%s", *Func.DefinitionName)
+        YS_WARN("Could not load Blueprint for Yarn function '%s'", *Func.DefinitionName)
         return;
     }
 

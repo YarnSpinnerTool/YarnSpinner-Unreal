@@ -114,6 +114,8 @@ void UYarnLibraryRegistryEditor::FindFunctionsAndCommands()
 
     TArray<FAssetData> ExistingAssets = FYarnAssetHelpers::FindAssetsInRegistryByPackagePath<UBlueprint>(FPaths::GetPath(TEXT("/Game/")));
     // TArray<FAssetData> ExistingAssets = FYarnAssetHelpers::FindAssetsInRegistryEditor<UBlueprint>();
+    // TArray<FAssetData> ExistingAssets = FYarnAssetHelpers::FindAssetsInRegistryByPackagePath<UBlueprint>(FPaths::ProjectContentDir());
+    // TArray<FAssetData> ExistingAssets = FYarnAssetHelpers::FindAssetsInRegistryByPackagePath<UBlueprint>(FPaths::GetPath(TEXT("/")));
 
     for (auto Asset : ExistingAssets)
     {
@@ -193,6 +195,7 @@ void UYarnLibraryRegistryEditor::ExtractFunctionDataFromBlueprintGraph(UBlueprin
             for (auto Pin : Node->Pins)
             {
                 auto& Category = Pin->PinType.PinCategory;
+                auto& SubCategory = Pin->PinType.PinSubCategory;
                 if (Category == TEXT("bool"))
                 {
                     FYarnBlueprintFuncParam Param;
@@ -201,7 +204,7 @@ void UYarnLibraryRegistryEditor::ExtractFunctionDataFromBlueprintGraph(UBlueprin
                     Param.Value = Yarn::Value(Value);
                     FuncDetails.InParams.Add(Param);
                 }
-                else if (Category == TEXT("float"))
+                else if (Category == TEXT("float") || (Category == TEXT("real") && (SubCategory == TEXT("float") || SubCategory == TEXT("double"))))
                 {
                     FYarnBlueprintFuncParam Param;
                     Param.Name = Pin->PinName;
@@ -219,7 +222,7 @@ void UYarnLibraryRegistryEditor::ExtractFunctionDataFromBlueprintGraph(UBlueprin
                 }
                 else if (Category != TEXT("exec"))
                 {
-                    // YS_WARN("Invalid Yarn function input parameter type: %s.  Must be bool, float or string.", *Pin->PinType.PinCategory.ToString())
+                    YS_WARN("Invalid Yarn function input pin type: %s (%s).  Must be bool, float or string.", *Pin->PinType.PinCategory.ToString(), *Pin->PinType.PinSubCategory.ToString())
                     FuncMeta.InvalidParams.Add(Pin->PinName.ToString());
                 }
             }
@@ -231,6 +234,7 @@ void UYarnLibraryRegistryEditor::ExtractFunctionDataFromBlueprintGraph(UBlueprin
             for (auto Pin : Node->Pins)
             {
                 auto& Category = Pin->PinType.PinCategory;
+                auto& SubCategory = Pin->PinType.PinSubCategory;
                 if (Category == TEXT("bool"))
                 {
                     if (FuncDetails.OutParam.IsSet() && (FuncDetails.OutParam->Value.GetType() != Yarn::Value::ValueType::BOOL || FuncDetails.OutParam->Name != Pin->PinName))
@@ -244,7 +248,8 @@ void UYarnLibraryRegistryEditor::ExtractFunctionDataFromBlueprintGraph(UBlueprin
                     Param.Value = Yarn::Value(Value);
                     FuncDetails.OutParam = Param;
                 }
-                else if (Category == TEXT("float"))
+                // Recent UE5 builds use "real" instead of "float" for float pins and force the subcategory for return values to be "double"
+                else if (Category == TEXT("float") || (Category == TEXT("real") && (SubCategory == TEXT("float") || SubCategory == TEXT("double"))))
                 {
                     if (FuncDetails.OutParam.IsSet() && (FuncDetails.OutParam->Value.GetType() != Yarn::Value::ValueType::NUMBER || FuncDetails.OutParam->Name != Pin->PinName))
                     {
@@ -272,7 +277,7 @@ void UYarnLibraryRegistryEditor::ExtractFunctionDataFromBlueprintGraph(UBlueprin
                 }
                 else if (Category != TEXT("exec"))
                 {
-                    // YS_WARN("Invalid Yarn function result pin type: %s.  Must be bool, float or string.", *Pin->PinType.PinCategory.ToString())
+                    YS_WARN("Invalid Yarn function result pin type: %s (%s).  Must be bool, float or string.", *Pin->PinType.PinCategory.ToString(), *Pin->PinType.PinSubCategory.ToString())
                     FuncMeta.InvalidParams.Add(Pin->PinName.ToString());
                 }
             }
