@@ -14,6 +14,8 @@ THIRD_PARTY_INCLUDES_END
 
 #include "DialogueRunner.generated.h"
 
+DECLARE_DELEGATE(FYarnDialogueRunnerContinueDelegate);
+
 UCLASS()
 class YARNSPINNER_API ADialogueRunner : public AActor, public Yarn::ILogger, public Yarn::IVariableStorage
 {
@@ -50,6 +52,8 @@ public:
     
     UFUNCTION(BlueprintCallable, Category="Dialogue Runner")
     void ContinueDialogue();
+
+    // TODO: add StopDialogue() blueprint callback
     
     UFUNCTION(BlueprintCallable, Category="Dialogue Runner")
     void SelectOption(UOption* Option);
@@ -61,6 +65,8 @@ private:
     TUniquePtr<Yarn::VirtualMachine> VirtualMachine;
 
     TUniquePtr<Yarn::Library> Library;
+
+    FYarnDialogueRunnerContinueDelegate ContinueDelegate;
 
     // ILogger
     virtual void Log(std::string Message, Type Severity = Type::INFO) override;

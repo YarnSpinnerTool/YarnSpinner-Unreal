@@ -70,7 +70,4 @@ private:
     void OnAssetUpdated(const FAssetData& AssetData);
     void OnAssetRenamed(const FAssetData& AssetData, const FString& String);
     void OnStartGameInstance(UGameInstance* GameInstance);
-
-    void AddStdFunction(const FYarnStdLibFunction& Func);
-    void LoadStdFunctions();
 };

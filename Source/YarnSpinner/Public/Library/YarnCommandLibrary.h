@@ -3,12 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-// #include "Engine/Blueprint.h"
-#include "YarnSpinnerCore/Value.h"
 #include "YarnCommandLibrary.generated.h"
 
 
-struct FYarnBlueprintFuncParam;
+struct FYarnBlueprintParam;
 
 
 UCLASS(Blueprintable, ClassGroup = (YarnSpinner))
@@ -20,7 +18,9 @@ public:
     // Sets default values for this actor's properties
     UYarnCommandLibrary();
 
-    TOptional<Yarn::Value> CallFunction(FName FunctionName, TArray<FYarnBlueprintFuncParam> Args, TOptional<FYarnBlueprintFuncParam> ReturnValue);
+    static UYarnCommandLibrary* FromBlueprint(const UBlueprint* Blueprint);
+
+    void CallCommand(FName CommandName, TSoftObjectPtr<class ADialogueRunner> DialogueRunner, TArray<FYarnBlueprintParam> Args);
 
 protected:
     // Called when the game starts or when spawned
@@ -29,4 +29,7 @@ protected:
 public:
     // Called every frame
     // virtual void Tick(float DeltaTime) override;
+
+private:
+    static void ContinueDialogue(const TSoftObjectPtr<class ADialogueRunner>& DialogueRunner);
 };

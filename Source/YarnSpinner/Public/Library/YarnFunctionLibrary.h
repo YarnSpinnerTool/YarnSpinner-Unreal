@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-// #include "Engine/Blueprint.h"
 #include "YarnLibraryRegistry.h"
 #include "YarnSpinnerCore/Value.h"
 #include "YarnFunctionLibrary.generated.h"
@@ -23,7 +22,7 @@ public:
 
     static UYarnFunctionLibrary* FromBlueprint(const UBlueprint* Blueprint);
 
-    TOptional<Yarn::Value> CallFunction(FName FunctionName, TArray<FYarnBlueprintFuncParam> Args, TOptional<FYarnBlueprintFuncParam> ReturnValue);
+    TOptional<Yarn::Value> CallFunction(FName FunctionName, TArray<FYarnBlueprintParam> Args, TOptional<FYarnBlueprintParam> ReturnValue);
 
 protected:
     // Called when the game starts or when spawned

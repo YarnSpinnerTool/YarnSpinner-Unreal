@@ -13,7 +13,7 @@ const FName GYSFunctionReturnParamName = TEXT("Out");
 
 
 USTRUCT()
-struct YARNSPINNER_API FYarnBlueprintFuncParam
+struct YARNSPINNER_API FYarnBlueprintParam
 {
     GENERATED_BODY()
 
@@ -31,8 +31,8 @@ struct YARNSPINNER_API FYarnBlueprintLibFunction
     UBlueprint* Library;
     FName Name;
 
-    TArray<FYarnBlueprintFuncParam> InParams;
-    TOptional<FYarnBlueprintFuncParam> OutParam;
+    TArray<FYarnBlueprintParam> InParams;
+    TOptional<FYarnBlueprintParam> OutParam;
 };
 
 
@@ -60,6 +60,18 @@ struct YARNSPINNER_API FYarnStdLibFunction
     TFunction<Yarn::Value(TArray<Yarn::Value> Params)> Function;
 };
 
+
+USTRUCT()
+struct YARNSPINNER_API FYarnStdLibCommand
+{
+    GENERATED_BODY()
+
+    FName Name;
+    int32 ExpectedParamCount = 0;
+    TFunction<void(TSoftObjectPtr<class ADialogueRunner>, TArray<FString> Params)> Command;
+};
+
+
 /**
  * 
  */
@@ -73,8 +85,10 @@ public:
     virtual void BeginDestroy() override;
 
     bool HasFunction(const FName& Name) const;
+    bool HasCommand(const FName& Name) const;
     int32 GetExpectedFunctionParamCount(const FName& Name) const;
     Yarn::Value CallFunction(const FName& Name, TArray<Yarn::Value> Parameters) const;
+    void CallCommand(const FName& Name, TSoftObjectPtr<class ADialogueRunner> DialogueRunner, TArray<FString> UnprocessedParamStrings) const;
 
 private:
     // Blueprints that extend YarnFunctionLibrary
@@ -90,6 +104,9 @@ private:
     TMap<FName, FYarnBlueprintLibFunction> AllFunctions;
     TMap<FName, FYarnStdLibFunction> StdFunctions;
     TMap<FName, FYarnBlueprintLibFunction> AllCommands;
+    TMap<FName, FYarnStdLibCommand> StdCommands;
+
+    FTimerHandle CommandTimerHandle;
 
     static UBlueprint* GetYarnFunctionLibraryBlueprint(const FAssetData& AssetData);
     static UBlueprint* GetYarnCommandLibraryBlueprint(const FAssetData& AssetData);
@@ -100,5 +117,7 @@ private:
     void OnStartGameInstance(UGameInstance* GameInstance);
 
     void AddStdFunction(const FYarnStdLibFunction& Func);
+    void AddStdCommand(const FYarnStdLibCommand& Func);
     void LoadStdFunctions();
+    void LoadStdCommands();
 };

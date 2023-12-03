@@ -4,6 +4,10 @@ title: Start
 A: Hey, here's a line! #line:test1_1
 B: Here's another line! #line:test1_2
 
+[float height=4]Here's [wave]a[/float] line [shake]with[/shake] lots of[/] markup. #line:test1_markup1
+Here's a line with escaped \[brackets\]. #line:test1_markup2
+[nomarkup]Here's a line with [nomarkup] [[]] .[/nomarkup] #line:test1_markup3
+
 // Show some options
 -> Wow! #line:test1_3
     A: Right? #line:test1_4
@@ -11,6 +15,10 @@ B: Here's another line! #line:test1_2
     B: Yeah! #line:test1_6
 -> Neat! #line:test1_7
     A: I know! #line:test1_8
+-> This is confusing, give me a sec to think.
+    <<wait 5>>
+
+Ok, onto the next section... #line:test1_whatever
 
 <<jump Variables>>
 
@@ -29,6 +37,8 @@ Ok, listen up because I'm only going to say this {$explainCount} {$explainCount}
     <<jump Variables>>
 -> Got it! #line:test1_12
     Good! #line:test1_13
+-> I've had enough, let me out!
+    <<stop>>
 
 <<jump Expressions>>
 

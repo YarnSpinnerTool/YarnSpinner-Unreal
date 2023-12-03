@@ -332,7 +332,6 @@ namespace Yarn
                 // Jumps to a label whose name is on the stack.
                 auto jumpDestination = state.PeekValue().GetStringValue();
                 state.programCounter = FindInstructionPointForLabel(jumpDestination) - 1;
-
                 break;
             }
         case Yarn::Instruction_OpCode_ADD_OPTION:
@@ -583,6 +582,7 @@ namespace Yarn
                 // Decrement program counter here, because it will be incremented when
                 // this function returns, and would mean skipping the first instruction
                 state.programCounter -= 1;
+
                 break;
             }
         default:

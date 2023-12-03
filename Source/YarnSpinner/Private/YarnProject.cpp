@@ -26,6 +26,7 @@ void UYarnProject::Init()
         auto LineId = FName(TEXT("line:") + Asset.AssetName.ToString());
         if (Lines.Contains(LineId))
         {
+            // TODO: if path contains a loc identifier, add to loc table
             LineAssets.FindOrAdd(LineId).Add(TSoftObjectPtr<UObject>(Asset.ToSoftObjectPath()));
         }
     }

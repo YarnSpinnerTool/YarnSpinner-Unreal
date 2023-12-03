@@ -56,7 +56,7 @@ UYarnFunctionLibrary* UYarnFunctionLibrary::FromBlueprint(const UBlueprint* Blue
 }
 
 
-TOptional<Yarn::Value> UYarnFunctionLibrary::CallFunction(FName FunctionName, TArray<FYarnBlueprintFuncParam> Args, TOptional<FYarnBlueprintFuncParam> ReturnValue)
+TOptional<Yarn::Value> UYarnFunctionLibrary::CallFunction(FName FunctionName, TArray<FYarnBlueprintParam> Args, TOptional<FYarnBlueprintParam> ReturnValue)
 {
     TOptional<Yarn::Value> Result;
     
@@ -65,7 +65,7 @@ TOptional<Yarn::Value> UYarnFunctionLibrary::CallFunction(FName FunctionName, TA
 
     if (!Function)
     {
-        YS_WARN("Could not find function %s", *FunctionName.ToString())
+        YS_WARN("Could not find function '%s'", *FunctionName.ToString())
         return Result;
     }
 
@@ -84,7 +84,7 @@ TOptional<Yarn::Value> UYarnFunctionLibrary::CallFunction(FName FunctionName, TA
             BoolParam = CastField<FBoolProperty>(Function->FindPropertyByName(Arg.Name));
             if (!BoolParam)
             {
-                YS_WARN_FUNC("Could not create function parameter %s for function %s from given values", *Arg.Name.ToString(), *FunctionName.ToString())
+                YS_WARN_FUNC("Could not create function parameter '%s' for function %s from given values", *Arg.Name.ToString(), *FunctionName.ToString())
                 return Result;
             }
             BoolParam->SetPropertyValue_InContainer(FuncParams.GetStructMemory(), Arg.Value.GetBooleanValue());
@@ -93,7 +93,7 @@ TOptional<Yarn::Value> UYarnFunctionLibrary::CallFunction(FName FunctionName, TA
             FloatParam = CastField<FFloatProperty>(Function->FindPropertyByName(Arg.Name));
             if (!FloatParam)
             {
-                YS_WARN_FUNC("Could not create function parameter %s for function %s from given values", *Arg.Name.ToString(), *FunctionName.ToString())
+                YS_WARN_FUNC("Could not create function parameter '%s' for function %s from given values", *Arg.Name.ToString(), *FunctionName.ToString())
                 return Result;
             }
             FloatParam->SetPropertyValue_InContainer(FuncParams.GetStructMemory(), Arg.Value.GetNumberValue());
@@ -102,7 +102,7 @@ TOptional<Yarn::Value> UYarnFunctionLibrary::CallFunction(FName FunctionName, TA
             StringParam = CastField<FStrProperty>(Function->FindPropertyByName(Arg.Name));
             if (!StringParam)
             {
-                YS_WARN_FUNC("Could not create function parameter %s for function %s from given values", *Arg.Name.ToString(), *FunctionName.ToString())
+                YS_WARN_FUNC("Could not create function parameter '%s' for function %s from given values", *Arg.Name.ToString(), *FunctionName.ToString())
                 return Result;
             }
             StringParam->SetPropertyValue_InContainer(FuncParams.GetStructMemory(), FString(Arg.Value.GetStringValue().c_str()));
@@ -122,7 +122,7 @@ TOptional<Yarn::Value> UYarnFunctionLibrary::CallFunction(FName FunctionName, TA
             BoolParam = CastField<FBoolProperty>(Function->FindPropertyByName(ReturnValue->Name));
             if (!BoolParam)
             {
-                YS_WARN_FUNC("Could not get return parameter %s for function %s", *ReturnValue->Name.ToString(), *FunctionName.ToString())
+                YS_WARN_FUNC("Could not get return parameter '%s' for function '%s'", *ReturnValue->Name.ToString(), *FunctionName.ToString())
                 return Result;
             }
             Result = Yarn::Value(BoolParam->GetPropertyValue_InContainer(FuncParams.GetStructMemory()));
@@ -131,7 +131,7 @@ TOptional<Yarn::Value> UYarnFunctionLibrary::CallFunction(FName FunctionName, TA
             FloatParam = CastField<FFloatProperty>(Function->FindPropertyByName(ReturnValue->Name));
             if (!FloatParam)
             {
-                YS_WARN_FUNC("Could not get return parameter %s for function %s", *ReturnValue->Name.ToString(), *FunctionName.ToString())
+                YS_WARN_FUNC("Could not get return parameter '%s' for function '%s'", *ReturnValue->Name.ToString(), *FunctionName.ToString())
                 return Result;
             }
             Result = Yarn::Value(FloatParam->GetPropertyValue_InContainer(FuncParams.GetStructMemory()));
@@ -140,7 +140,7 @@ TOptional<Yarn::Value> UYarnFunctionLibrary::CallFunction(FName FunctionName, TA
             StringParam = CastField<FStrProperty>(Function->FindPropertyByName(ReturnValue->Name));
             if (!StringParam)
             {
-                YS_WARN_FUNC("Could not get return parameter %s for function %s", *ReturnValue->Name.ToString(), *FunctionName.ToString())
+                YS_WARN_FUNC("Could not get return parameter '%s' for function '%s'", *ReturnValue->Name.ToString(), *FunctionName.ToString())
                 return Result;
             }
             Result = Yarn::Value(TCHAR_TO_UTF8(*StringParam->GetPropertyValue_InContainer(FuncParams.GetStructMemory())));

@@ -3,6 +3,7 @@
 
 #include "Library/YarnLibraryRegistry.h"
 
+#include "DialogueRunner.h"
 #include "Library/YarnCommandLibrary.h"
 #include "Library/YarnFunctionLibrary.h"
 #include "Library/YarnSpinnerLibraryData.h"
@@ -17,6 +18,7 @@ UYarnLibraryRegistry::UYarnLibraryRegistry()
     FWorldDelegates::OnStartGameInstance.AddUObject(this, &UYarnLibraryRegistry::OnStartGameInstance);
 
     LoadStdFunctions();
+    LoadStdCommands();
 }
 
 
@@ -42,6 +44,25 @@ bool UYarnLibraryRegistry::HasFunction(const FName& Name) const
     }
 
     return AllFunctions.Contains(Name);
+}
+
+
+bool UYarnLibraryRegistry::HasCommand(const FName& Name) const
+{
+    if (StdCommands.Contains(Name))
+        return true;
+
+    if (!AllCommands.Contains(Name))
+    {
+        FString S = TEXT("Could not find command '") + Name.ToString() + TEXT("'.  Known commands: ");
+        for (auto Cmd : AllCommands)
+        {
+            S += TEXT("'") + Cmd.Key.ToString() + TEXT("', ");
+        }
+        YS_WARN("%s", *S)
+    }
+
+    return AllCommands.Contains(Name);
 }
 
 
@@ -89,15 +110,15 @@ Yarn::Value UYarnLibraryRegistry::CallFunction(const FName& Name, TArray<Yarn::V
         return Yarn::Value();
     }
 
-    TArray<FYarnBlueprintFuncParam> InParams;
+    TArray<FYarnBlueprintParam> InParams;
     for (auto Param : FuncDetail.InParams)
     {
-        FYarnBlueprintFuncParam InParam = Param;
+        FYarnBlueprintParam InParam = Param;
         InParam.Value = Parameters[InParams.Num()];
         InParams.Add(InParam);
     }
 
-    TOptional<FYarnBlueprintFuncParam> OutParam = FuncDetail.OutParam;
+    TOptional<FYarnBlueprintParam> OutParam = FuncDetail.OutParam;
 
     auto Result = Lib->CallFunction(Name, InParams, OutParam);
     if (Result.IsSet())
@@ -106,6 +127,64 @@ Yarn::Value UYarnLibraryRegistry::CallFunction(const FName& Name, TArray<Yarn::V
     }
     YS_WARN("Function '%s' returned an invalid value.", *Name.ToString())
     return Yarn::Value();
+}
+
+
+void UYarnLibraryRegistry::CallCommand(const FName& Name, TSoftObjectPtr<ADialogueRunner> DialogueRunner, TArray<FString> UnprocessedParamStrings) const
+{
+    if (StdCommands.Contains(Name))
+    {
+        return StdCommands[Name].Command(DialogueRunner, UnprocessedParamStrings);
+    }
+
+    if (!AllCommands.Contains(Name))
+    {
+        YS_WARN("Attempted to call non-existent command '%s'", *Name.ToString())
+        return;
+    }
+
+    FYarnBlueprintLibFunction CmdDetail = AllCommands[Name];
+
+    if (CmdDetail.InParams.Num() != UnprocessedParamStrings.Num())
+    {
+        YS_WARN("Attempted to call command '%s' with incorrect number of arguments (expected %d).", *Name.ToString(), CmdDetail.InParams.Num())
+        return;
+    }
+
+    UYarnCommandLibrary* Lib = UYarnCommandLibrary::FromBlueprint(CmdDetail.Library);
+
+    if (!Lib)
+    {
+        YS_WARN("Couldn't create library for Blueprint containing command '%s'", *Name.ToString())
+        return;
+    }
+
+    // Convert strings to expected params
+    TArray<FYarnBlueprintParam> InParams;
+    for (int I = 0; I < CmdDetail.InParams.Num(); I++)
+    {
+        FYarnBlueprintParam InParam = CmdDetail.InParams[I];
+        if (UnprocessedParamStrings.Num() > I)
+        {
+            if (InParam.Value.type == Yarn::Value::ValueType::NUMBER)
+            {
+                InParam.Value = Yarn::Value(FCString::Atof(*UnprocessedParamStrings[I]));
+            }
+            else if (InParam.Value.type == Yarn::Value::ValueType::BOOL)
+            {
+                InParam.Value = Yarn::Value(UnprocessedParamStrings[I].ToLower() == "true");
+            }
+            else
+            {
+                InParam.Value = Yarn::Value(TCHAR_TO_UTF8(*UnprocessedParamStrings[I]));
+            }
+        }
+        InParams.Add(InParam);
+    }
+
+    Lib->CallCommand(Name, DialogueRunner, InParams);
+
+    YS_LOG("Command '%s' called.", *Name.ToString())
 }
 
 
@@ -204,7 +283,7 @@ void UYarnLibraryRegistry::AddFunction(const FYSLSAction& Func)
 
     for (auto InParam : Func.Parameters)
     {
-        FYarnBlueprintFuncParam Param{FName(InParam.Name)};
+        FYarnBlueprintParam Param{FName(InParam.Name)};
         if (InParam.Type == "boolean")
         {
             Param.Value = Yarn::Value(InParam.DefaultValue == "true");
@@ -221,7 +300,7 @@ void UYarnLibraryRegistry::AddFunction(const FYSLSAction& Func)
         FuncDetail.InParams.Add(Param);
     }
 
-    FYarnBlueprintFuncParam Param{GYSFunctionReturnParamName};
+    FYarnBlueprintParam Param{GYSFunctionReturnParamName};
     if (Func.ReturnType == "boolean")
     {
         Param.Value = Yarn::Value(false);
@@ -255,6 +334,12 @@ void UYarnLibraryRegistry::OnStartGameInstance(UGameInstance* GameInstance)
 void UYarnLibraryRegistry::AddStdFunction(const FYarnStdLibFunction& Func)
 {
     StdFunctions.Add(Func.Name, Func);
+}
+
+
+void UYarnLibraryRegistry::AddStdCommand(const FYarnStdLibCommand& Command)
+{
+    StdCommands.Add(Command.Name, Command);
 }
 
 
@@ -582,3 +667,30 @@ void UYarnLibraryRegistry::LoadStdFunctions()
         }
     });
 }
+
+
+void UYarnLibraryRegistry::LoadStdCommands()
+{
+    AddStdCommand({
+        TEXT("wait"), 1, [this](TSoftObjectPtr<ADialogueRunner> DialogueRunner, TArray<FString> Params)
+        {
+            YS_LOG_FUNCSIG
+            float WaitTime = 0;
+            if (Params.Num() != 1)
+            {
+                YS_WARN("wait called with incorrect number of parameters (expected 1).")
+            }
+            else if (!((WaitTime = FCString::Atof(*Params[0]))))
+            {
+                YS_WARN("wait called with incorrect parameter types (expected NUMBER).")
+            }
+
+            DialogueRunner->GetWorld()->GetTimerManager().SetTimer(CommandTimerHandle, [DialogueRunner]()
+            {
+                YS_LOG_FUNCSIG
+                DialogueRunner->ContinueDialogue();
+            }, WaitTime, false);
+        }
+    });
+}
+

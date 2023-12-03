@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "YarnSubsystem.h"
@@ -74,8 +74,8 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
         {
             YS_LOG_FUNC("FOUND MyQuickActorFunction")
             auto YFL = Cast<UYarnFunctionLibrary>(Lib->GetDefaultObject());
-            auto Result1 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintFuncParam{"InParam", Yarn::Value(12.345)}}, {{"OutParam", Yarn::Value(true)}});
-            auto Result2 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintFuncParam{"InParam", Yarn::Value(1234.5)}}, {{"OutParam", Yarn::Value(true)}});
+            auto Result1 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintParam{"InParam", Yarn::Value(12.345)}}, {{"OutParam", Yarn::Value(true)}});
+            auto Result2 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintParam{"InParam", Yarn::Value(1234.5)}}, {{"OutParam", Yarn::Value(true)}});
     
             YS_LOG_FUNC("Did we succeed? %d, %d", Result1.IsSet() && Result1->GetBooleanValue(), Result2.IsSet() && Result2->GetBooleanValue())
         }
@@ -83,7 +83,7 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
         {
             YS_LOG_FUNC("calling YarnFunctionLibrary %s->MyAwesomeFunc()", *Lib->GetName())
             auto YFL = Cast<UYarnFunctionLibrary>(Lib->GetDefaultObject());
-            auto Result = YFL->CallFunction("MyAwesomeFunc", {FYarnBlueprintFuncParam{"FirstInParam", Yarn::Value(true)}, FYarnBlueprintFuncParam{"SecondInParam", Yarn::Value(12.345)}}, {{"OutParam", Yarn::Value(0.0)}});
+            auto Result = YFL->CallFunction("MyAwesomeFunc", {FYarnBlueprintParam{"FirstInParam", Yarn::Value(true)}, FYarnBlueprintParam{"SecondInParam", Yarn::Value(12.345)}}, {{"OutParam", Yarn::Value(0.0)}});
             if (Result.IsSet())
             {
                 YS_LOG_FUNC("Function returned: %f", Result->GetNumberValue())
@@ -135,4 +135,7 @@ void UYarnSubsystem::ClearValue(std::string name)
 {
     Variables.Remove(FString(UTF8_TO_TCHAR(name.c_str())));
 }
+
+
+
 
