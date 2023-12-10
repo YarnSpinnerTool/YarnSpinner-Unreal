@@ -41,6 +41,7 @@ struct YARNSPINNER_API FYarnBlueprintLibFunctionMeta
 {
     GENERATED_BODY()
 
+    bool bHasDialogueRunnerRefParam = false;
     bool bIsPublic = false;
     bool bIsPure = false;
     bool bIsConst = false;

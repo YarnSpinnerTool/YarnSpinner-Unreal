@@ -321,7 +321,63 @@ void UYarnLibraryRegistry::AddFunction(const FYSLSAction& Func)
 
 void UYarnLibraryRegistry::AddCommand(const FYSLSAction& Cmd)
 {
-    // TODO
+    YS_LOG_FUNCSIG
+    // Find the blueprint
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 2
+    auto Asset = FAssetRegistryModule::GetRegistry().GetAssetByObjectPath(FSoftObjectPath(Cmd.FileName));
+#else
+    auto Asset = FAssetRegistryModule::GetRegistry().GetAssetByObjectPath(FName(Cmd.FileName));
+#endif
+
+    YS_LOG_FUNC("Found asset %s for function %s (%s)", *Asset.GetFullName(), *Cmd.DefinitionName, *Cmd.FileName)
+    Asset.PrintAssetData();
+
+    auto BP = GetYarnCommandLibraryBlueprint(Asset);
+    if (!BP)
+    {
+        YS_WARN("Could not load Blueprint for Yarn function '%s'", *Cmd.DefinitionName)
+        return;
+    }
+
+    CommandLibraries.Add(BP);
+
+    FYarnBlueprintLibFunction CmdDetail{BP, FName(Cmd.DefinitionName)};
+
+    for (auto InParam : Cmd.Parameters)
+    {
+        FYarnBlueprintParam Param{FName(InParam.Name)};
+        if (InParam.Type == "boolean")
+        {
+            Param.Value = Yarn::Value(InParam.DefaultValue == "true");
+        }
+        else if (InParam.Type == "number")
+        {
+            Param.Value = Yarn::Value(FCString::Atof(*InParam.DefaultValue));
+        }
+        else
+        {
+            Param.Value = Yarn::Value(TCHAR_TO_UTF8(*InParam.DefaultValue));
+        }
+
+        CmdDetail.InParams.Add(Param);
+    }
+
+    FYarnBlueprintParam Param{GYSFunctionReturnParamName};
+    if (Cmd.ReturnType == "boolean")
+    {
+        Param.Value = Yarn::Value(false);
+    }
+    else if (Cmd.ReturnType == "number")
+    {
+        Param.Value = Yarn::Value(0.0f);
+    }
+    else
+    {
+        Param.Value = Yarn::Value("");
+    }
+    CmdDetail.OutParam = Param;
+
+    AllCommands.Add(FName(Cmd.DefinitionName), CmdDetail);
 }
 
 

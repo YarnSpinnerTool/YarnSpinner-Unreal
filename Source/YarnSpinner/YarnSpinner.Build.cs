@@ -14,6 +14,7 @@ public class YarnSpinner : ModuleRules
                 "YSProtobuf",
                 "CoreUObject",
                 "AssetRegistry",
+                "GameplayTasks",
             });
 
         PrivateDependencyModuleNames.AddRange(

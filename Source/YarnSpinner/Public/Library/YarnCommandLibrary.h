@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTaskOwnerInterface.h"
 #include "YarnCommandLibrary.generated.h"
 
 
@@ -10,7 +11,7 @@ struct FYarnBlueprintParam;
 
 
 UCLASS(Blueprintable, ClassGroup = (YarnSpinner))
-class YARNSPINNER_API UYarnCommandLibrary : public UObject
+class YARNSPINNER_API UYarnCommandLibrary : public UObject, public IGameplayTaskOwnerInterface
 {
     GENERATED_BODY()
 

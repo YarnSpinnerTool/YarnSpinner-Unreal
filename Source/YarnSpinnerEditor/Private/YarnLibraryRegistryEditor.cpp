@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "YarnLibraryRegistryEditor.h"
@@ -132,9 +132,9 @@ void UYarnLibraryRegistryEditor::FindFunctionsAndCommands()
 }
 
 
-void UYarnLibraryRegistryEditor::ExtractFunctionDataFromBlueprintGraph(UBlueprint* YarnFunctionLibrary, UEdGraph* Func, FYarnBlueprintLibFunction& FuncDetails, FYarnBlueprintLibFunctionMeta& FuncMeta)
+void UYarnLibraryRegistryEditor::ExtractFunctionDataFromBlueprintGraph(UBlueprint* YarnFunctionLibrary, UEdGraph* Func, FYarnBlueprintLibFunction& FuncDetails, FYarnBlueprintLibFunctionMeta& FuncMeta, bool bExpectDialogueRunnerParam)
 {
-    YS_LOG("Function graph: %s", *Func->GetName())
+    YS_LOG("Function graph: '%s'", *Func->GetName())
     FuncDetails.Library = YarnFunctionLibrary;
     FuncDetails.Name = Func->GetFName();
 
@@ -166,10 +166,11 @@ void UYarnLibraryRegistryEditor::ExtractFunctionDataFromBlueprintGraph(UBlueprin
     // Pin: execute (Direction: 0, PinType: exec)
     // Pin: OutputParam (Direction: 0, PinType: string)
 
+
     // Find function entry and return nodes, ensure they have a valid number of pins, etc
     for (auto Node : Func->Nodes)
     {
-        YS_LOG("Node: %s (Class: %s, Title: %s)", *Node->GetName(), *Node->GetClass()->GetName(), *Node->GetNodeTitle(ENodeTitleType::ListView).ToString())
+        YS_LOG("Node: '%s' (Class: '%s', Title: '%s')", *Node->GetName(), *Node->GetClass()->GetName(), *Node->GetNodeTitle(ENodeTitleType::ListView).ToString())
         if (Node->IsA(UK2Node_FunctionEntry::StaticClass()))
         {
             auto EntryNode = CastChecked<UK2Node_FunctionEntry>(Node);
@@ -194,7 +195,12 @@ void UYarnLibraryRegistryEditor::ExtractFunctionDataFromBlueprintGraph(UBlueprin
             {
                 auto& Category = Pin->PinType.PinCategory;
                 auto& SubCategory = Pin->PinType.PinSubCategory;
-                if (Category == TEXT("bool"))
+                YS_LOG("PinName: '%s', Category: '%s', SubCategory: '%s'", *Pin->PinName.ToString(), *Category.ToString(), *SubCategory.ToString())
+                if (bExpectDialogueRunnerParam && Pin->PinName == FName(TEXT("DialogueRunner")) && Category == FName(TEXT("object")))
+                {
+                    FuncMeta.bHasDialogueRunnerRefParam = true;
+                }
+                else if (Category == TEXT("bool"))
                 {
                     FYarnBlueprintParam Param;
                     Param.Name = Pin->PinName;
@@ -220,7 +226,7 @@ void UYarnLibraryRegistryEditor::ExtractFunctionDataFromBlueprintGraph(UBlueprin
                 }
                 else if (Category != TEXT("exec"))
                 {
-                    YS_WARN("Invalid Yarn function input pin type: %s (%s).  Must be bool, float or string.", *Pin->PinType.PinCategory.ToString(), *Pin->PinType.PinSubCategory.ToString())
+                    YS_WARN("Invalid Yarn function input pin type: '%s' ('%s').  Must be bool, float or string.", *Pin->PinType.PinCategory.ToString(), *Pin->PinType.PinSubCategory.ToString())
                     FuncMeta.InvalidParams.Add(Pin->PinName.ToString());
                 }
             }
@@ -275,7 +281,7 @@ void UYarnLibraryRegistryEditor::ExtractFunctionDataFromBlueprintGraph(UBlueprin
                 }
                 else if (Category != TEXT("exec"))
                 {
-                    YS_WARN("Invalid Yarn function result pin type: %s (%s).  Must be bool, float or string.", *Pin->PinType.PinCategory.ToString(), *Pin->PinType.PinSubCategory.ToString())
+                    YS_WARN("Invalid Yarn function result pin type: '%s' ('%s').  Must be bool, float or string.", *Pin->PinType.PinCategory.ToString(), *Pin->PinType.PinSubCategory.ToString())
                     FuncMeta.InvalidParams.Add(Pin->PinName.ToString());
                 }
             }
@@ -284,13 +290,61 @@ void UYarnLibraryRegistryEditor::ExtractFunctionDataFromBlueprintGraph(UBlueprin
         {
             // YS_LOG("Node is a function terminator node with %d pins", Node->Pins.Num())
         }
-        for (auto Pin : Node->Pins)
-        {
-            // YS_LOG("Pin: %s (Direction: %d, PinType: %s, DefaultValue: %s)", *Pin->GetName(), (int)Pin->Direction, *Pin->PinType.PinCategory.ToString(), *Pin->GetDefaultAsString())
-        }
+        // for (auto Pin : Node->Pins)
+        // {
+        //     YS_LOG("Pin: %s (Direction: %d, PinType: %s, DefaultValue: %s)", *Pin->GetName(), (int)Pin->Direction, *Pin->PinType.PinCategory.ToString(), *Pin->GetDefaultAsString())
+        // }
     }
 }
 
+
+void UYarnLibraryRegistryEditor::AddToYSLSData(FYarnBlueprintLibFunction FuncDetails)
+{
+    // convert to .ysls
+    
+    const bool bIsCommand = !FuncDetails.OutParam.IsSet();
+    
+    FYSLSAction Action;
+    Action.YarnName = FuncDetails.Name.ToString();
+    Action.DefinitionName = FuncDetails.Name.ToString();
+    Action.DefinitionName = FuncDetails.Name.ToString();
+    Action.FileName = FuncDetails.Library->GetPathName();
+    
+    if (bIsCommand)
+    {
+        Action.Signature = FuncDetails.Name.ToString();
+        for (auto Param : FuncDetails.InParams)
+        {
+            FYSLSParameter Parameter;
+            Parameter.Name = Param.Name.ToString();
+            Parameter.Type = FYarnValueHelpers::GetTypeString(Param.Value);
+            // TODO: add default value support by capturing the default value when inspecting blueprint function
+            // Parameter.DefaultValue = Param.Value;
+            Action.Parameters.Add(Parameter);
+            Action.Signature += " " + Parameter.Name;
+        }
+        YSLSData.Commands.Add(Action);
+    }
+    else
+    {
+        Action.ReturnType = FYarnValueHelpers::GetTypeString(FuncDetails.OutParam->Value);
+        Action.Signature = Action.ReturnType + "(";
+        for (auto Param : FuncDetails.InParams)
+        {
+            FYSLSParameter Parameter;
+            Parameter.Name = Param.Name.ToString();
+            Parameter.Type = FYarnValueHelpers::GetTypeString(Param.Value);
+            Action.Parameters.Add(Parameter);
+            Action.Signature += Parameter.Name + ", ";
+        }
+        if (Action.Signature.EndsWith(", "))
+        {
+            Action.Signature.LeftInline(Action.Signature.Len() - 2);
+        }
+        Action.Signature += ")";
+        YSLSData.Functions.Add(Action);
+    }
+}
 
 void UYarnLibraryRegistryEditor::ImportFunctions(UBlueprint* YarnFunctionLibrary)
 {
@@ -312,7 +366,11 @@ void UYarnLibraryRegistryEditor::ImportFunctions(UBlueprint* YarnFunctionLibrary
         ExtractFunctionDataFromBlueprintGraph(YarnFunctionLibrary, Func, FuncDetails, FuncMeta);
 
         // Ignore private functions
-        if (FuncMeta.bIsPublic)
+        // if (!FuncMeta.bIsPublic)
+        // {
+        //     YS_LOG("Ignoring private Blueprint function '%s'.", *FuncDetails.Name.ToString())
+        // }
+        // else
         {
             // Test for valid function
             bool bIsValid = true;
@@ -329,13 +387,13 @@ void UYarnLibraryRegistryEditor::ImportFunctions(UBlueprint* YarnFunctionLibrary
             if (FuncMeta.InvalidParams.Num() > 0)
             {
                 bIsValid = false;
-                YS_WARN("Function %s has invalid parameter types. Yarn functions only support boolean, float and string.", *FuncDetails.Name.ToString())
+                YS_WARN("Function '%s' has invalid parameter types. Yarn functions only support boolean, float and string.", *FuncDetails.Name.ToString())
             }
             // Check name is unique
             if (AllFunctions.Contains(FuncDetails.Name) && AllFunctions[FuncDetails.Name].Library != FuncDetails.Library)
             {
                 bIsValid = false;
-                YS_WARN("Function %s already exists in another Blueprint.  Yarn function names must be unique.", *FuncDetails.Name.ToString())
+                YS_WARN("Function '%s' already exists in another Blueprint.  Yarn function names must be unique.", *FuncDetails.Name.ToString())
             }
             // Check name is valid
             const FRegexPattern Pattern{TEXT("^[\\w_][\\w\\d_]*$")};
@@ -343,7 +401,7 @@ void UYarnLibraryRegistryEditor::ImportFunctions(UBlueprint* YarnFunctionLibrary
             if (!FunctionNameMatcher.FindNext())
             {
                 bIsValid = false;
-                YS_WARN("Function %s has an invalid name.  Yarn function names must be valid C++ function names.", *FuncDetails.Name.ToString())
+                YS_WARN("Function '%s' has an invalid name.  Yarn function names must be valid C++ function names.", *FuncDetails.Name.ToString())
             }
 
             // TODO: check function has no async nodes
@@ -351,33 +409,11 @@ void UYarnLibraryRegistryEditor::ImportFunctions(UBlueprint* YarnFunctionLibrary
             // Add to function sets
             if (bIsValid)
             {
+                YS_LOG("Adding function '%s' to available YarnSpinner functions.", *FuncDetails.Name.ToString())
                 LibFunctions.FindOrAdd(YarnFunctionLibrary).Add(FuncDetails.Name);
                 AllFunctions.Add(FuncDetails.Name, FuncDetails);
 
-                // convert to .ysls
-                FYSLSAction Action;
-                Action.YarnName = FuncDetails.Name.ToString();
-                Action.DefinitionName = FuncDetails.Name.ToString();
-                Action.DefinitionName = FuncDetails.Name.ToString();
-                Action.FileName = FuncDetails.Library->GetPathName();
-                Action.ReturnType = FYarnValueHelpers::GetTypeString(FuncDetails.OutParam->Value);
-                Action.Signature = Action.ReturnType + "(";
-                for (auto Param : FuncDetails.InParams)
-                {
-                    FYSLSParameter Parameter;
-                    Parameter.Name = Param.Name.ToString();
-                    Parameter.Type = FYarnValueHelpers::GetTypeString(Param.Value);
-                    // TODO: add default value support by capturing the default value when inspecting blueprint function
-                    // Parameter.DefaultValue = Param.Value;
-                    Action.Parameters.Add(Parameter);
-                    Action.Signature += Parameter.Name + ", ";
-                }
-                if (Action.Signature.EndsWith(", "))
-                {
-                    Action.Signature.LeftInline(Action.Signature.Len() - 2);
-                }
-                Action.Signature += ")";
-                YSLSData.Functions.Add(Action);
+                AddToYSLSData(FuncDetails);
             }
         }
     }
@@ -396,51 +432,61 @@ void UYarnLibraryRegistryEditor::ImportCommands(UBlueprint* YarnCommandLibrary)
     CommandLibraries.Add(YarnCommandLibrary);
     LibCommands.FindOrAdd(YarnCommandLibrary);
 
-    for (UEdGraph* Func : YarnCommandLibrary->FunctionGraphs)
+    for (UEdGraph* Func : YarnCommandLibrary->EventGraphs)
     {
         FYarnBlueprintLibFunction FuncDetails;
         FYarnBlueprintLibFunctionMeta FuncMeta;
 
-        ExtractFunctionDataFromBlueprintGraph(YarnCommandLibrary, Func, FuncDetails, FuncMeta);
+        ExtractFunctionDataFromBlueprintGraph(YarnCommandLibrary, Func, FuncDetails, FuncMeta, true);
 
-        // Ignore private functions
-        if (FuncMeta.bIsPublic)
+        // Test for valid function
+        bool bIsValid = true;
+        if (!FuncMeta.bHasDialogueRunnerRefParam)
         {
-            // Test for valid function
-            bool bIsValid = true;
-            if (FuncDetails.OutParam.IsSet())
+            bIsValid = false;
+            // Only show the warning for non-builtin events.
+            const FRegexPattern BuiltinEventPattern(TEXT("^[a-zA-Z]+_[A-Z,0-9]+$"));
+            FRegexMatcher BuiltinEventMatcher(BuiltinEventPattern, FuncDetails.Name.ToString());
+            if (!BuiltinEventMatcher.FindNext())
             {
-                bIsValid = false;
-                YS_WARN("Function %s has a return value.  Yarn commands must not return values.", *FuncDetails.Name.ToString())
+                YS_WARN("Function '%s' requires a parameter called 'DialogueRunner' which is a reference to a DialogueRunner object in order to be usable as a Yarn command.", *FuncDetails.Name.ToString())
             }
-            if (FuncMeta.InvalidParams.Num() > 0)
-            {
-                bIsValid = false;
-                YS_WARN("Function %s has invalid parameter types. Yarn commands only support boolean, float and string.", *FuncDetails.Name.ToString())
-            }
-            // Check name is unique
-            if (AllFunctions.Contains(FuncDetails.Name) && AllFunctions[FuncDetails.Name].Library != FuncDetails.Library)
-            {
-                bIsValid = false;
-                YS_WARN("Function %s already exists in another Blueprint.  Yarn command names must be unique.", *FuncDetails.Name.ToString())
-            }
-            // Check name is valid
-            const FRegexPattern Pattern{TEXT("^[\\w_][\\w\\d_]*$")};
-            FRegexMatcher FunctionNameMatcher(Pattern, FuncDetails.Name.ToString());
-            if (!FunctionNameMatcher.FindNext())
-            {
-                bIsValid = false;
-                YS_WARN("Function %s has an invalid name.  Yarn function names must be valid C++ function names.", *FuncDetails.Name.ToString())
-            }
+        }
+        if (FuncDetails.OutParam.IsSet())
+        {
+            bIsValid = false;
+            YS_WARN("Function '%s' has a return value.  Yarn commands must not return values.", *FuncDetails.Name.ToString())
+        }
+        if (FuncMeta.InvalidParams.Num() > 0)
+        {
+            bIsValid = false;
+            YS_WARN("Function '%s' has invalid parameter types. Yarn commands only support boolean, float and string.", *FuncDetails.Name.ToString())
+        }
+        // Check name is unique
+        if (AllFunctions.Contains(FuncDetails.Name) && AllFunctions[FuncDetails.Name].Library != FuncDetails.Library)
+        {
+            bIsValid = false;
+            YS_WARN("Function '%s' already exists in another Blueprint.  Yarn command names must be unique.", *FuncDetails.Name.ToString())
+        }
+        // Check name is valid
+        const FRegexPattern Pattern{TEXT("^[\\w_][\\w\\d_]*$")};
+        FRegexMatcher FunctionNameMatcher(Pattern, FuncDetails.Name.ToString());
+        if (!FunctionNameMatcher.FindNext())
+        {
+            bIsValid = false;
+            YS_WARN("Function '%s' has an invalid name.  Yarn function names must be valid C++ function names.", *FuncDetails.Name.ToString())
+        }
 
-            // TODO: check function calls Continue() at some point
+        // TODO: check function calls Continue() at some point
 
-            // Add to function sets
-            if (bIsValid)
-            {
-                LibCommands.FindOrAdd(YarnCommandLibrary).Add(FuncDetails.Name);
-                AllCommands.Add(FuncDetails.Name, FuncDetails);
-            }
+        // Add to function sets
+        if (bIsValid)
+        {
+            YS_LOG("Adding command '%s' to available YarnSpinner commands.", *FuncDetails.Name.ToString())
+            LibCommands.FindOrAdd(YarnCommandLibrary).Add(FuncDetails.Name);
+            AllCommands.Add(FuncDetails.Name, FuncDetails);
+
+            AddToYSLSData(FuncDetails);
         }
     }
 }

@@ -50,7 +50,8 @@ private:
     static UBlueprint* GetYarnCommandLibraryBlueprint(const FAssetData& AssetData);
     void SaveYSLS();
     void FindFunctionsAndCommands();
-    static void ExtractFunctionDataFromBlueprintGraph(UBlueprint* YarnFunctionLibrary, UEdGraph* Func, FYarnBlueprintLibFunction& FuncDetails, FYarnBlueprintLibFunctionMeta& FuncMeta);
+    static void ExtractFunctionDataFromBlueprintGraph(UBlueprint* YarnFunctionLibrary, UEdGraph* Func, FYarnBlueprintLibFunction& FuncDetails, FYarnBlueprintLibFunctionMeta& FuncMeta, bool bExpectDialogueRunnerParam = false);
+    void AddToYSLSData(FYarnBlueprintLibFunction FuncDetails);
     // Import functions for a given Blueprint
     void ImportFunctions(UBlueprint* YarnFunctionLibrary);
     // Import functions for a given Blueprint

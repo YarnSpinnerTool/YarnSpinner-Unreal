@@ -9,6 +9,7 @@
 #include "Library/YarnLibraryRegistry.h"
 #include "Misc/OutputDeviceNull.h"
 #include "Misc/YSLogging.h"
+#include "UObject/SoftObjectPtr.h"
 
 
 
@@ -73,6 +74,16 @@ void UYarnCommandLibrary::CallCommand(FName CommandName, TSoftObjectPtr<ADialogu
     FBoolProperty* BoolParam;
     FFloatProperty* FloatParam;
     FStrProperty* StringParam;
+
+    const FName DialogueRunnerField = TEXT("DialogueRunner");
+
+    const FObjectProperty* ObjectProperty = CastField<FObjectProperty>(Function->FindPropertyByName(DialogueRunnerField));
+    ObjectProperty->SetObjectPropertyValue_InContainer(FuncParams.GetStructMemory(), DialogueRunner.Get());
+
+    // FSoftObjectProperty* DialogueRunnerProperty = CastField<FSoftObjectProperty>(Function->FindPropertyByName(DialogueRunnerField));
+    // // FSoftObjectProperty SoftObjectProperty = FSoftObjectProperty
+    // DialogueRunnerProperty->SetObjectPropertyValue_InContainer(FuncParams.GetStructMemory(), DialogueRunner);
+    // DialogueRunnerProperty->SetPropertyValue_InContainer(FuncParams.GetStructMemory(), {DialogueRunner});
 
     for (auto Arg : Args)
     {
