@@ -61,6 +61,9 @@ public:
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Dialogue Runner")
     UYarnProject* YarnProject;
 
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Dialogue Runner")
+    bool bRunLinesForSelectedOptions = true;
+
 private:
     TUniquePtr<Yarn::VirtualMachine> VirtualMachine;
 

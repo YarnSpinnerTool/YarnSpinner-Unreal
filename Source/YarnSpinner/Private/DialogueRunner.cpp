@@ -64,10 +64,8 @@ void ADialogueRunner::PreInitializeComponents()
 
         GetDisplayTextForLine(LineObject, Line);
 
-        // const TArray<TSoftObjectPtr<UObject>> LineAssets = YarnSubsystem()->GetLineAssets(LineObject->LineID);
         const TArray<TSoftObjectPtr<UObject>> LineAssets = YarnProject->GetLineAssets(LineObject->LineID);
-
-        YS_LOG_FUNC("Got %d line assets for line %s", LineAssets.Num(), *LineObject->LineID.ToString())
+        YS_LOG_FUNC("Got %d line assets for line '%s'", LineAssets.Num(), *LineObject->LineID.ToString())
 
         OnRunLine(LineObject, LineAssets);
     };
@@ -278,7 +276,17 @@ void ADialogueRunner::SelectOption(UOption* Option)
 
     VirtualMachine->SetSelectedOption(Option->OptionID);
 
-    ContinueDialogue();
+    if (bRunLinesForSelectedOptions)
+    {
+        const TArray<TSoftObjectPtr<UObject>> LineAssets = YarnProject->GetLineAssets(Option->Line->LineID);
+        YS_LOG_FUNC("Got %d line assets for line '%s'", LineAssets.Num(), *Option->Line->LineID.ToString())
+
+        OnRunLine(Option->Line, LineAssets);
+    }
+    else
+    {
+        ContinueDialogue();
+    }
 }
 
 
