@@ -373,7 +373,7 @@ void UYarnAssetFactory::BuildLocalizationTarget(const UYarnProject* YarnProject,
 
         if (!FFileHelper::LoadFileToString(LocFileData, *LocFile))
         {
-            YS_WARN("Couldn't load strings file: %s", *LocFile)
+            YS_WARN("Couldn't load strings file '%s' for locale '%s'", *LocFile, *Culture)
             continue;
         }
 
@@ -392,9 +392,9 @@ void UYarnAssetFactory::BuildLocalizationTarget(const UYarnProject* YarnProject,
             HeaderMap.Add(WCHAR_TO_TCHAR(HeaderRow[I]), I);
         }
         // Test for required columns
-        if (!HeaderMap.Contains(TEXT("character")) || !HeaderMap.Contains(TEXT("text")) || !HeaderMap.Contains(TEXT("id")))
+        if (!HeaderMap.Contains(TEXT("text")) || !HeaderMap.Contains(TEXT("id")))
         {
-            YS_ERR("Missing required column 'id', 'text' or 'character' in strings file: %s", *LocFile)
+            YS_ERR("Missing required column 'id' or 'text' in strings file: %s", *LocFile)
             continue;
         }
 
@@ -403,7 +403,7 @@ void UYarnAssetFactory::BuildLocalizationTarget(const UYarnProject* YarnProject,
             const auto& Row = Rows[I];
             const FString& LineID = WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("id")]]);
             const FString& LineText = WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("text")]]);
-            const FString& LineCharacter = WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("character")]]);
+            const FString& LineCharacter = HeaderMap.Contains(TEXT("character")) ? WCHAR_TO_TCHAR(Row[HeaderMap[TEXT("character")]]) : TEXT("");
 
             auto Source = LocTextHelper.FindSourceText(NamespaceKey, FLocKey(LineID));
 

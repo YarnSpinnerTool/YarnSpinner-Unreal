@@ -558,10 +558,11 @@ void UYarnLibraryRegistryEditor::OnAssetRegistryFilesLoaded()
 
 void UYarnLibraryRegistryEditor::OnAssetAdded(const FAssetData& AssetData)
 {
-    YS_LOG_FUNCSIG
     // Ignore this until the registry has finished loading the first time.
     if (!bRegistryEditorFilesLoaded)
         return;
+
+    YS_LOG_FUNCSIG
 
     if (UBlueprint* BP = GetYarnFunctionLibraryBlueprint(AssetData))
     {

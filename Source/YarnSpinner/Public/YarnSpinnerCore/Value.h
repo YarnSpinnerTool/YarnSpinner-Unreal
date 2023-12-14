@@ -64,6 +64,19 @@ namespace Yarn
             }
         }
 
+        float ConvertToNumber()
+        {
+            if (type == STRING)
+            {
+                return atof(stringValue.c_str());
+            }
+            if (type == BOOL)
+            {
+                return boolean ? 1 : 0;
+            }
+            return number;
+        }
+
         bool GetBooleanValue()
         {
             if (this->type == BOOL)

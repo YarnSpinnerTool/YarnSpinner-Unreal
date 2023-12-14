@@ -722,6 +722,34 @@ void UYarnLibraryRegistry::LoadStdFunctions()
             return Yarn::Value(Params[0].GetStringValue() + Params[1].GetStringValue());
         }
     });
+
+    AddStdFunction({
+        TEXT("string"), 1, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        {
+            if (Params.Num() != 1)
+            {
+                YS_WARN("string called with incorrect number of parameters (expected 1).")
+                return Yarn::Value();
+            }
+            return Yarn::Value(Params[0].ConvertToString());
+        }
+    });
+
+    AddStdFunction({
+        TEXT("number"), 1, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        {
+            if (Params.Num() != 1)
+            {
+                YS_WARN("number called with incorrect number of parameters (expected 1).")
+                return Yarn::Value();
+            }
+            return Yarn::Value(Params[0].ConvertToNumber());
+        }
+    });
+
+    // missing:
+    // format_invariant
+    // ...
 }
 
 
