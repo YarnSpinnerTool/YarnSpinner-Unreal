@@ -40,9 +40,9 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
     TArray<TSubclassOf<UYarnFunctionLibrary>> LibRefs;
     TArray<FAssetData> Blueprints;
-    
+
     FARFilter Filter;
-#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 2
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 3
     Filter.ClassPaths.Add(UBlueprint::StaticClass());
     Filter.ClassPaths.Add(UBlueprintGeneratedClass::StaticClass()->GetFName());
 #else
@@ -50,7 +50,7 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     Filter.ClassNames.Add(UBlueprintGeneratedClass::StaticClass()->GetFName());
 #endif
     FAssetRegistryModule::GetRegistry().GetAssets(Filter, Blueprints);
-    
+
     for (auto Asset : Blueprints)
     {
         if (UObject* BPObj = Cast<UObject>(Asset.GetAsset()))
@@ -67,7 +67,7 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
             }
         }
     }
-    
+
     for (auto Lib : LibRefs)
     {
         if (Lib->FindFunctionByName(FName("MyQuickActorFunction")))
@@ -76,7 +76,7 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
             auto YFL = Cast<UYarnFunctionLibrary>(Lib->GetDefaultObject());
             auto Result1 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintParam{"InParam", Yarn::Value(12.345)}}, {{"OutParam", Yarn::Value(true)}});
             auto Result2 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintParam{"InParam", Yarn::Value(1234.5)}}, {{"OutParam", Yarn::Value(true)}});
-    
+
             YS_LOG_FUNC("Did we succeed? %d, %d", Result1.IsSet() && Result1->GetBooleanValue(), Result2.IsSet() && Result2->GetBooleanValue())
         }
         if (Lib->FindFunctionByName(FName("MyAwesomeFunc")))
