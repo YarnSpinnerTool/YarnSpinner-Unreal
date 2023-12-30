@@ -1,114 +1,187 @@
 #pragma once
 
 #include <string>
-#include "YarnSpinnerCore/Common.h"
 #include <cmath>
 
 namespace Yarn
 {
-    class YARNSPINNER_API Value
+    class YARNSPINNER_API FValue
     {
-
     public:
-        enum ValueType
+        enum EValueType
         {
-            STRING,
-            NUMBER,
-            BOOL
+            String,
+            Number,
+            Bool
         };
 
-        ValueType type;
+        // Default constructor
+        FValue() : Data(TInPlaceType<double>(), 0) {}
+        
+        // Value constructors
+        explicit FValue(const char* const Str) : Data(TInPlaceType<FString>(), Str) {}
+        explicit FValue(const std::string& Str) : Data(TInPlaceType<FString>(), Str.c_str()) {}
+        explicit FValue(const FString& Str) : Data(TInPlaceType<FString>(), Str) {}
+        explicit FValue(float Num) : Data(TInPlaceType<double>(), MoveTemp(Num)) {}
+        explicit FValue(double Num) : Data(TInPlaceType<double>(), MoveTemp(Num)) {}
+        explicit FValue(int Num) : Data(TInPlaceType<double>(), MoveTemp(Num)) {}
+        explicit FValue(bool Val) : Data(TInPlaceType<bool>(), MoveTemp(Val)) {}
+        
+        // Copy & Move constructors
+        FValue(const FValue& Other) : Data(Other.Data) {}
+        FValue(FValue&& Other) noexcept : Data(MoveTemp(Other.Data)) {}
 
-        std::string stringValue;
-        double number;
-        bool boolean;
-
-        Value() : type(ValueType::NUMBER), number(0) {}
-
-        Value(const char *string) : type(ValueType::STRING), stringValue(std::string(string)) {}
-
-        Value(const std::string &string) : type(ValueType::STRING), stringValue(string) {}
-
-        Value(float number) : type(ValueType::NUMBER), number(number) {}
-        Value(double number) : type(ValueType::NUMBER), number(number) {}
-        Value(int number) : type(ValueType::NUMBER), number(number) {}
-
-        Value(bool boolean) : type(ValueType::BOOL), boolean(boolean) {}
-
-        ValueType GetType() const
+        // Assignment
+        FValue& operator=(const FValue& Other)
         {
-            return this->type;
+            if (this == &Other)
+                return *this;
+            Data = Other.Data;
+            return *this;
         }
 
-        const std::string GetStringValue()
+        FValue& operator=(const FString& Str)
         {
-            if (this->type == STRING)
-            {
-                return this->stringValue;
-            }
-            else
-            {
-                return "";
-            }
+            Data.Set<FString>(Str);
+            return *this;
+        }
+        
+        FValue& operator=(const double& Number)
+        {
+            Data.Set<double>(Number);
+            return *this;
         }
 
-        float GetNumberValue()
+        FValue& operator=(const bool& Value)
         {
-            if (this->type == NUMBER)
-            {
-                return this->number;
-            }
-            else
-            {
-                return 0;
-            }
+            Data.Set<bool>(Value);
+            return *this;
         }
 
-        float ConvertToNumber()
+        FValue& operator=(FValue&& Other) noexcept
         {
-            if (type == STRING)
-            {
-                return atof(stringValue.c_str());
-            }
-            if (type == BOOL)
-            {
-                return boolean ? 1 : 0;
-            }
-            return number;
+            if (this == &Other)
+                return *this;
+            Data = MoveTemp(Other.Data);
+            return *this;
         }
 
-        bool GetBooleanValue()
+        FValue& operator=(FString&& Str) noexcept
         {
-            if (this->type == BOOL)
-            {
-                return this->boolean;
-            }
-            else
-            {
-                return false;
-            }
+            Data.Set<FString>(MoveTemp(Str));
+            return *this;
         }
 
-        const std::string ConvertToString()
+        FValue& operator=(double&& Number) noexcept
         {
-            switch (type)
+            Data.Set<double>(MoveTemp(Number));
+            return *this;
+        }
+
+        FValue& operator=(bool&& Value) noexcept
+        {
+            Data.Set<bool>(MoveTemp(Value));
+            return *this;
+        }
+
+        // Value accessors
+        template<typename T>
+        T GetValue() const
+        {
+            unimplemented();
+        }
+
+        UE_NODISCARD EValueType GetType() const
+        {
+            if (Data.IsType<FString>())
             {
-            case STRING:
-                return stringValue;
-            case BOOL:
-                return boolean ? "True" : "False";
-            case NUMBER:
-                if (trunc(number) == number)
+                return String;
+            }
+
+            if (Data.IsType<bool>())
+            {
+                return Bool;
+            }
+
+            return Number;
+        }
+
+        UE_NODISCARD FString ConvertToString() const
+        {
+            switch (GetType())
+            {
+            case String:
+                return Data.Get<FString>();
+            case Number:
                 {
-                    return std::to_string((int)number);
+                    const double& NumberValue = Data.Get<double>();
+                    return trunc(NumberValue) == NumberValue ?
+                        FString::FromInt(static_cast<int>(NumberValue)) :
+                    FString::SanitizeFloat(NumberValue);
                 }
-                else
-                {
-                    return std::to_string(number);
-                }
+            case Bool:
+                return Data.Get<bool>() ? "True" : "False";
             default:
                 return "<unknown>";
             }
         }
+        
+        UE_NODISCARD double ConvertToNumber() const
+        {
+            switch (GetType())
+            {
+            case String:
+                return FCString::Atod(*Data.Get<FString>());
+            case Bool:
+                return Data.Get<bool>() ? 1 : 0;
+            case Number:
+                return Data.Get<double>();
+            default:
+                return 0;
+            }
+        }
+        
+    protected:
+        TVariant<FString, double, bool> Data;
     };
+
+    template <>
+    UE_NODISCARD FORCEINLINE double FValue::GetValue<double>() const
+    {
+        return Data.IsType<double>() ?
+            Data.Get<double>() :
+            0;
+    }
+
+    template <>
+    UE_NODISCARD FORCEINLINE bool FValue::GetValue<bool>() const
+    {
+        return Data.IsType<bool>() ?
+            Data.Get<bool>() :
+            false;
+    }
+
+    template <>
+    UE_NODISCARD FORCEINLINE FString FValue::GetValue<FString>() const
+    {
+        return Data.IsType<FString>() ?
+            Data.Get<FString>() :
+            FString();
+    }
+}
+
+// String value conversion
+YARNSPINNER_API UE_NODISCARD FORCEINLINE FString LexToString(const Yarn::FValue::EValueType ValueType)
+{
+    switch (ValueType)
+    {
+    case Yarn::FValue::EValueType::String:
+        return "string";
+    case Yarn::FValue::EValueType::Bool:
+        return "boolean";
+    case Yarn::FValue::EValueType::Number:
+        return "number";
+    }
+
+    return "number";
 }

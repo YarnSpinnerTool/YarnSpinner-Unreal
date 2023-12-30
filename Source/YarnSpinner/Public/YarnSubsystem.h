@@ -32,7 +32,7 @@ public:
     virtual void SetValue(std::string name, std::string value);
 
     virtual bool HasValue(std::string name);
-    virtual Yarn::Value GetValue(std::string name);
+    virtual Yarn::FValue GetValue(std::string name);
 
     virtual void ClearValue(std::string name);
 
@@ -50,7 +50,7 @@ private:
     UPROPERTY()
     UObjectLibrary* YarnCommandObjectLibrary;
     
-    TMap<FString, Yarn::Value> Variables;
+    TMap<FString, Yarn::FValue> Variables;
     
     FDelegateHandle OnAssetRegistryFilesLoadedHandle;
     FDelegateHandle OnLevelAddedToWorldHandle;
