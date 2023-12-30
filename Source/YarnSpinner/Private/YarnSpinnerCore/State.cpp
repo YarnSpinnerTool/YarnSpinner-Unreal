@@ -27,47 +27,47 @@ namespace Yarn
 
     void State::PushValue(std::string string)
     {
-        stack.push_back(Value(string));
+        stack.push_back(FValue(string));
     }
 
     void State::PushValue(const char *string)
     {
-        stack.push_back(Value(string));
+        stack.push_back(FValue(string));
     }
 
     void State::PushValue(double number)
     {
-        stack.push_back(Value(number));
+        stack.push_back(FValue(number));
     }
 
     void State::PushValue(float number)
     {
-        stack.push_back(Value(number));
+        stack.push_back(FValue(number));
     }
 
     void State::PushValue(int number)
     {
-        stack.push_back(Value(number));
+        stack.push_back(FValue(number));
     }
 
     void State::PushValue(bool boolean)
     {
-        stack.push_back(Value(boolean));
+        stack.push_back(FValue(boolean));
     }
 
-    void State::PushValue(Value value)
+    void State::PushValue(FValue value)
     {
         stack.push_back(value);
     }
 
-    Value State::PopValue()
+    FValue State::PopValue()
     {
         auto last = stack.back();
         stack.pop_back();
         return last;
     }
 
-    Value State::PeekValue()
+    FValue State::PeekValue()
     {
         return stack.back();
     }

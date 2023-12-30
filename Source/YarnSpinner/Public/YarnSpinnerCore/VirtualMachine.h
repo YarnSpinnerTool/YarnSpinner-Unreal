@@ -22,7 +22,7 @@ namespace Yarn
         virtual void SetValue(std::string name, std::string value) = 0;
 
         virtual bool HasValue(std::string name) = 0;
-        virtual Value GetValue(std::string name) = 0;
+        virtual FValue GetValue(std::string name) = 0;
 
         virtual void ClearValue(std::string name) = 0;
     };
@@ -92,7 +92,7 @@ namespace Yarn
         std::function<void()> DialogueCompleteHandler;
         std::function<bool(std::string)> DoesFunctionExist;
         std::function<int(std::string)> GetExpectedFunctionParamCount;
-        std::function<Yarn::Value(std::string, std::vector<Yarn::Value>)> CallFunction;
+        std::function<Yarn::FValue(std::string, std::vector<Yarn::FValue>)> CallFunction;
 
         void SetSelectedOption(int selectedOptionIndex);
 
