@@ -1,5 +1,8 @@
 #include "YarnSpinnerCore/Library.h"
 
+#include "Misc/YSLogging.h"
+#include "YarnSpinnerCore/Common.h"
+
 #if defined(_MSC_VER)
 	#pragma warning (disable:4800) // 'type' : forcing value to bool 'true' or 'false' (performance warning)
 #endif
@@ -18,13 +21,13 @@ namespace Yarn
     {
     }
     template <typename T>
-    FunctionInfo<T>::FunctionInfo(int paramCount, T (*f)(std::vector<FValue>))
+    FunctionInfo<T>::FunctionInfo(const int ParamCount, T (*F)(const TArray<FValue>&))
     {
-        Function = f;
-        ExpectedParameterCount = paramCount;
+        Function = F;
+        ExpectedParameterCount = ParamCount;
     }
 
-    Library::Library(ILogger &logger) : logger(logger)
+    Library::Library()
     {
         LoadStandardLibrary();
     }
@@ -43,45 +46,45 @@ namespace Yarn
     // Get function
 
     template <typename T>
-    FunctionInfo<T> Library::GetFunction(std::string name)
+    FunctionInfo<T> Library::GetFunction(const FString& Name)
     {
-        UNUSED(name);
+        UNUSED(Name);
         static_assert(dependent_false<T>::value, "Invalid return type for function");
     }
 
     template <>
-    FunctionInfo<std::string> Library::GetFunction<std::string>(std::string name)
+    FunctionInfo<FString> Library::GetFunction<FString>(const FString& name)
     {
         return stringFunctions[name];
     }
 
     template <>
-    FunctionInfo<float> Library::GetFunction<float>(std::string name)
+    FunctionInfo<float> Library::GetFunction<float>(const FString& name)
     {
         return numberFunctions[name];
     }
 
     template <>
-    FunctionInfo<bool> Library::GetFunction<bool>(std::string name)
+    FunctionInfo<bool> Library::GetFunction<bool>(const FString& name)
     {
         return boolFunctions[name];
     }
 
     template <typename T>
-    FunctionInfo<T> &Library::GetFunctionImpl(std::map<std::string, FunctionInfo<T>> &source, std::string name)
+    FunctionInfo<T> &Library::GetFunctionImpl(TMap<FString, FunctionInfo<T>> &Source, const FString& Name)
     {
-        if (source.count(name) == 0)
+        if (!Source.contains(Name))
         {
-            logger.Log(string_format("Can't get implementation for unknown function '%s'", UTF8_TO_TCHAR(name.c_str())));
+            YS_LOG("Can't get implementation for unknown function '%s'", *Name);
             return FunctionInfo<T>();
         }
-        return source[name];
+        return Source[Name];
     }
 
     // Add Function
 
     // template <typename T>
-    // void Library::AddFunction (std::string name, T(*f)(std::vector<Value>), int parameterCount) {
+    // void Library::AddFunction (FString name, T(*f)(TArray<Value>), int parameterCount) {
     //     // A helper function that can take any function pointer (including lambdas),
     //     // converts them to a YarnFunction<T>, and then forwards that to the regular
     //     // YarnFunction<T> method
@@ -90,7 +93,7 @@ namespace Yarn
     // }
 
     template <typename T>
-    void Library::AddFunction(std::string name, YarnFunction<T> function, int parameterCount)
+    void Library::AddFunction(const FString& name, TYarnFunction<T> function, int parameterCount)
     {
         UNUSED(name);
         UNUSED(function);
@@ -99,36 +102,36 @@ namespace Yarn
     }
 
     template <>
-    void Library::AddFunction<std::string>(std::string name, YarnFunction<std::string> function, int parameterCount)
+    void Library::AddFunction<FString>(const FString& name, TYarnFunction<FString> function, int parameterCount)
     {
         AddFunctionImpl(stringFunctions, name, function, parameterCount);
     }
 
     template <>
-    void Library::AddFunction<float>(std::string name, YarnFunction<float> function, int parameterCount)
+    void Library::AddFunction<float>(const FString& name, TYarnFunction<float> function, int parameterCount)
     {
         AddFunctionImpl(numberFunctions, name, function, parameterCount);
     }
 
     template <>
-    void Library::AddFunction<bool>(std::string name, YarnFunction<bool> function, int parameterCount)
+    void Library::AddFunction<bool>(const FString& name, TYarnFunction<bool> function, int parameterCount)
     {
         AddFunctionImpl(boolFunctions, name, function, parameterCount);
     }
 
     template <typename T>
-    void Library::AddFunctionImpl(std::map<std::string, FunctionInfo<T>> &source, std::string name, YarnFunction<T> func, int parameterCount)
+    void Library::AddFunctionImpl(TMap<FString, FunctionInfo<T>> &source, const FString& name, TYarnFunction<T> func, int parameterCount)
     {
         // Report an error if this function is already defined across any of our
         // function tables
         if (
-            stringFunctions.count(name) > 0 ||
-            numberFunctions.count(name) > 0 ||
-            boolFunctions.count(name) > 0 ||
-            source.count(name) > 0) // strictly unnecessary but might help catch future bugs
+            stringFunctions.Contains(name) ||
+            numberFunctions.Contains(name) ||
+            boolFunctions.Contains(name) ||
+            source.Contains(name)) // strictly unnecessary but might help catch future bugs
 
         {
-            logger.Log(string_format("Function %s is already defined", UTF8_TO_TCHAR(name.c_str())));
+            YS_LOG("Function %s is already defined", *name);
             return;
         }
 
@@ -136,99 +139,96 @@ namespace Yarn
         FunctionInfo<T> info;
         info.ExpectedParameterCount = parameterCount;
         info.Function = func;
-        source[name] = info;
+        source.Emplace(name, MoveTemp(info));
     }
 
     // Remove function
 
     template <typename T>
-    void Library::RemoveFunction(std::string name)
+    void Library::RemoveFunction(const FString& Name)
     {
-        UNUSED(name);
+        UNUSED(Name);
         static_assert(dependent_false<T>::value, "Invalid return type for function");
     }
 
     template <>
-    void Library::RemoveFunction<std::string>(std::string name)
+    void Library::RemoveFunction<FString>(const FString& name)
     {
         RemoveFunctionImpl(stringFunctions, name);
     }
 
     template <>
-    void Library::RemoveFunction<float>(std::string name)
+    void Library::RemoveFunction<float>(const FString& name)
     {
         RemoveFunctionImpl(stringFunctions, name);
     }
 
     template <>
-    void Library::RemoveFunction<bool>(std::string name)
+    void Library::RemoveFunction<bool>(const FString& name)
     {
         RemoveFunctionImpl(stringFunctions, name);
     }
 
     template <typename T>
-    void Library::RemoveFunctionImpl(std::map<std::string, FunctionInfo<T>> &source, std::string name)
+    void Library::RemoveFunctionImpl(TMap<FString, FunctionInfo<T>> &source, const FString& name)
     {
-        if (source.count(name) > 0)
-        {
-            source.erase(name);
-        }
+        source.Remove(name);
     }
 
     // Has Function
     template <typename T>
-    bool Library::HasFunction(std::string name)
+    bool Library::HasFunction(const FString& Name)
     {
-        UNUSED(name);
+        UNUSED(Name);
         static_assert(dependent_false<T>::value, "Invalid return type for function");
     }
 
     template <>
-    bool Library::HasFunction<std::string>(std::string name)
+    bool Library::HasFunction<FString>(const FString& name)
     {
-        return HasFunctionImpl<std::string>(stringFunctions, name);
+        return HasFunctionImpl<FString>(stringFunctions, name);
     }
 
     template <>
-    bool Library::HasFunction<float>(std::string name)
+    bool Library::HasFunction<float>(const FString& name)
     {
         return HasFunctionImpl<float>(numberFunctions, name);
     }
 
     template <>
-    bool Library::HasFunction<bool>(std::string name)
+    bool Library::HasFunction<bool>(const FString& name)
     {
         return HasFunctionImpl<bool>(boolFunctions, name);
     }
 
     template <typename T>
-    bool Library::HasFunctionImpl(std::map<std::string, FunctionInfo<T>> &source, std::string name)
+    bool Library::HasFunctionImpl(TMap<FString, FunctionInfo<T>> &source, const FString& name)
     {
-        return source.count(name) > 0;
+        return source.Contains(name);
     }
 
     // Remove all functions
     void Library::RemoveAllFunctions()
     {
-        stringFunctions.clear();
-        numberFunctions.clear();
-        boolFunctions.clear();
+        stringFunctions.Empty();
+        numberFunctions.Empty();
+        boolFunctions.Empty();
     }
 
     // Get parameter count
-    int Library::GetExpectedParameterCount(std::string name)
+    int Library::GetExpectedParameterCount(const FString& Name)
     {
-        if (HasFunction<std::string>(name))
+        if (HasFunction<FString>(Name))
         {
-            return GetFunction<std::string>(name).ExpectedParameterCount;
+            return GetFunction<FString>(Name).ExpectedParameterCount;
         }
-        else if (HasFunction<float>(name))
+        else if (HasFunction<float>(Name))
         {
-            return GetFunction<float>(name).ExpectedParameterCount;
+            return GetFunction<float>(Name).ExpectedParameterCount;
         }
-        else if (HasFunction<bool>(name))
+        else if (HasFunction<bool>(Name))
         {
-            return GetFunction<bool>(name).ExpectedParameterCount;
+            return GetFunction<bool>(Name).ExpectedParameterCount;
         }
         else
         {
@@ -240,153 +240,176 @@ namespace Yarn
     void Library::LoadStandardLibrary()
     {
         // Number methods
-        AddFunction<bool>(
+        AddFunction(
             "Number.EqualTo",
-            [](std::vector<FValue> values)
+            TYarnFunction<bool>::CreateLambda(
+            [](const TArray<FValue>& Values)
             {
-                return values.at(0).GetValue<double>() == values.at(1).GetValue<double>();
-            },
+                return Values[0].GetValue<double>() == Values[1].GetValue<double>();
+            }),
             2);
 
-        AddFunction<bool>(
+        AddFunction(
             "Number.NotEqualTo",
-            [](std::vector<FValue> values)
+            TYarnFunction<bool>::CreateLambda(
+            [](const TArray<FValue>& Values)
             {
-                return values.at(0).GetValue<double>() != values.at(1).GetValue<double>();
-            },
+                return Values[0].GetValue<double>() != Values[1].GetValue<double>();
+            }),
             2);
 
-        AddFunction<float>(
+        AddFunction(
             "Number.Add",
-            [](std::vector<FValue> values)
+            TYarnFunction<float>::CreateLambda(
+            [](const TArray<FValue>& Values)
             {
-                return values.at(0).GetValue<double>() + values.at(1).GetValue<double>();
-            },
+                return Values[0].GetValue<double>() + Values[1].GetValue<double>();
+            }),
             2);
 
-        AddFunction<float>(
+        AddFunction(
             "Number.Minus",
-            [](std::vector<FValue> values)
+            TYarnFunction<float>::CreateLambda(
+            [](const TArray<FValue>& Values)
             {
-                return values.at(0).GetValue<double>() - values.at(1).GetValue<double>();
-            },
+                return Values[0].GetValue<double>() - Values[1].GetValue<double>();
+            }),
             2);
 
-        AddFunction<float>(
+        AddFunction(
             "Number.Divide",
-            [](std::vector<FValue> values)
+            TYarnFunction<float>::CreateLambda(
+            [](const TArray<FValue>& Values)
             {
-                return values.at(0).GetValue<double>() / values.at(1).GetValue<double>();
-            },
+                return Values[0].GetValue<double>() / Values[1].GetValue<double>();
+            }),
             2);
 
-        AddFunction<float>(
+        AddFunction(
             "Number.Multiply",
-            [](std::vector<FValue> values)
+            TYarnFunction<float>::CreateLambda(
+            [](const TArray<FValue>& Values)
             {
-                return values.at(0).GetValue<double>() * values.at(1).GetValue<double>();
-            },
+                return Values[0].GetValue<double>() * Values[1].GetValue<double>();
+            }),
             2);
 
-        AddFunction<float>(
+        AddFunction(
             "Number.Modulo",
-            [](std::vector<FValue> values)
+            TYarnFunction<float>::CreateLambda(
+            [](const TArray<FValue>& Values)
             {
-                return (int)(values.at(0).GetValue<double>()) % (int)(values.at(1).GetValue<double>());
-            },
+                return static_cast<int>(Values[0].GetValue<double>()) % static_cast<int>(Values[1].GetValue<double>());
+            }),
             2);
 
-        AddFunction<float>(
+        AddFunction(
             "Number.UnaryMinus",
-            [](std::vector<FValue> values)
+            TYarnFunction<float>::CreateLambda(
+            [](const TArray<FValue>& Values)
             {
-                return -(values.at(0).GetValue<double>());
-            },
+                return -Values[0].GetValue<double>();
+            }),
             1);
 
-        AddFunction<bool>(
+        AddFunction(
             "Number.GreaterThan",
-            [](std::vector<FValue> values)
+            TYarnFunction<bool>::CreateLambda(
+            [](const TArray<FValue>& Values)
             {
-                return values.at(0).GetValue<double>() > values.at(1).GetValue<double>();
-            },
+                return Values[0].GetValue<double>() > Values[1].GetValue<double>();
+            }),
             2);
 
-        AddFunction<bool>(
+        AddFunction(
             "Number.GreaterThanOrEqualTo",
-            [](std::vector<FValue> values)
+            TYarnFunction<bool>::CreateLambda(
+            [](const TArray<FValue>& Values)
             {
-                return values.at(0).GetValue<double>() >= values.at(1).GetValue<double>();
-            },
+                return Values[0].GetValue<double>() >= Values[1].GetValue<double>();
+            }),
             2);
 
-        AddFunction<bool>(
+        AddFunction(
             "Number.LessThan",
-            [](std::vector<FValue> values)
+            TYarnFunction<bool>::CreateLambda(
+            [](const TArray<FValue>& Values)
             {
-                return values.at(0).GetValue<double>() < values.at(1).GetValue<double>();
-            },
+                return Values[0].GetValue<double>() < Values[1].GetValue<double>();
+            }),
             2);
 
-        AddFunction<bool>(
+        AddFunction(
             "Number.LessThanOrEqualTo",
-            [](std::vector<FValue> values)
+            TYarnFunction<bool>::CreateLambda(
+            [](const TArray<FValue>& Values)
             {
-                return values.at(0).GetValue<double>() <= values.at(1).GetValue<double>();
-            },
+                return Values[0].GetValue<double>() <= Values[1].GetValue<double>();
+            }),
             2);
 
         // Boolean methods
-        AddFunction<bool>(
-            "Bool.EqualTo", [](std::vector<FValue> values)
-            { return values.at(0).GetValue<bool>() == values.at(1).GetValue<bool>(); },
+        AddFunction(
+            "Bool.EqualTo", 
+            TYarnFunction<bool>::CreateLambda(
+                [](const TArray<FValue>& Values)
+                { return Values[0].GetValue<bool>() == Values[1].GetValue<bool>(); }),
+            2);
+
+        AddFunction(
+            "Bool.NotEqualTo",
+            TYarnFunction<bool>::CreateLambda(
+                [](const TArray<FValue>& Values)
+                { return Values[0].GetValue<bool>() != Values[1].GetValue<bool>(); }),
+            2);
+
+        AddFunction(
+            "Bool.And", TYarnFunction<bool>::CreateLambda(
+                [](const TArray<FValue>& Values)
+                { return Values[0].GetValue<bool>() && Values[1].GetValue<bool>(); }),
+            2);
+
+        AddFunction(
+            "Bool.Or", TYarnFunction<bool>::CreateLambda(
+                [](const TArray<FValue>& Values)
+                { return Values[0].GetValue<bool>() || Values[1].GetValue<bool>(); }),
             2);
 
         AddFunction<bool>(
-            "Bool.NotEqualTo", [](std::vector<FValue> values)
-            { return values.at(0).GetValue<bool>() != values.at(1).GetValue<bool>(); },
+            "Bool.Xor", TYarnFunction<bool>::CreateLambda(
+                [](const TArray<FValue>& Values)
+                { return Values[0].GetValue<bool>() ^ Values[1].GetValue<bool>(); }),
             2);
 
-        AddFunction<bool>(
-            "Bool.And", [](std::vector<FValue> values)
-            { return values.at(0).GetValue<bool>() && values.at(1).GetValue<bool>(); },
-            2);
-
-        AddFunction<bool>(
-            "Bool.Or", [](std::vector<FValue> values)
-            { return values.at(0).GetValue<bool>() || values.at(1).GetValue<bool>(); },
-            2);
-
-        AddFunction<bool>(
-            "Bool.Xor", [](std::vector<FValue> values)
-            { return values.at(0).GetValue<bool>() ^ values.at(1).GetValue<bool>(); },
-            2);
-
-        AddFunction<bool>(
-            "Bool.Not", [](std::vector<FValue> values)
-            { return !values.at(0).GetValue<bool>(); },
+        AddFunction(
+            "Bool.Not", TYarnFunction<bool>::CreateLambda(
+                [](const TArray<FValue>& Values)
+                { return !Values[0].GetValue<bool>(); }),
             1);
 
         // String functions
 
-        AddFunction<bool>(
-            "String.EqualTo", [](std::vector<FValue> values)
-            { return values.at(0).GetValue<FString>() == values.at(1).GetValue<FString>(); },
+        AddFunction(
+            "String.EqualTo", TYarnFunction<bool>::CreateLambda(
+                [](const TArray<FValue>& Values)
+                { return Values[0].GetValue<FString>() == Values[1].GetValue<FString>(); }),
             2);
 
-        AddFunction<bool>(
-            "String.NotEqualTo", [](std::vector<FValue> values)
-            { return values.at(0).GetValue<FString>() != values.at(1).GetValue<FString>(); },
+        AddFunction(
+            "String.NotEqualTo", TYarnFunction<bool>::CreateLambda(
+                [](const TArray<FValue>& Values)
+                { return Values[0].GetValue<FString>() != Values[1].GetValue<FString>(); }),
             2);
 
-        AddFunction<std::string>(
-            "String.Add", [](std::vector<FValue> values)
-            { return TCHAR_TO_UTF8(*(values.at(0).GetValue<FString>() + values.at(1).GetValue<FString>())); },
+        AddFunction(
+            "String.Add", TYarnFunction<FString>::CreateLambda(
+                [](const TArray<FValue>& Values)
+                { return Values[0].GetValue<FString>() + Values[1].GetValue<FString>(); }),
             2);
     }
 
-    std::string Library::GenerateUniqueVisitedVariableForNode(std::string nodeName)
+    FString Library::GenerateUniqueVisitedVariableForNode(const FString& NodeName)
     {
-        return "$Yarn.Internal.Visiting." + nodeName;
+        return FString::Printf(TEXT("$Yarn.Internal.Visiting.%s"), *NodeName);
     }
 }

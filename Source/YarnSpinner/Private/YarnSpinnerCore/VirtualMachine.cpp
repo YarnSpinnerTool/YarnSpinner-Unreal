@@ -1,60 +1,48 @@
 #include "YarnSpinnerCore/VirtualMachine.h"
 
-#include "CoreMinimal.h"
-#include "YarnSubsystem.h"
-
-#include <stack>
 #include <regex>
 #include <string>
-#include <sstream>
+#include <string>
+
+#include "CoreMinimal.h"
+#include "Misc/YSLogging.h"
 
 
 namespace Yarn
 {
-    VirtualMachine::VirtualMachine(Yarn::Program program, Library& library, IVariableStorage& variableStorage, ILogger& logger)
+    VirtualMachine::VirtualMachine(Yarn::Program program, Library& library, IVariableStorage& variableStorage)
         : program(program),
           state(State()),
           executionState(STOPPED),
           library(library),
-          logger(logger),
           variableStorage(variableStorage)
     {
         // Add the 'visited' and 'visited_count' functions, which query the variable
         // storage for information about how many times a node has been visited.
-        library.AddFunction<bool>(
+        library.AddFunction(
             "visited",
-            [&variableStorage](std::vector<FValue> values)
+            TYarnFunction<bool>::CreateLambda(
+            [&variableStorage](const TArray<FValue>& Values)
             {
-                std::string nodeName = TCHAR_TO_UTF8(*values.at(0).GetValue<FString>());
-                std::string visitTrackingVariable = Library::GenerateUniqueVisitedVariableForNode(nodeName);
-                if (variableStorage.HasValue(visitTrackingVariable))
-                {
-                    int visitCount = variableStorage.GetValue(visitTrackingVariable).GetValue<double>();
-                    return visitCount > 0;
-                }
-                else
-                {
-                    return false;
-                }
-            },
+                const FString NodeName = Values[0].GetValue<FString>();
+                const FString VisitTrackingVariable = Library::GenerateUniqueVisitedVariableForNode(NodeName);
+                return variableStorage.HasValue(VisitTrackingVariable) ?
+                    variableStorage.GetValue(VisitTrackingVariable).GetValue<double>() > 0 :
+                    false;
+            }),
             1);
 
-        library.AddFunction<float>(
+        library.AddFunction(
             "visited_count",
-            [&variableStorage](std::vector<FValue> values)
+            TYarnFunction<float>::CreateLambda(
+            [&variableStorage](const TArray<FValue>& Values)
             {
-                std::string nodeName = TCHAR_TO_UTF8(*values.at(0).GetValue<FString>());
-                std::string visitTrackingVariable = Library::GenerateUniqueVisitedVariableForNode(nodeName);
-                if (variableStorage.HasValue(visitTrackingVariable))
-                {
-                    int visitCount = (int)variableStorage.GetValue(visitTrackingVariable).GetValue<double>();
-                    return visitCount;
-                }
-                else
-                {
-                    return 0;
-                }
-            },
+                const FString NodeName = Values[0].GetValue<FString>();
+                const FString VisitTrackingVariable = Library::GenerateUniqueVisitedVariableForNode(NodeName);
+                return variableStorage.HasValue(VisitTrackingVariable) ?
+                    static_cast<int>(variableStorage.GetValue(VisitTrackingVariable).GetValue<double>()) :
+                    0;
+            }),
             1);
     }
 
@@ -78,25 +66,25 @@ namespace Yarn
     }
 
 
-    bool VirtualMachine::SetNode(const char* nodeName)
+    bool VirtualMachine::SetNode(const FString& NodeName)
     {
-        if (program.nodes().contains(nodeName) == false)
+        if (program.nodes().contains(TCHAR_TO_UTF8(*NodeName)) == false)
         {
-            logger.Log(string_format("No node named %s has been loaded.", nodeName), ILogger::ERROR);
+            YS_ERR("No node named %s has been loaded.", *NodeName);
             return false;
         }
 
-        logger.Log(string_format("Running node %s", nodeName));
+        YS_LOG("Running node %s", *NodeName);
 
-        currentNode = program.nodes().at(nodeName);
+        currentNode = program.nodes().at(TCHAR_TO_UTF8(*NodeName));
 
         // Clear our State and return to the Stopped execution state
         state = State();
         SetCurrentExecutionState(ExecutionState::STOPPED);
 
-        state.currentNodeName = nodeName;
+        state.currentNodeName = NodeName;
 
-        NodeStartHandler(nodeName);
+        OnNodeStart.Broadcast(NodeName);
 
         return true;
     }
@@ -164,10 +152,10 @@ namespace Yarn
 
             if (state.programCounter >= currentNode.instructions_size() && GetCurrentExecutionState() != STOPPED)
             {
-                NodeCompleteHandler(currentNode.name());
+                OnNodeComplete.Broadcast(currentNode.name().c_str());
                 SetCurrentExecutionState(STOPPED);
-                DialogueCompleteHandler();
-                logger.Log("Run complete.", ILogger::INFO);
+                OnDialogueComplete.Broadcast();
+                YS_LOG("Run complete.");
             }
         }
 
@@ -177,30 +165,31 @@ namespace Yarn
 
     bool VirtualMachine::RunInstruction(Yarn::Instruction& instruction)
     {
-        std::stringstream str;
+        TStringBuilder<NAME_SIZE> StrBuilder;
 
-        str << Yarn::Instruction_OpCode_Name(instruction.opcode());
+        StrBuilder << Instruction_OpCode_Name(instruction.opcode()).c_str();
 
         for (auto operand : instruction.operands())
         {
-            str << " ";
+            StrBuilder << " ";
             switch (operand.value_case())
             {
             case Yarn::Operand::kBoolValue:
-                str << (operand.bool_value() ? "true" : "false");
+                StrBuilder << (operand.bool_value() ? "true" : "false");
                 break;
             case Yarn::Operand::kFloatValueFieldNumber:
-                str << operand.float_value();
+                StrBuilder << FString::SanitizeFloat(operand.float_value());
                 break;
             case Yarn::Operand::kStringValue:
-                str << operand.string_value();
+                StrBuilder << operand.string_value().c_str();
                 break;
             default:
-                str << "(unknown operand type!)";
+                StrBuilder << "(unknown operand type!)";
             }
         }
 
-        logger.Log(str.str());
+        YS_LOG("%s", StrBuilder.ToString());
+        
         switch (instruction.opcode())
         {
         case Yarn::Instruction_OpCode_RUN_LINE:
@@ -208,9 +197,9 @@ namespace Yarn
                 // Fetch line ID
                 auto lineID = instruction.operands(0).string_value();
 
-                // Build line struct
+                // Build line structs
                 Line line = Line();
-                line.LineID = lineID;
+                line.LineID = lineID.c_str();
 
                 // If we have 2+ operands, get the second operand as a number
                 if (instruction.operands_size() > 1)
@@ -219,16 +208,16 @@ namespace Yarn
 
                     // And get that many expressions off the stack and build the
                     // collection of substitutions (in reverse order)
-                    std::vector<std::string> substitutions;
+                    TArray<FString> substitutions;
 
                     for (int expressionIndex = expressionCount - 1; expressionIndex >= 0; expressionIndex--)
                     {
                         auto top = state.PopValue();
-                        std::string topAsString = TCHAR_TO_UTF8(*top.ConvertToString());
-                        substitutions.push_back(topAsString);
+                        FString topAsString = top.ConvertToString();
+                        substitutions.Add(topAsString);
                     }
 
-                    std::reverse(substitutions.begin(), substitutions.end());
+                    Algo::Reverse(substitutions);
 
                     line.Substitutions = substitutions;
                 }
@@ -237,7 +226,7 @@ namespace Yarn
                 SetCurrentExecutionState(DELIVERING_CONTENT);
 
                 // Call the line handler
-                LineHandler(line);
+                OnLine.Broadcast(line);
 
                 // If we're still marked as delivering content, then the line
                 // handler didn't call Continue, so we'll wait here
@@ -259,14 +248,14 @@ namespace Yarn
 
                     // And get that many expressions off the stack and build the
                     // collection of substitutions (in reverse order)
-                    std::vector<std::string> substitutions;
+                    TArray<FString> substitutions;
 
                     for (int expressionIndex = expressionCount - 1; expressionIndex >= 0; expressionIndex--)
                     {
                         auto top = state.PopValue();
-                        std::string topAsString = TCHAR_TO_UTF8(*top.ConvertToString());
+                        const std::string topAsString = TCHAR_TO_UTF8(*top.ConvertToString());
 
-                        // std::string placeholder("\\{" << expressionIndex << "\\}");
+                        // FString placeholder("\\{" << expressionIndex << "\\}");
                         commandText = std::regex_replace(commandText, std::regex("\\{" + std::to_string(expressionIndex) + "\\}"), topAsString);
                     }
                 }
@@ -274,9 +263,9 @@ namespace Yarn
                 SetCurrentExecutionState(DELIVERING_CONTENT);
 
                 auto command = Command();
-                command.Text = commandText;
+                command.Text = commandText.c_str();
 
-                CommandHandler(command);
+                OnCommand.Broadcast(command);
 
                 if (GetCurrentExecutionState() == DELIVERING_CONTENT)
                 {
@@ -288,8 +277,8 @@ namespace Yarn
             }
         case Yarn::Instruction_OpCode_STOP:
             {
-                NodeCompleteHandler(currentNode.name());
-                DialogueCompleteHandler();
+                OnNodeComplete.Broadcast(currentNode.name().c_str());
+                OnDialogueComplete.Broadcast();
                 SetCurrentExecutionState(STOPPED);
                 break;
             }
@@ -307,7 +296,7 @@ namespace Yarn
             }
         case Yarn::Instruction_OpCode_PUSH_STRING:
             {
-                std::string value = instruction.operands(0).string_value();
+                FString value = instruction.operands(0).string_value().c_str();
                 state.PushValue(value);
                 break;
             }
@@ -316,21 +305,21 @@ namespace Yarn
                 bool topOfStack = state.PeekValue().GetValue<bool>();
                 if (topOfStack == false)
                 {
-                    auto label = instruction.operands(0).string_value();
+                    auto label = instruction.operands(0).string_value().c_str();
                     state.programCounter = FindInstructionPointForLabel(label) - 1;
                 }
                 break;
             }
         case Yarn::Instruction_OpCode_JUMP_TO:
             {
-                auto label = instruction.operands(0).string_value();
+                auto label = instruction.operands(0).string_value().c_str();
                 state.programCounter = FindInstructionPointForLabel(label) - 1;
                 break;
             }
         case Yarn::Instruction_OpCode_JUMP:
             {
                 // Jumps to a label whose name is on the stack.
-                std::string jumpDestination = TCHAR_TO_UTF8(*state.PeekValue().GetValue<FString>());
+                FString jumpDestination = state.PeekValue().GetValue<FString>();
                 state.programCounter = FindInstructionPointForLabel(jumpDestination) - 1;
                 break;
             }
@@ -338,8 +327,8 @@ namespace Yarn
             {
                 Line line = Line();
 
-                line.LineID = instruction.operands(0).string_value();
-                std::string destination = instruction.operands(1).string_value();
+                line.LineID = instruction.operands(0).string_value().c_str();
+                FString destination = instruction.operands(1).string_value().c_str();
 
                 if (instruction.operands_size() > 2)
                 {
@@ -350,16 +339,16 @@ namespace Yarn
 
                     // Get that many expressions off the stack and build the collection
                     // of substitutions (in reverse order)
-                    std::vector<std::string> substitutions;
+                    TArray<FString> substitutions;
 
                     for (int expressionIndex = expressionCount - 1; expressionIndex >= 0; expressionIndex--)
                     {
                         auto top = state.PopValue();
-                        std::string topAsString = TCHAR_TO_UTF8(*top.ConvertToString());
-                        substitutions.push_back(topAsString);
+                        FString topAsString = top.ConvertToString();
+                        substitutions.Add(topAsString);
                     }
 
-                    std::reverse(substitutions.begin(), substitutions.end());
+                    Algo::Reverse(substitutions);
 
                     line.Substitutions = substitutions;
                 }
@@ -384,7 +373,7 @@ namespace Yarn
                     }
                 }
 
-                state.AddOption(line, destination.c_str(), lineConditionPassed);
+                state.AddOption(line, destination, lineConditionPassed);
                 break;
             }
         case Yarn::Instruction_OpCode_SHOW_OPTIONS:
@@ -393,10 +382,10 @@ namespace Yarn
 
                 // If we have no options to show, immediately stop.
 
-                if (state.currentOptions.size() == 0)
+                if (state.currentOptions.IsEmpty())
                 {
                     SetCurrentExecutionState(STOPPED);
-                    DialogueCompleteHandler();
+                    OnDialogueComplete.Broadcast();
                     break;
                 }
 
@@ -412,7 +401,7 @@ namespace Yarn
                 // Pass the options set to the client, as well as a
                 // delegate for them to call when the user has made
                 // a selection
-                OptionsHandler(optionSet);
+                OnOptions.Broadcast(optionSet);
 
                 if (GetCurrentExecutionState() == WAITING_FOR_CONTINUE)
                 {
@@ -429,7 +418,7 @@ namespace Yarn
             {
                 // Push a null value. This is not a valid instruction as of Yarn Spinner
                 // 2.0.
-                logger.Log("PUSH_NULL is not a valid instruction in Yarn Spinner 2.0+", ILogger::ERROR);
+                YS_ERR("PUSH_NULL is not a valid instruction in Yarn Spinner 2.0+");
                 return false;
                 break;
             }
@@ -443,40 +432,39 @@ namespace Yarn
             {
                 // Call a named function, with parameters found on the stack, and push
                 // the resulting value onto the stack.
-                auto functionName = instruction.operands(0).string_value();
+                const FString functionName = instruction.operands(0).string_value().c_str();
 
                 auto actualParamCount = (int)state.PopValue().GetValue<double>();
-
-                if (!DoesFunctionExist(functionName))
+                if (!OnCheckFunctionExist.Execute(functionName))
                 {
-                    logger.Log(string_format("Unknown function '%s'", functionName.c_str()), ILogger::ERROR);
+                    YS_ERR("Unknown function '%s'", *functionName);
                     return false;
                 }
 
                 // auto expectedParamCount = library.GetExpectedParameterCount(functionName);
-                auto expectedParamCount = GetExpectedFunctionParamCount(functionName);
+                auto expectedParamCount = OnGetFunctionParamNum.Execute(functionName);
 
                 if (expectedParamCount >= 0 && expectedParamCount != actualParamCount)
                 {
-                    logger.Log(string_format("Function '%s' expects %i parameters, but %i were provided", functionName.c_str(), expectedParamCount, actualParamCount), ILogger::ERROR);
+                    YS_ERR("Function '%s' expects %i parameters, but %i were provided", *functionName, expectedParamCount, actualParamCount);
                     return false;
                 }
 
-                std::vector<FValue> parameters;
+                TArray<FValue> parameters;
 
                 for (int param = actualParamCount - 1; param >= 0; param--)
                 {
                     auto value = state.PopValue();
-                    parameters.push_back(value);
+                    parameters.Add(value);
                 }
-                std::reverse(parameters.begin(), parameters.end());
+                Algo::Reverse(parameters);
 
-                auto result = CallFunction(functionName, parameters);
+                auto result = OnCallFunction.Execute(functionName, parameters);
                 state.PushValue(result);
 
-                // if (library.HasFunction<std::string>(functionName))
+                // if (library.HasFunction<FString>(functionName))
                 // {
-                //     auto function = library.GetFunction<std::string>(functionName);
+                //     auto function = library.GetFunction<FString>(functionName);
                 //     auto result = function.Function(parameters);
                 //     state.PushValue(result);
                 // }
@@ -494,18 +482,18 @@ namespace Yarn
                 // }
                 // else
                 // {
-                //     logger.Log(string_format("Unknown function %s", functionName.c_str()), ILogger::ERROR);
+                //     YS_ERR("Unknown function %s", *functionName);
                 //     return false;
                 // }
 
-                logger.Log(string_format("Function call returned \"%s\" (type: %d)", *state.PeekValue().ConvertToString(), state.PeekValue().GetType()));
+                YS_LOG("Function call returned \"%s\" (type: %d)", *state.PeekValue().ConvertToString(), state.PeekValue().GetType());
 
                 break;
             }
         case Yarn::Instruction_OpCode_PUSH_VARIABLE:
             {
                 // Get the contents of a variable, and push that onto the stack.
-                auto variableName = instruction.operands(0).string_value();
+                const FString variableName = instruction.operands(0).string_value().c_str();
 
                 if (variableStorage.HasValue(variableName))
                 {
@@ -513,34 +501,34 @@ namespace Yarn
                     FValue v = variableStorage.GetValue(variableName);
                     state.PushValue(v);
                 }
-                else if (program.initial_values().count(variableName) > 0)
+                else if (program.initial_values().count(TCHAR_TO_UTF8(*variableName)) > 0)
                 {
                     // We don't have a value for this. The initial value may be found in
                     // the program. (If it's not, then the variable's value is
                     // undefined, which isn't allowed.)
-                    auto operand = program.initial_values().at(variableName);
+                    auto operand = program.initial_values().at(TCHAR_TO_UTF8(*variableName));
                     switch (operand.value_case())
                     {
                     case Yarn::Operand::ValueCase::kBoolValue:
                         state.PushValue(operand.bool_value());
                         break;
                     case Yarn::Operand::ValueCase::kStringValue:
-                        state.PushValue(operand.string_value());
+                        state.PushValue(operand.string_value().c_str());
                         break;
                     case Yarn::Operand::ValueCase::kFloatValue:
                         state.PushValue(operand.float_value());
                         break;
                     default:
-                        logger.Log(string_format("Unknown initial value type %i for variable %s", operand.value_case(), variableName.c_str()), ILogger::ERROR);
+                        YS_ERR("Unknown initial value type %i for variable %s", operand.value_case(), *variableName);
                         return false;
                     }
                 }
                 else
                 {
                     // We didn't find a value for this variable in storage or in the
-                    // program's intial values. This is an error - the variable must not
+                    // program's initial values. This is an error - the variable must not
                     // have been defined.
-                    logger.Log(string_format("Undefined variable %s", variableName.c_str()), ILogger::ERROR);
+                    YS_ERR("Undefined variable %s", *variableName);
                     return false;
                 }
                 break;
@@ -548,15 +536,15 @@ namespace Yarn
         case Yarn::Instruction_OpCode_STORE_VARIABLE:
             {
                 // Store the top value on the stack in a variable.
-                auto topValue = state.PeekValue();
-                auto destinationVariableName = instruction.operands(0).string_value();
+                const FValue topValue = state.PeekValue();
+                const FString destinationVariableName = instruction.operands(0).string_value().c_str();
 
-                logger.Log(string_format("Set %s to %s", destinationVariableName.c_str(), *topValue.ConvertToString()));
+                YS_LOG("Set %ss to %s", *destinationVariableName, *topValue.ConvertToString());
 
                 switch (topValue.GetType())
                 {
                 case FValue::EValueType::String:
-                    variableStorage.SetValue(destinationVariableName, TCHAR_TO_UTF8(*topValue.GetValue<FString>()));
+                    variableStorage.SetValue(destinationVariableName, topValue.GetValue<FString>());
                     break;
                 case FValue::EValueType::Number:
                     variableStorage.SetValue(destinationVariableName, static_cast<float>(topValue.GetValue<double>()));
@@ -565,7 +553,7 @@ namespace Yarn
                     variableStorage.SetValue(destinationVariableName, topValue.GetValue<bool>());
                     break;
                 default:
-                    logger.Log(string_format("Invalid Yarn value type %i for variable %s", topValue.GetType(), destinationVariableName.c_str()), ILogger::ERROR);
+                    YS_ERR("Invalid Yarn value type %i for variable %s", topValue.GetType(), *destinationVariableName);
                     return false;
                 }
                 break;
@@ -573,11 +561,11 @@ namespace Yarn
         case Yarn::Instruction_OpCode_RUN_NODE:
             {
                 // Pop a string from the stack, and jump to a node with that name.
-                const std::string nodeName = TCHAR_TO_UTF8(*state.PopValue().GetValue<FString>());
+                const FString nodeName = state.PopValue().GetValue<FString>();
 
-                NodeCompleteHandler(currentNode.name());
+                OnNodeComplete.Broadcast(currentNode.name().c_str());
 
-                SetNode(nodeName.c_str());
+                SetNode(nodeName);
 
                 // Decrement program counter here, because it will be incremented when
                 // this function returns, and would mean skipping the first instruction
@@ -586,7 +574,7 @@ namespace Yarn
                 break;
             }
         default:
-            logger.Log(string_format("Unhandled instruction type %i", instruction.opcode()));
+            YS_LOG("Unhandled instruction type %i", instruction.opcode());
             return false;
             break;
         }
@@ -602,15 +590,15 @@ namespace Yarn
     }
 
 
-    int VirtualMachine::FindInstructionPointForLabel(std::string label)
+    int VirtualMachine::FindInstructionPointForLabel(const FString& Label)
     {
-        if (currentNode.labels().count(label) == 0)
+        if (currentNode.labels().count(TCHAR_TO_UTF8(*Label)) == 0)
         {
-            logger.Log(string_format("Unknown label %s in node %s", label.c_str(), currentNode.name().c_str()), ILogger::ERROR);
+            YS_ERR("Unknown label %s in node %s", *Label, currentNode.name().c_str());
             SetCurrentExecutionState(ERROR);
             return -1;
         }
-        return currentNode.labels().at(label);
+        return currentNode.labels().at(TCHAR_TO_UTF8(*Label));
     }
 
 
@@ -618,33 +606,33 @@ namespace Yarn
     {
         if (executionState == WAITING_ON_OPTION_SELECTION)
         {
-            logger.Log("Cannot continue running dialogue. Still waiting on option selection.", ILogger::Type::ERROR);
+            YS_ERR("Cannot continue running dialogue. Still waiting on option selection.");
             return false;
         }
 
-        if (!LineHandler)
+        if (!OnLine.IsBound())
         {
-            logger.Log("Cannot continue dialogue: LineHandler has not been set.", ILogger::Type::ERROR);
+            YS_ERR("Cannot continue dialogue: OnLine handler has not been set.");
             return false;
         }
-        if (!OptionsHandler)
+        if (!OnOptions.IsBound())
         {
-            logger.Log("Cannot continue dialogue: OptionsHandler has not been set.", ILogger::Type::ERROR);
+            YS_ERR("Cannot continue dialogue: OnOptions handler has not been set.");
             return false;
         }
-        if (!CommandHandler)
+        if (!OnCommand.IsBound())
         {
-            logger.Log("Cannot continue dialogue: CommandHandler has not been set.", ILogger::Type::ERROR);
+            YS_ERR("Cannot continue dialogue: OnCommand handler has not been set.");
             return false;
         }
-        if (!NodeCompleteHandler)
+        if (!OnNodeComplete.IsBound())
         {
-            logger.Log("Cannot continue dialogue: NodeCompleteHandler has not been set.", ILogger::Type::ERROR);
+            YS_ERR("Cannot continue dialogue: OnNodeComplete handler has not been set.");
             return false;
         }
-        if (!DialogueCompleteHandler)
+        if (!OnDialogueComplete.IsBound())
         {
-            logger.Log("Cannot continue dialogue: DialogueCompleteHandler has not been set.", ILogger::Type::ERROR);
+            YS_ERR("Cannot continue dialogue: OnDialogueComplete handler has not been set.");
             return false;
         }
         return true;
@@ -655,36 +643,36 @@ namespace Yarn
     {
         if (GetCurrentExecutionState() != WAITING_ON_OPTION_SELECTION)
         {
-            logger.Log("SetSelectedOption was called, but Dialogue wasn't waiting for a selection. This method should only be called after the Dialogue is waiting for the user to select an option.", ILogger::ERROR);
+            YS_ERR("SetSelectedOption was called, but Dialogue wasn't waiting for a selection. This method should only be called after the Dialogue is waiting for the user to select an option.");
             SetCurrentExecutionState(VirtualMachine::ERROR);
             return;
         }
 
-        if (selectedOptionIndex < 0 || selectedOptionIndex >= (int)state.currentOptions.size())
+        if (selectedOptionIndex < 0 || selectedOptionIndex >= state.currentOptions.Num())
         {
-            logger.Log("SetSelectedOption was called with an invalid option index");
+            YS_LOG("SetSelectedOption was called with an invalid option index");
         }
 
         auto destinationNode = state.currentOptions[selectedOptionIndex].DestinationNode;
         state.PushValue(destinationNode);
 
-        state.currentOptions.clear();
+        state.currentOptions.Empty();
 
         SetCurrentExecutionState(WAITING_FOR_CONTINUE);
     }
 
 
-    std::string VirtualMachine::ExpandSubstitutions(std::string templateString, std::vector<std::string> substitutions)
+    FString VirtualMachine::ExpandSubstitutions(const FString& TemplateString, const TArray<FString>& Substitutions)
     {
         int i = 0;
 
-        std::string output = templateString;
-        for (std::string& sub : substitutions)
+        std::string Output = TCHAR_TO_UTF8(*TemplateString);
+        for (const FString& Sub : Substitutions)
         {
-            output = std::regex_replace(output, std::regex("\\{" + std::to_string(i) + "\\}"), sub);
+            Output = std::regex_replace(Output, std::regex("\\{" + std::to_string(i) + "\\}"), TCHAR_TO_UTF8(*Sub));
             i++;
         }
 
-        return output;
+        return FString(Output.c_str());
     }
 }

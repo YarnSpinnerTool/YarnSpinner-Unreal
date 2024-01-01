@@ -1,74 +1,69 @@
 #pragma once
 
-#include <map>
-#include <functional>
 #include <string>
 
 #include "Value.h"
 
 namespace Yarn
 {
-
     template <typename T>
-    using YarnFunction = std::function<T(std::vector<FValue>)>;
+    using TYarnFunction = TDelegate<T(const TArray<FValue>&)>;
 
     template <typename T>
     class YARNSPINNER_API FunctionInfo
     {
     public:
         int ExpectedParameterCount;
-        YarnFunction<T> Function;
+        TYarnFunction<T> Function;
 
         FunctionInfo();
-        FunctionInfo(int paramCount, T (*f)(std::vector<FValue>));
+        FunctionInfo(int ParamCount, T (*F)(const TArray<FValue>&));
     };
 
     class YARNSPINNER_API Library
     {
     private:
-        ILogger &logger;
-
-        std::map<std::string, FunctionInfo<std::string>> stringFunctions;
-        std::map<std::string, FunctionInfo<float>> numberFunctions;
-        std::map<std::string, FunctionInfo<bool>> boolFunctions;
+        TMap<FString, FunctionInfo<FString>> stringFunctions;
+        TMap<FString, FunctionInfo<float>> numberFunctions;
+        TMap<FString, FunctionInfo<bool>> boolFunctions;
 
         template <typename T>
-        FunctionInfo<T> &GetFunctionImpl(std::map<std::string, FunctionInfo<T>> &source, std::string name);
+        FunctionInfo<T> &GetFunctionImpl(TMap<FString, FunctionInfo<T>> &Source, const FString& Name);
 
         template <typename T>
-        void AddFunctionImpl(std::map<std::string, FunctionInfo<T>> &source, std::string name, YarnFunction<T> func, int parameterCount);
+        void AddFunctionImpl(TMap<FString, FunctionInfo<T>> &source, const FString& name, TYarnFunction<T> func, int parameterCount);
 
         template <typename T>
-        void RemoveFunctionImpl(std::map<std::string, FunctionInfo<T>> &source, std::string name);
+        void RemoveFunctionImpl(TMap<FString, FunctionInfo<T>> &source, const FString& name);
 
         template <typename T>
-        bool HasFunctionImpl(std::map<std::string, FunctionInfo<T>> &source, std::string name);
+        bool HasFunctionImpl(TMap<FString, FunctionInfo<T>> &source, const FString& name);
 
     public:
-        Library(ILogger &logger);
+        Library();
 
         template <typename T>
-        FunctionInfo<T> GetFunction(std::string name);
+        FunctionInfo<T> GetFunction(const FString& Name);
 
         template <typename T>
-        void AddFunction(std::string name, YarnFunction<T> function, int parameterCount);
+        void AddFunction(const FString& name, TYarnFunction<T> function, int parameterCount);
 
         // template <typename T>
-        // void AddFunction (std::string name, T(*f)(std::vector<::Value>), int parameterCount);
+        // void AddFunction (const FString& name, T(*f)(TArray<::Value>), int parameterCount);
 
         template <typename T>
-        void RemoveFunction(std::string name);
+        void RemoveFunction(const FString& Name);
 
         template <typename T>
-        bool HasFunction(std::string name);
+        bool HasFunction(const FString& Name);
 
         void RemoveAllFunctions();
 
-        int GetExpectedParameterCount(std::string name);
+        int GetExpectedParameterCount(const FString& Name);
 
         void LoadStandardLibrary();
 
-        static std::string GenerateUniqueVisitedVariableForNode(std::string nodeName);
+        static FString GenerateUniqueVisitedVariableForNode(const FString& NodeName);
     };
 
 }

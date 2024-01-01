@@ -1,39 +1,38 @@
 #pragma once
 
 #include <string>
-#include <stack>
 #include <vector>
 
-#include "YarnSpinnerCore/Common.h"
 #include "Value.h"
+#include "YarnSpinnerCore/Common.h"
 
 namespace Yarn
 {
     class YARNSPINNER_API State
     {
     public:
-        std::vector<FValue> stack;
-        std::vector<Option> currentOptions;
+        TArray<FValue> stack;
+        TArray<Option> currentOptions;
 
-        std::string currentNodeName;
+        FString currentNodeName;
 
         int programCounter = 0;
 
-        void AddOption(Line &line, const char *destination, bool enabled);
+        void AddOption(const Line &Line, const FString& Destination, bool bEnabled);
         void ClearOptions();
-        const std::vector<Option> GetCurrentOptions();
+        TArray<Option> GetCurrentOptions();
 
-        void PushValue(std::string string);
-        void PushValue(const char *string);
-        void PushValue(double number);
-        void PushValue(float number);
-        void PushValue(int number);
-        void PushValue(bool boolean);
+        void PushValue(const FString& Str);
+        void PushValue(const char *String);
+        void PushValue(double Number);
+        void PushValue(float Number);
+        void PushValue(int Number);
+        void PushValue(bool bVal);
 
-        void PushValue(FValue value);
+        void PushValue(const FValue& Value);
 
         FValue PopValue();
-        FValue PeekValue();
+        FValue& PeekValue();
 
         void ClearStack();
     };

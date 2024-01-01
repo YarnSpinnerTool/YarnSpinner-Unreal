@@ -293,7 +293,7 @@ void UYarnLibraryRegistry::AddFunction(const FYSLSAction& Func)
         }
         else
         {
-            Param.Value = Yarn::FValue(TCHAR_TO_UTF8(*InParam.DefaultValue));
+            Param.Value = Yarn::FValue(InParam.DefaultValue);
         }
 
         FuncDetail.InParams.Add(Param);
@@ -355,7 +355,7 @@ void UYarnLibraryRegistry::AddCommand(const FYSLSAction& Cmd)
         }
         else
         {
-            Param.Value = Yarn::FValue(TCHAR_TO_UTF8(*InParam.DefaultValue));
+            Param.Value = InParam.DefaultValue;
         }
 
         CmdDetail.InParams.Add(Param);

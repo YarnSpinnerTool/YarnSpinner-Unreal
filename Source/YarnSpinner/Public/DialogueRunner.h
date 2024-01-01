@@ -17,7 +17,7 @@ THIRD_PARTY_INCLUDES_END
 DECLARE_DELEGATE(FYarnDialogueRunnerContinueDelegate);
 
 UCLASS()
-class YARNSPINNER_API ADialogueRunner : public AActor, public Yarn::ILogger, public Yarn::IVariableStorage
+class YARNSPINNER_API ADialogueRunner : public AActor, public Yarn::IVariableStorage
 {
     GENERATED_BODY()
     
@@ -71,18 +71,15 @@ private:
 
     FYarnDialogueRunnerContinueDelegate ContinueDelegate;
 
-    // ILogger
-    virtual void Log(std::string Message, Type Severity = Type::INFO) override;
-
     // IVariableStorage
-    virtual void SetValue(std::string Name, bool bValue) override;
-    virtual void SetValue(std::string Name, float Value) override;
-    virtual void SetValue(std::string Name, std::string Value) override;
+    virtual void SetValue(const FString& Name, bool bValue) override;
+    virtual void SetValue(const FString& Name, float Value) override;
+    virtual void SetValue(const FString& Name, const FString& Value) override;
 
-    virtual bool HasValue(std::string Name) override;
-    virtual Yarn::FValue GetValue(std::string Name) override;
+    virtual bool HasValue(const FString& Name) override;
+    virtual Yarn::FValue GetValue(const FString& Name) override;
 
-    virtual void ClearValue(std::string Name) override;
+    virtual void ClearValue(const FString& Name) override;
 
     FString GetLine(FName LineID, FName Language);
 

@@ -3,77 +3,76 @@
 namespace Yarn
 {
 
-    void State::AddOption(Line &line, const char *destination, bool enabled)
+    void State::AddOption(const Line &Line, const FString& Destination, const bool bEnabled)
     {
         auto option = Option();
 
-        option.Line = line;
-        option.DestinationNode = destination;
-        option.IsAvailable = enabled;
-        option.ID = currentOptions.size();
+        option.Line = Line;
+        option.DestinationNode = Destination;
+        option.IsAvailable = bEnabled;
+        option.ID = currentOptions.Num();
 
-        currentOptions.push_back(option);
+        currentOptions.Add(option);
     }
 
     void State::ClearOptions()
     {
-        currentOptions.clear();
+        currentOptions.Empty();
     }
 
-    const std::vector<Option> State::GetCurrentOptions()
+    TArray<Option> State::GetCurrentOptions()
     {
         return currentOptions;
     }
 
-    void State::PushValue(std::string string)
+    void State::PushValue(const FString& Str)
     {
-        stack.push_back(FValue(string));
+        stack.Emplace(FValue(Str));
     }
 
-    void State::PushValue(const char *string)
+    void State::PushValue(const char* String)
     {
-        stack.push_back(FValue(string));
+        stack.Add(FValue(String));
     }
 
-    void State::PushValue(double number)
+    void State::PushValue(const double Number)
     {
-        stack.push_back(FValue(number));
+        stack.Add(FValue(Number));
     }
 
-    void State::PushValue(float number)
+    void State::PushValue(const float Number)
     {
-        stack.push_back(FValue(number));
+        stack.Add(FValue(Number));
     }
 
-    void State::PushValue(int number)
+    void State::PushValue(const int Number)
     {
-        stack.push_back(FValue(number));
+        stack.Add(FValue(Number));
     }
 
-    void State::PushValue(bool boolean)
+    void State::PushValue(const bool bVal)
     {
-        stack.push_back(FValue(boolean));
+        stack.Add(FValue(bVal));
     }
 
-    void State::PushValue(FValue value)
+    void State::PushValue(const FValue& Value)
     {
-        stack.push_back(value);
+        stack.Add(Value);
     }
 
     FValue State::PopValue()
     {
-        auto last = stack.back();
-        stack.pop_back();
-        return last;
+        return stack.Pop();
     }
 
-    FValue State::PeekValue()
+    FValue& State::PeekValue()
     {
-        return stack.back();
+        return stack.Last();
     }
 
     void State::ClearStack()
     {
+        stack.Empty();
     }
 
 }

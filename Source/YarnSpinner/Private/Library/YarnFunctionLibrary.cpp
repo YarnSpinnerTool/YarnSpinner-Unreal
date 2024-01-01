@@ -143,7 +143,7 @@ TOptional<Yarn::FValue> UYarnFunctionLibrary::CallFunction(FName FunctionName, T
                 YS_WARN_FUNC("Could not get return parameter '%s' for function '%s'", *ReturnValue->Name.ToString(), *FunctionName.ToString())
                 return Result;
             }
-            Result = Yarn::FValue(TCHAR_TO_UTF8(*StringParam->GetPropertyValue_InContainer(FuncParams.GetStructMemory())));
+            Result = Yarn::FValue(StringParam->GetPropertyValue_InContainer(FuncParams.GetStructMemory()));
             break;
         }
     }

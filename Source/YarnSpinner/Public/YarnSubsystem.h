@@ -27,14 +27,14 @@ public:
     virtual void Initialize(FSubsystemCollectionBase& Collection) override;
     virtual void Deinitialize() override;
 
-    virtual void SetValue(std::string name, bool value);
-    virtual void SetValue(std::string name, float value);
-    virtual void SetValue(std::string name, std::string value);
+    virtual void SetValue(const FString& name, bool value);
+    virtual void SetValue(const FString& name, float value);
+    virtual void SetValue(const FString& name, const FString& value);
 
-    virtual bool HasValue(std::string name);
-    virtual Yarn::FValue GetValue(std::string name);
+    virtual bool HasValue(const FString& name);
+    virtual Yarn::FValue GetValue(const FString& name);
 
-    virtual void ClearValue(std::string name);
+    virtual void ClearValue(const FString& name);
 
     const UYarnLibraryRegistry* GetYarnLibraryRegistry() const { return YarnFunctionRegistry; }
 

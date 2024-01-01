@@ -17,15 +17,28 @@ namespace Yarn
     class YARNSPINNER_API IVariableStorage
     {
     public:
-        virtual void SetValue(std::string name, bool value) = 0;
-        virtual void SetValue(std::string name, float value) = 0;
-        virtual void SetValue(std::string name, std::string value) = 0;
+        virtual ~IVariableStorage() = default;
+        
+        virtual void SetValue(const FString& name, bool value) = 0;
+        virtual void SetValue(const FString& name, float value) = 0;
+        virtual void SetValue(const FString& name, const FString& value) = 0;
 
-        virtual bool HasValue(std::string name) = 0;
-        virtual FValue GetValue(std::string name) = 0;
+        virtual bool HasValue(const FString& name) = 0;
+        virtual FValue GetValue(const FString& name) = 0;
 
-        virtual void ClearValue(std::string name) = 0;
+        virtual void ClearValue(const FString& name) = 0;
     };
+
+    // Function handler delegate definitions
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnLine, const Line&);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnOptions, const OptionSet&);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnCommand, const Command&);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnNodeStart, const FString&);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnNodeComplete, const FString&);
+    DECLARE_MULTICAST_DELEGATE(FOnDialogueComplete);
+    DECLARE_DELEGATE_RetVal_OneParam(bool, FOnCheckFunctionExist, const FString&);
+    DECLARE_DELEGATE_RetVal_OneParam(int, FOnGetFunctionParamNum, const FString&);
+    DECLARE_DELEGATE_RetVal_TwoParams(FValue, FOnCallFunction, const FString&, const TArray<FValue>&);
 
     class YARNSPINNER_API VirtualMachine
     {
@@ -59,24 +72,23 @@ namespace Yarn
 
         Yarn::Node currentNode;
 
-        std::string currentNodeName;
+        FString currentNodeName;
 
         State state;
 
         ExecutionState executionState;
 
         Library &library;
-        ILogger &logger;
         IVariableStorage &variableStorage;
 
     public:
-        VirtualMachine(Yarn::Program program, Library &library, IVariableStorage &variableStorage, ILogger &logger);
+        VirtualMachine(Yarn::Program program, Library &library, IVariableStorage &variableStorage);
         ~VirtualMachine();
 
         void SetProgram(Yarn::Program program);
         const Yarn::Program &GetProgram();
 
-        bool SetNode(const char *nodeName);
+        bool SetNode(const FString& NodeName);
         const char *GetCurrentNodeName();
 
         ExecutionState GetCurrentExecutionState();
@@ -84,24 +96,25 @@ namespace Yarn
         // Begins or continues execution of the virtual machine.
         bool Continue();
 
-        std::function<void(Line &)> LineHandler;
-        std::function<void(OptionSet &)> OptionsHandler;
-        std::function<void(Command &)> CommandHandler;
-        std::function<void(std::string)> NodeStartHandler;
-        std::function<void(std::string)> NodeCompleteHandler;
-        std::function<void()> DialogueCompleteHandler;
-        std::function<bool(std::string)> DoesFunctionExist;
-        std::function<int(std::string)> GetExpectedFunctionParamCount;
-        std::function<Yarn::FValue(std::string, std::vector<Yarn::FValue>)> CallFunction;
+        // Function handlers
+        FOnLine OnLine;
+        FOnOptions OnOptions;
+        FOnCommand OnCommand;
+        FOnNodeStart OnNodeStart;
+        FOnNodeComplete OnNodeComplete;
+        FOnDialogueComplete OnDialogueComplete;
+        FOnCheckFunctionExist OnCheckFunctionExist;
+        FOnGetFunctionParamNum OnGetFunctionParamNum;
+        FOnCallFunction OnCallFunction;
 
         void SetSelectedOption(int selectedOptionIndex);
 
-        static std::string ExpandSubstitutions(std::string templateString, std::vector<std::string> substitutions);
+        static FString ExpandSubstitutions(const FString& TemplateString, const TArray<FString>& Substitutions);
 
     private:
         void SetCurrentExecutionState(ExecutionState state);
         bool CheckCanContinue();
         bool RunInstruction(Yarn::Instruction &instruction);
-        int FindInstructionPointForLabel(std::string label);
+        int FindInstructionPointForLabel(const FString& Label);
     };
 }

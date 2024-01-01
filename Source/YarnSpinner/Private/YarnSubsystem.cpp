@@ -3,13 +3,10 @@
 
 #include "YarnSubsystem.h"
 
-#include "DisplayLine.h"
 #include "Engine/ObjectLibrary.h"
 #include "Library/YarnCommandLibrary.h"
 #include "Library/YarnFunctionLibrary.h"
 #include "Library/YarnLibraryRegistry.h"
-#include "Misc/OutputDeviceHelper.h"
-#include "Misc/OutputDeviceNull.h"
 #include "Misc/YarnAssetHelpers.h"
 #include "Misc/YSLogging.h"
 
@@ -101,39 +98,39 @@ void UYarnSubsystem::Deinitialize()
 }
 
 
-void UYarnSubsystem::SetValue(std::string name, bool value)
+void UYarnSubsystem::SetValue(const FString& name, bool value)
 {
-    Variables.FindOrAdd(FString(UTF8_TO_TCHAR(name.c_str()))) = Yarn::FValue(value);
+    Variables.FindOrAdd(name) = value;
 }
 
 
-void UYarnSubsystem::SetValue(std::string name, float value)
+void UYarnSubsystem::SetValue(const FString& name, float value)
 {
-    Variables.FindOrAdd(FString(UTF8_TO_TCHAR(name.c_str()))) = Yarn::FValue(value);
+    Variables.FindOrAdd(name) = value;
 }
 
 
-void UYarnSubsystem::SetValue(std::string name, std::string value)
+void UYarnSubsystem::SetValue(const FString& name, const FString& value)
 {
-    Variables.FindOrAdd(FString(UTF8_TO_TCHAR(name.c_str()))) = Yarn::FValue(value);
+    Variables.FindOrAdd(name) = value;
 }
 
 
-bool UYarnSubsystem::HasValue(std::string name)
+bool UYarnSubsystem::HasValue(const FString& name)
 {
-    return Variables.Contains(FString(UTF8_TO_TCHAR(name.c_str())));
+    return Variables.Contains(name);
 }
 
 
-Yarn::FValue UYarnSubsystem::GetValue(std::string name)
+Yarn::FValue UYarnSubsystem::GetValue(const FString& name)
 {
-    return Variables.FindOrAdd(FString(UTF8_TO_TCHAR(name.c_str())));
+    return Variables.FindOrAdd(name);
 }
 
 
-void UYarnSubsystem::ClearValue(std::string name)
+void UYarnSubsystem::ClearValue(const FString& name)
 {
-    Variables.Remove(FString(UTF8_TO_TCHAR(name.c_str())));
+    Variables.Remove(name);
 }
 
 
