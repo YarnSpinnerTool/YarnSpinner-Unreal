@@ -2,10 +2,9 @@
 
 #include "YarnSpinner.h"
 
-#include "Modules/ModuleManager.h"
-#include "Interfaces/IPluginManager.h"
 #include "Misc/MessageDialog.h"
 #include "Misc/YSLogging.h"
+#include "Modules/ModuleManager.h"
 
 THIRD_PARTY_INCLUDES_START
 #include <google/protobuf/stubs/logging.h>
@@ -16,9 +15,10 @@ THIRD_PARTY_INCLUDES_END
 
 
 
-void UnrealLogHandler(google::protobuf::LogLevel level, const char* filename, int line,
-                        const std::string& message) {
-	UE_LOG(LogYarnSpinner, Warning, TEXT("Protobuf: %s"), message.c_str());
+void UnrealLogHandler([[maybe_unused]] google::protobuf::LogLevel Level, [[maybe_unused]] const char* Filename,
+						[[maybe_unused]] int Line, const std::string& Message)
+{
+	YS_WARN("Protobuf: %hs", Message.c_str());
 }
 
 

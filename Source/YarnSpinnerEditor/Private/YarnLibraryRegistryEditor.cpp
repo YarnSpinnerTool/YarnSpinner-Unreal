@@ -14,7 +14,6 @@
 #include "Misc/DefaultValueHelper.h"
 #include "Misc/FileHelper.h"
 #include "Misc/YarnAssetHelpers.h"
-#include "Misc/YarnValueHelpers.h"
 #include "Misc/YSLogging.h"
 
 
@@ -205,7 +204,7 @@ void UYarnLibraryRegistryEditor::ExtractFunctionDataFromBlueprintGraph(UBlueprin
                     FYarnBlueprintParam Param;
                     Param.Name = Pin->PinName;
                     bool Value = Pin->GetDefaultAsString() == "true";
-                    Param.Value = Yarn::Value(Value);
+                    Param.Value = Yarn::FValue(Value);
                     FuncDetails.InParams.Add(Param);
                 }
                 else if (Category == TEXT("float") || (Category == TEXT("real") && (SubCategory == TEXT("float") || SubCategory == TEXT("double"))))
@@ -214,14 +213,14 @@ void UYarnLibraryRegistryEditor::ExtractFunctionDataFromBlueprintGraph(UBlueprin
                     Param.Name = Pin->PinName;
                     float Value = 0;
                     FDefaultValueHelper::ParseFloat(Pin->GetDefaultAsString(), Value);
-                    Param.Value = Yarn::Value(Value);
+                    Param.Value = Yarn::FValue(Value);
                     FuncDetails.InParams.Add(Param);
                 }
                 else if (Category == TEXT("string"))
                 {
                     FYarnBlueprintParam Param;
                     Param.Name = Pin->PinName;
-                    Param.Value = Yarn::Value(TCHAR_TO_UTF8(*Pin->GetDefaultAsString()));
+                    Param.Value = Yarn::FValue(TCHAR_TO_UTF8(*Pin->GetDefaultAsString()));
                     FuncDetails.InParams.Add(Param);
                 }
                 else if (Category != TEXT("exec"))
@@ -241,7 +240,7 @@ void UYarnLibraryRegistryEditor::ExtractFunctionDataFromBlueprintGraph(UBlueprin
                 auto& SubCategory = Pin->PinType.PinSubCategory;
                 if (Category == TEXT("bool"))
                 {
-                    if (FuncDetails.OutParam.IsSet() && (FuncDetails.OutParam->Value.GetType() != Yarn::Value::ValueType::BOOL || FuncDetails.OutParam->Name != Pin->PinName))
+                    if (FuncDetails.OutParam.IsSet() && (FuncDetails.OutParam->Value.GetType() != Yarn::FValue::EValueType::Bool || FuncDetails.OutParam->Name != Pin->PinName))
                     {
                         // YS_WARN("Function %s has multiple return values or types.  Yarn functions may only have one return value.", *FuncDetails.Name.ToString())
                         FuncMeta.bHasMultipleOutParams = true;
@@ -249,13 +248,13 @@ void UYarnLibraryRegistryEditor::ExtractFunctionDataFromBlueprintGraph(UBlueprin
                     FYarnBlueprintParam Param;
                     Param.Name = Pin->PinName;
                     bool Value = Pin->GetDefaultAsString() == "true";
-                    Param.Value = Yarn::Value(Value);
+                    Param.Value = Yarn::FValue(Value);
                     FuncDetails.OutParam = Param;
                 }
                 // Recent UE5 builds use "real" instead of "float" for float pins and force the subcategory for return values to be "double"
                 else if (Category == TEXT("float") || (Category == TEXT("real") && (SubCategory == TEXT("float") || SubCategory == TEXT("double"))))
                 {
-                    if (FuncDetails.OutParam.IsSet() && (FuncDetails.OutParam->Value.GetType() != Yarn::Value::ValueType::NUMBER || FuncDetails.OutParam->Name != Pin->PinName))
+                    if (FuncDetails.OutParam.IsSet() && (FuncDetails.OutParam->Value.GetType() != Yarn::FValue::EValueType::Number || FuncDetails.OutParam->Name != Pin->PinName))
                     {
                         // YS_WARN("Function %s has multiple return values or types.  Only one is supported.", *FuncDetails.Name.ToString())
                         FuncMeta.bHasMultipleOutParams = true;
@@ -264,19 +263,19 @@ void UYarnLibraryRegistryEditor::ExtractFunctionDataFromBlueprintGraph(UBlueprin
                     Param.Name = Pin->PinName;
                     float Value = 0;
                     FDefaultValueHelper::ParseFloat(Pin->GetDefaultAsString(), Value);
-                    Param.Value = Yarn::Value(Value);
+                    Param.Value = Yarn::FValue(Value);
                     FuncDetails.OutParam = Param;
                 }
                 else if (Category == TEXT("string"))
                 {
-                    if (FuncDetails.OutParam.IsSet() && (FuncDetails.OutParam->Value.GetType() != Yarn::Value::ValueType::STRING || FuncDetails.OutParam->Name != Pin->PinName))
+                    if (FuncDetails.OutParam.IsSet() && (FuncDetails.OutParam->Value.GetType() != Yarn::FValue::EValueType::String || FuncDetails.OutParam->Name != Pin->PinName))
                     {
                         // YS_WARN("Function %s has multiple return values or types.  Only one is supported.", *FuncDetails.Name.ToString())
                         FuncMeta.bHasMultipleOutParams = true;
                     }
                     FYarnBlueprintParam Param;
                     Param.Name = Pin->PinName;
-                    Param.Value = Yarn::Value(TCHAR_TO_UTF8(*Pin->GetDefaultAsString()));
+                    Param.Value = Yarn::FValue(TCHAR_TO_UTF8(*Pin->GetDefaultAsString()));
                     FuncDetails.OutParam = Param;
                 }
                 else if (Category != TEXT("exec"))
@@ -317,7 +316,7 @@ void UYarnLibraryRegistryEditor::AddToYSLSData(FYarnBlueprintLibFunction FuncDet
         {
             FYSLSParameter Parameter;
             Parameter.Name = Param.Name.ToString();
-            Parameter.Type = FYarnValueHelpers::GetTypeString(Param.Value);
+            Parameter.Type = LexToString(Param.Value.GetType());
             // TODO: add default value support by capturing the default value when inspecting blueprint function
             // Parameter.DefaultValue = Param.Value;
             Action.Parameters.Add(Parameter);
@@ -327,13 +326,13 @@ void UYarnLibraryRegistryEditor::AddToYSLSData(FYarnBlueprintLibFunction FuncDet
     }
     else
     {
-        Action.ReturnType = FYarnValueHelpers::GetTypeString(FuncDetails.OutParam->Value);
+        Action.ReturnType = LexToString(FuncDetails.OutParam->Value.GetType());
         Action.Signature = Action.ReturnType + "(";
         for (auto Param : FuncDetails.InParams)
         {
             FYSLSParameter Parameter;
             Parameter.Name = Param.Name.ToString();
-            Parameter.Type = FYarnValueHelpers::GetTypeString(Param.Value);
+            Parameter.Type = LexToString(Param.Value.GetType());
             Action.Parameters.Add(Parameter);
             Action.Signature += Parameter.Name + ", ";
         }

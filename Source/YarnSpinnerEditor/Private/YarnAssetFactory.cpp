@@ -107,10 +107,10 @@ UObject* UYarnAssetFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
     }
 
     // Now convert the Program into binary wire format for saving
-    std::string Data = CompilerOutput.program().SerializeAsString();
+    const std::string Data = CompilerOutput.program().SerializeAsString();
 
     // And convert THAT into a TArray of bytes for storage
-    TArray<uint8> Output = TArray<uint8>((const uint8*)Data.c_str(), Data.size());
+    const TArray<uint8> Output = TArray(reinterpret_cast<const uint8*>(Data.c_str()), Data.size());
 
     YarnProject->Data = Output;
 

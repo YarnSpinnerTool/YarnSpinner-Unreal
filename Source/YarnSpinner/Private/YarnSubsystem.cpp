@@ -3,13 +3,10 @@
 
 #include "YarnSubsystem.h"
 
-#include "DisplayLine.h"
 #include "Engine/ObjectLibrary.h"
 #include "Library/YarnCommandLibrary.h"
 #include "Library/YarnFunctionLibrary.h"
 #include "Library/YarnLibraryRegistry.h"
-#include "Misc/OutputDeviceHelper.h"
-#include "Misc/OutputDeviceNull.h"
 #include "Misc/YarnAssetHelpers.h"
 #include "Misc/YSLogging.h"
 
@@ -74,19 +71,19 @@ void UYarnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
         {
             YS_LOG_FUNC("FOUND MyQuickActorFunction")
             auto YFL = Cast<UYarnFunctionLibrary>(Lib->GetDefaultObject());
-            auto Result1 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintParam{"InParam", Yarn::Value(12.345)}}, {{"OutParam", Yarn::Value(true)}});
-            auto Result2 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintParam{"InParam", Yarn::Value(1234.5)}}, {{"OutParam", Yarn::Value(true)}});
+            auto Result1 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintParam{"InParam", Yarn::FValue(12.345)}}, {{"OutParam", Yarn::FValue(true)}});
+            auto Result2 = YFL->CallFunction("MyQuickActorFunction", {FYarnBlueprintParam{"InParam", Yarn::FValue(1234.5)}}, {{"OutParam", Yarn::FValue(true)}});
 
-            YS_LOG_FUNC("Did we succeed? %d, %d", Result1.IsSet() && Result1->GetBooleanValue(), Result2.IsSet() && Result2->GetBooleanValue())
+            YS_LOG_FUNC("Did we succeed? %d, %d", Result1.IsSet() && Result1->GetValue<bool>(), Result2.IsSet() && Result2->GetValue<bool>())
         }
         if (Lib->FindFunctionByName(FName("MyAwesomeFunc")))
         {
             YS_LOG_FUNC("calling YarnFunctionLibrary %s->MyAwesomeFunc()", *Lib->GetName())
             auto YFL = Cast<UYarnFunctionLibrary>(Lib->GetDefaultObject());
-            auto Result = YFL->CallFunction("MyAwesomeFunc", {FYarnBlueprintParam{"FirstInParam", Yarn::Value(true)}, FYarnBlueprintParam{"SecondInParam", Yarn::Value(12.345)}}, {{"OutParam", Yarn::Value(0.0)}});
+            auto Result = YFL->CallFunction("MyAwesomeFunc", {FYarnBlueprintParam{"FirstInParam", Yarn::FValue(true)}, FYarnBlueprintParam{"SecondInParam", Yarn::FValue(12.345)}}, {{"OutParam", Yarn::FValue(0.0)}});
             if (Result.IsSet())
             {
-                YS_LOG_FUNC("Function returned: %f", Result->GetNumberValue())
+                YS_LOG_FUNC("Function returned: %f", Result->GetValue<double>())
             }
         }
     }
@@ -101,39 +98,39 @@ void UYarnSubsystem::Deinitialize()
 }
 
 
-void UYarnSubsystem::SetValue(std::string name, bool value)
+void UYarnSubsystem::SetValue(const FString& name, bool value)
 {
-    Variables.FindOrAdd(FString(UTF8_TO_TCHAR(name.c_str()))) = Yarn::Value(value);
+    Variables.FindOrAdd(name) = value;
 }
 
 
-void UYarnSubsystem::SetValue(std::string name, float value)
+void UYarnSubsystem::SetValue(const FString& name, float value)
 {
-    Variables.FindOrAdd(FString(UTF8_TO_TCHAR(name.c_str()))) = Yarn::Value(value);
+    Variables.FindOrAdd(name) = value;
 }
 
 
-void UYarnSubsystem::SetValue(std::string name, std::string value)
+void UYarnSubsystem::SetValue(const FString& name, const FString& value)
 {
-    Variables.FindOrAdd(FString(UTF8_TO_TCHAR(name.c_str()))) = Yarn::Value(value);
+    Variables.FindOrAdd(name) = value;
 }
 
 
-bool UYarnSubsystem::HasValue(std::string name)
+bool UYarnSubsystem::HasValue(const FString& name)
 {
-    return Variables.Contains(FString(UTF8_TO_TCHAR(name.c_str())));
+    return Variables.Contains(name);
 }
 
 
-Yarn::Value UYarnSubsystem::GetValue(std::string name)
+Yarn::FValue UYarnSubsystem::GetValue(const FString& name)
 {
-    return Variables.FindOrAdd(FString(UTF8_TO_TCHAR(name.c_str())));
+    return Variables.FindOrAdd(name);
 }
 
 
-void UYarnSubsystem::ClearValue(std::string name)
+void UYarnSubsystem::ClearValue(const FString& name)
 {
-    Variables.Remove(FString(UTF8_TO_TCHAR(name.c_str())));
+    Variables.Remove(name);
 }
 
 
