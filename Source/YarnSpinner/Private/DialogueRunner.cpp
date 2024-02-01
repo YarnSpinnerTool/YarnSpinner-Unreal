@@ -109,11 +109,11 @@ void ADialogueRunner::PreInitializeComponents()
         return YarnSubsystem()->GetYarnLibraryRegistry()->GetExpectedFunctionParamCount(FName(UTF8_TO_TCHAR(FunctionName.c_str())));
     };
 
-    VirtualMachine->CallFunction = [this](const std::string& FunctionName, const std::vector<Yarn::Value>& Parameters) -> Yarn::Value
+    VirtualMachine->CallFunction = [this](const std::string& FunctionName, const std::vector<Yarn::FValue>& Parameters) -> Yarn::FValue
     {
         return YarnSubsystem()->GetYarnLibraryRegistry()->CallFunction(
             FName(UTF8_TO_TCHAR(FunctionName.c_str())),
-            TArray<Yarn::Value>(Parameters.data(), Parameters.size())
+            TArray<Yarn::FValue>(Parameters.data(), Parameters.size())
         );
     };
 
@@ -336,10 +336,10 @@ bool ADialogueRunner::HasValue(std::string Name)
 }
 
 
-Yarn::Value ADialogueRunner::GetValue(std::string Name)
+Yarn::FValue ADialogueRunner::GetValue(std::string Name)
 {
-    Yarn::Value Value = YarnSubsystem()->GetValue(Name);
-    YS_LOG("Retrieving variable %s with value %s", UTF8_TO_TCHAR(Name.c_str()), UTF8_TO_TCHAR(Value.ConvertToString().c_str()))
+    Yarn::FValue Value = YarnSubsystem()->GetValue(Name);
+    YS_LOG("Retrieving variable %s with value %s", UTF8_TO_TCHAR(Name.c_str()), *Value.ConvertToString());
     return Value;
 }
 

@@ -81,7 +81,7 @@ int32 UYarnLibraryRegistry::GetExpectedFunctionParamCount(const FName& Name) con
 }
 
 
-Yarn::Value UYarnLibraryRegistry::CallFunction(const FName& Name, TArray<Yarn::Value> Parameters) const
+Yarn::FValue UYarnLibraryRegistry::CallFunction(const FName& Name, TArray<Yarn::FValue> Parameters) const
 {
     if (StdFunctions.Contains(Name))
     {
@@ -91,7 +91,7 @@ Yarn::Value UYarnLibraryRegistry::CallFunction(const FName& Name, TArray<Yarn::V
     if (!AllFunctions.Contains(Name))
     {
         YS_WARN("Attempted to call non-existent function '%s'", *Name.ToString())
-        return Yarn::Value();
+        return Yarn::FValue();
     }
 
     auto FuncDetail = AllFunctions[Name];
@@ -99,7 +99,7 @@ Yarn::Value UYarnLibraryRegistry::CallFunction(const FName& Name, TArray<Yarn::V
     if (FuncDetail.InParams.Num() != Parameters.Num())
     {
         YS_WARN("Attempted to call function '%s' with incorrect number of arguments (expected %d).", *Name.ToString(), FuncDetail.InParams.Num())
-        return Yarn::Value();
+        return Yarn::FValue();
     }
 
     auto Lib = UYarnFunctionLibrary::FromBlueprint(FuncDetail.Library);
@@ -107,7 +107,7 @@ Yarn::Value UYarnLibraryRegistry::CallFunction(const FName& Name, TArray<Yarn::V
     if (!Lib)
     {
         YS_WARN("Couldn't create library for Blueprint containing function '%s'", *Name.ToString())
-        return Yarn::Value();
+        return Yarn::FValue();
     }
 
     TArray<FYarnBlueprintParam> InParams;
@@ -126,7 +126,7 @@ Yarn::Value UYarnLibraryRegistry::CallFunction(const FName& Name, TArray<Yarn::V
         return Result.GetValue();
     }
     YS_WARN("Function '%s' returned an invalid value.", *Name.ToString())
-    return Yarn::Value();
+    return Yarn::FValue();
 }
 
 
@@ -166,17 +166,16 @@ void UYarnLibraryRegistry::CallCommand(const FName& Name, TSoftObjectPtr<ADialog
         FYarnBlueprintParam InParam = CmdDetail.InParams[I];
         if (UnprocessedParamStrings.Num() > I)
         {
-            if (InParam.Value.type == Yarn::Value::ValueType::NUMBER)
+            const FString& ParamString = UnprocessedParamStrings[I];
+            switch (InParam.Value.GetType())
             {
-                InParam.Value = Yarn::Value(FCString::Atof(*UnprocessedParamStrings[I]));
-            }
-            else if (InParam.Value.type == Yarn::Value::ValueType::BOOL)
-            {
-                InParam.Value = Yarn::Value(UnprocessedParamStrings[I].ToLower() == "true");
-            }
-            else
-            {
-                InParam.Value = Yarn::Value(TCHAR_TO_UTF8(*UnprocessedParamStrings[I]));
+            case Yarn::FValue::EValueType::Number:
+                InParam.Value = FCString::Atof(*ParamString);
+            case Yarn::FValue::EValueType::Bool:
+                InParam.Value = ParamString.ToLower() == "true";
+            case Yarn::FValue::EValueType::String:
+            default:
+                InParam.Value = ParamString;
             }
         }
         InParams.Add(InParam);
@@ -286,15 +285,15 @@ void UYarnLibraryRegistry::AddFunction(const FYSLSAction& Func)
         FYarnBlueprintParam Param{FName(InParam.Name)};
         if (InParam.Type == "boolean")
         {
-            Param.Value = Yarn::Value(InParam.DefaultValue == "true");
+            Param.Value = Yarn::FValue(InParam.DefaultValue == "true");
         }
         else if (InParam.Type == "number")
         {
-            Param.Value = Yarn::Value(FCString::Atof(*InParam.DefaultValue));
+            Param.Value = Yarn::FValue(FCString::Atof(*InParam.DefaultValue));
         }
         else
         {
-            Param.Value = Yarn::Value(TCHAR_TO_UTF8(*InParam.DefaultValue));
+            Param.Value = Yarn::FValue(TCHAR_TO_UTF8(*InParam.DefaultValue));
         }
 
         FuncDetail.InParams.Add(Param);
@@ -303,15 +302,15 @@ void UYarnLibraryRegistry::AddFunction(const FYSLSAction& Func)
     FYarnBlueprintParam Param{GYSFunctionReturnParamName};
     if (Func.ReturnType == "boolean")
     {
-        Param.Value = Yarn::Value(false);
+        Param.Value = Yarn::FValue(false);
     }
     else if (Func.ReturnType == "number")
     {
-        Param.Value = Yarn::Value(0.0f);
+        Param.Value = Yarn::FValue(0.0f);
     }
     else
     {
-        Param.Value = Yarn::Value("");
+        Param.Value = Yarn::FValue("");
     }
     FuncDetail.OutParam = Param;
 
@@ -348,15 +347,15 @@ void UYarnLibraryRegistry::AddCommand(const FYSLSAction& Cmd)
         FYarnBlueprintParam Param{FName(InParam.Name)};
         if (InParam.Type == "boolean")
         {
-            Param.Value = Yarn::Value(InParam.DefaultValue == "true");
+            Param.Value = Yarn::FValue(InParam.DefaultValue == "true");
         }
         else if (InParam.Type == "number")
         {
-            Param.Value = Yarn::Value(FCString::Atof(*InParam.DefaultValue));
+            Param.Value = Yarn::FValue(FCString::Atof(*InParam.DefaultValue));
         }
         else
         {
-            Param.Value = Yarn::Value(TCHAR_TO_UTF8(*InParam.DefaultValue));
+            Param.Value = Yarn::FValue(TCHAR_TO_UTF8(*InParam.DefaultValue));
         }
 
         CmdDetail.InParams.Add(Param);
@@ -365,15 +364,15 @@ void UYarnLibraryRegistry::AddCommand(const FYSLSAction& Cmd)
     FYarnBlueprintParam Param{GYSFunctionReturnParamName};
     if (Cmd.ReturnType == "boolean")
     {
-        Param.Value = Yarn::Value(false);
+        Param.Value = Yarn::FValue(false);
     }
     else if (Cmd.ReturnType == "number")
     {
-        Param.Value = Yarn::Value(0.0f);
+        Param.Value = Yarn::FValue(0.0f);
     }
     else
     {
-        Param.Value = Yarn::Value("");
+        Param.Value = Yarn::FValue("");
     }
     CmdDetail.OutParam = Param;
 
@@ -402,348 +401,348 @@ void UYarnLibraryRegistry::AddStdCommand(const FYarnStdLibCommand& Command)
 void UYarnLibraryRegistry::LoadStdFunctions()
 {
     AddStdFunction({
-        TEXT("Number.EqualTo"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("Number.EqualTo"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
             if (Params.Num() != 2)
             {
                 YS_WARN("Number.EqualTo called with incorrect number of parameters (expected 2).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            if (Params[0].GetType() != Yarn::Value::ValueType::NUMBER || Params[1].GetType() != Yarn::Value::ValueType::NUMBER)
+            if (Params[0].GetType() != Yarn::FValue::EValueType::Number || Params[1].GetType() != Yarn::FValue::EValueType::Number)
             {
                 YS_WARN("Number.EqualTo called with incorrect parameter types (expected NUMBER, NUMBER).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].GetNumberValue() == Params[1].GetNumberValue());
+            return Yarn::FValue(Params[0].GetValue<double>() == Params[1].GetValue<double>());
         }
     });
 
     AddStdFunction({
-        TEXT("Number.NotEqualTo"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("Number.NotEqualTo"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
             if (Params.Num() != 2)
             {
                 YS_WARN("Number.NotEqualTo called with incorrect number of parameters (expected 2).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            if (Params[0].GetType() != Yarn::Value::ValueType::NUMBER || Params[1].GetType() != Yarn::Value::ValueType::NUMBER)
+            if (Params[0].GetType() != Yarn::FValue::EValueType::Number || Params[1].GetType() != Yarn::FValue::EValueType::Number)
             {
                 YS_WARN("Number.NotEqualTo called with incorrect parameter types (expected NUMBER, NUMBER).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].GetNumberValue() != Params[1].GetNumberValue());
+            return Yarn::FValue(Params[0].GetValue<double>() != Params[1].GetValue<double>());
         }
     });
 
     AddStdFunction({
-        TEXT("Number.Add"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("Number.Add"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
             if (Params.Num() != 2)
             {
                 YS_WARN("Number.Add called with incorrect number of parameters (expected 2).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            if (Params[0].GetType() != Yarn::Value::ValueType::NUMBER || Params[1].GetType() != Yarn::Value::ValueType::NUMBER)
+            if (Params[0].GetType() != Yarn::FValue::EValueType::Number || Params[1].GetType() != Yarn::FValue::EValueType::Number)
             {
                 YS_WARN("Number.Add called with incorrect parameter types (expected NUMBER, NUMBER).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].GetNumberValue() + Params[1].GetNumberValue());
+            return Yarn::FValue(Params[0].GetValue<double>() + Params[1].GetValue<double>());
         }
     });
 
     AddStdFunction({
-        TEXT("Number.Minus"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("Number.Minus"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
             if (Params.Num() != 2)
             {
                 YS_WARN("Number.Minus called with incorrect number of parameters (expected 2).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            if (Params[0].GetType() != Yarn::Value::ValueType::NUMBER || Params[1].GetType() != Yarn::Value::ValueType::NUMBER)
+            if (Params[0].GetType() != Yarn::FValue::EValueType::Number || Params[1].GetType() != Yarn::FValue::EValueType::Number)
             {
                 YS_WARN("Number.Minus called with incorrect parameter types (expected NUMBER, NUMBER).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].GetNumberValue() - Params[1].GetNumberValue());
+            return Yarn::FValue(Params[0].GetValue<double>() - Params[1].GetValue<double>());
         }
     });
 
     AddStdFunction({
-        TEXT("Number.Divide"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("Number.Divide"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
             if (Params.Num() != 2)
             {
                 YS_WARN("Number.Divide called with incorrect number of parameters (expected 2).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            if (Params[0].GetType() != Yarn::Value::ValueType::NUMBER || Params[1].GetType() != Yarn::Value::ValueType::NUMBER)
+            if (Params[0].GetType() != Yarn::FValue::EValueType::Number || Params[1].GetType() != Yarn::FValue::EValueType::Number)
             {
                 YS_WARN("Number.Divide called with incorrect parameter types (expected NUMBER, NUMBER).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].GetNumberValue() / Params[1].GetNumberValue());
+            return Yarn::FValue(Params[0].GetValue<double>() / Params[1].GetValue<double>());
         }
     });
 
     AddStdFunction({
-        TEXT("Number.Multiply"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("Number.Multiply"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
             if (Params.Num() != 2)
             {
                 YS_WARN("Number.Multiply called with incorrect number of parameters (expected 2).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            if (Params[0].GetType() != Yarn::Value::ValueType::NUMBER || Params[1].GetType() != Yarn::Value::ValueType::NUMBER)
+            if (Params[0].GetType() != Yarn::FValue::EValueType::Number || Params[1].GetType() != Yarn::FValue::EValueType::Number)
             {
                 YS_WARN("Number.Multiply called with incorrect parameter types (expected NUMBER, NUMBER).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].GetNumberValue() * Params[1].GetNumberValue());
+            return Yarn::FValue(Params[0].GetValue<double>() * Params[1].GetValue<double>());
         }
     });
 
     AddStdFunction({
-        TEXT("Number.Modulo"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("Number.Modulo"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
             if (Params.Num() != 2)
             {
                 YS_WARN("Number.Modulo called with incorrect number of parameters (expected 2).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            if (Params[0].GetType() != Yarn::Value::ValueType::NUMBER || Params[1].GetType() != Yarn::Value::ValueType::NUMBER)
+            if (Params[0].GetType() != Yarn::FValue::EValueType::Number || Params[1].GetType() != Yarn::FValue::EValueType::Number)
             {
                 YS_WARN("Number.Modulo called with incorrect parameter types (expected NUMBER, NUMBER).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(FMath::Fmod(Params[0].GetNumberValue(), Params[1].GetNumberValue()));
+            return Yarn::FValue(FMath::Fmod(Params[0].GetValue<double>(), Params[1].GetValue<double>()));
         }
     });
 
     AddStdFunction({
-        TEXT("Number.UnaryMinus"), 1, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("Number.UnaryMinus"), 1, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
             if (Params.Num() != 1)
             {
                 YS_WARN("Number.UnaryMinus called with incorrect number of parameters (expected 1).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            if (Params[0].GetType() != Yarn::Value::ValueType::NUMBER)
+            if (Params[0].GetType() != Yarn::FValue::EValueType::Number)
             {
                 YS_WARN("Number.UnaryMinus called with incorrect parameter types (expected NUMBER).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(-Params[0].GetNumberValue());
+            return Yarn::FValue(-Params[0].GetValue<double>());
         }
     });
 
     AddStdFunction({
-        TEXT("Number.GreaterThan"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("Number.GreaterThan"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
             if (Params.Num() != 2)
             {
                 YS_WARN("Number.GreaterThan called with incorrect number of parameters (expected 2).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            if (Params[0].GetType() != Yarn::Value::ValueType::NUMBER || Params[1].GetType() != Yarn::Value::ValueType::NUMBER)
+            if (Params[0].GetType() != Yarn::FValue::EValueType::Number || Params[1].GetType() != Yarn::FValue::EValueType::Number)
             {
                 YS_WARN("Number.GreaterThan called with incorrect parameter types (expected NUMBER, NUMBER).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].GetNumberValue() > Params[1].GetNumberValue());
+            return Yarn::FValue(Params[0].GetValue<double>() > Params[1].GetValue<double>());
         }
     });
 
     AddStdFunction({
-        TEXT("Number.GreaterThanOrEqualTo"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("Number.GreaterThanOrEqualTo"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
             if (Params.Num() != 2)
             {
                 YS_WARN("Number.GreaterThanOrEqualTo called with incorrect number of parameters (expected 2).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            if (Params[0].GetType() != Yarn::Value::ValueType::NUMBER || Params[1].GetType() != Yarn::Value::ValueType::NUMBER)
+            if (Params[0].GetType() != Yarn::FValue::EValueType::Number || Params[1].GetType() != Yarn::FValue::EValueType::Number)
             {
                 YS_WARN("Number.GreaterThanOrEqualTo called with incorrect parameter types (expected NUMBER, NUMBER).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].GetNumberValue() >= Params[1].GetNumberValue());
+            return Yarn::FValue(Params[0].GetValue<double>() >= Params[1].GetValue<double>());
         }
     });
 
     AddStdFunction({
-        TEXT("Number.LessThan"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("Number.LessThan"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
             if (Params.Num() != 2)
             {
                 YS_WARN("Number.LessThan called with incorrect number of parameters (expected 2).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            if (Params[0].GetType() != Yarn::Value::ValueType::NUMBER || Params[1].GetType() != Yarn::Value::ValueType::NUMBER)
+            if (Params[0].GetType() != Yarn::FValue::EValueType::Number || Params[1].GetType() != Yarn::FValue::EValueType::Number)
             {
                 YS_WARN("Number.LessThan called with incorrect parameter types (expected NUMBER, NUMBER).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].GetNumberValue() < Params[1].GetNumberValue());
+            return Yarn::FValue(Params[0].GetValue<double>() < Params[1].GetValue<double>());
         }
     });
 
     AddStdFunction({
-        TEXT("Number.LessThanOrEqualTo"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("Number.LessThanOrEqualTo"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
             if (Params.Num() != 2)
             {
                 YS_WARN("Number.LessThanOrEqualTo called with incorrect number of parameters (expected 2).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            if (Params[0].GetType() != Yarn::Value::ValueType::NUMBER || Params[1].GetType() != Yarn::Value::ValueType::NUMBER)
+            if (Params[0].GetType() != Yarn::FValue::EValueType::Number || Params[1].GetType() != Yarn::FValue::EValueType::Number)
             {
                 YS_WARN("Number.LessThanOrEqualTo called with incorrect parameter types (expected NUMBER, NUMBER).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].GetNumberValue() <= Params[1].GetNumberValue());
+            return Yarn::FValue(Params[0].GetValue<double>() <= Params[1].GetValue<double>());
         }
     });
 
     AddStdFunction({
-        TEXT("Bool.EqualTo"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("Bool.EqualTo"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
             if (Params.Num() != 2)
             {
                 YS_WARN("Bool.EqualTo called with incorrect number of parameters (expected 2).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            if (Params[0].GetType() != Yarn::Value::ValueType::BOOL || Params[1].GetType() != Yarn::Value::ValueType::BOOL)
+            if (Params[0].GetType() != Yarn::FValue::EValueType::Bool || Params[1].GetType() != Yarn::FValue::EValueType::Bool)
             {
                 YS_WARN("Bool.EqualTo called with incorrect parameter types (expected BOOL, BOOL).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].GetBooleanValue() == Params[1].GetBooleanValue());
+            return Yarn::FValue(Params[0].GetValue<bool>() == Params[1].GetValue<bool>());
         }
     });
 
     AddStdFunction({
-        TEXT("Bool.NotEqualTo"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("Bool.NotEqualTo"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
             if (Params.Num() != 2)
             {
                 YS_WARN("Bool.NotEqualTo called with incorrect number of parameters (expected 2).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            if (Params[0].GetType() != Yarn::Value::ValueType::BOOL || Params[1].GetType() != Yarn::Value::ValueType::BOOL)
+            if (Params[0].GetType() != Yarn::FValue::EValueType::Bool || Params[1].GetType() != Yarn::FValue::EValueType::Bool)
             {
                 YS_WARN("Bool.NotEqualTo called with incorrect parameter types (expected BOOL, BOOL).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].GetBooleanValue() != Params[1].GetBooleanValue());
+            return Yarn::FValue(Params[0].GetValue<bool>() != Params[1].GetValue<bool>());
         }
     });
 
     AddStdFunction({
-        TEXT("Bool.And"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("Bool.And"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
-            if (Params.Num() != 2 || Params[0].GetType() != Yarn::Value::ValueType::BOOL || Params[1].GetType() != Yarn::Value::ValueType::BOOL)
+            if (Params.Num() != 2 || Params[0].GetType() != Yarn::FValue::EValueType::Bool || Params[1].GetType() != Yarn::FValue::EValueType::Bool)
             {
                 YS_WARN("Bool.And called with incorrect number of parameters (expected 2) or incorrect parameter types (expected BOOL, BOOL).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].GetBooleanValue() && Params[1].GetBooleanValue());
+            return Yarn::FValue(Params[0].GetValue<bool>() && Params[1].GetValue<bool>());
         }
     });
 
     AddStdFunction({
-        TEXT("Bool.Or"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("Bool.Or"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
-            if (Params.Num() != 2 || Params[0].GetType() != Yarn::Value::ValueType::BOOL || Params[1].GetType() != Yarn::Value::ValueType::BOOL)
+            if (Params.Num() != 2 || Params[0].GetType() != Yarn::FValue::EValueType::Bool || Params[1].GetType() != Yarn::FValue::EValueType::Bool)
             {
                 YS_WARN("Bool.Or called with incorrect number of parameters (expected 2) or incorrect parameter types (expected BOOL, BOOL).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].GetBooleanValue() || Params[1].GetBooleanValue());
+            return Yarn::FValue(Params[0].GetValue<bool>() || Params[1].GetValue<bool>());
         }
     });
 
     AddStdFunction({
-        TEXT("Bool.Xor"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("Bool.Xor"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
-            if (Params.Num() != 2 || Params[0].GetType() != Yarn::Value::ValueType::BOOL || Params[1].GetType() != Yarn::Value::ValueType::BOOL)
+            if (Params.Num() != 2 || Params[0].GetType() != Yarn::FValue::EValueType::Bool || Params[1].GetType() != Yarn::FValue::EValueType::Bool)
             {
                 YS_WARN("Bool.Xor called with incorrect number of parameters (expected 2) or incorrect parameter types (expected BOOL, BOOL).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].GetBooleanValue() != Params[1].GetBooleanValue());
+            return Yarn::FValue(Params[0].GetValue<bool>() != Params[1].GetValue<bool>());
         }
     });
 
     AddStdFunction({
-        TEXT("Bool.Not"), 1, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("Bool.Not"), 1, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
-            if (Params.Num() != 1 || Params[0].GetType() != Yarn::Value::ValueType::BOOL)
+            if (Params.Num() != 1 || Params[0].GetType() != Yarn::FValue::EValueType::Bool)
             {
                 YS_WARN("Bool.Not called with incorrect number of parameters (expected 1) or incorrect parameter types (expected BOOL).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(!Params[0].GetBooleanValue());
+            return Yarn::FValue(!Params[0].GetValue<bool>());
         }
     });
 
     AddStdFunction({
-        TEXT("String.EqualTo"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("String.EqualTo"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
-            if (Params.Num() != 2 || Params[0].GetType() != Yarn::Value::ValueType::STRING || Params[1].GetType() != Yarn::Value::ValueType::STRING)
+            if (Params.Num() != 2 || Params[0].GetType() != Yarn::FValue::EValueType::String || Params[1].GetType() != Yarn::FValue::EValueType::String)
             {
                 YS_WARN("String.EqualTo called with incorrect number of parameters (expected 2) or incorrect parameter types (expected STRING, STRING).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].GetStringValue() == Params[1].GetStringValue());
+            return Yarn::FValue(Params[0].GetValue<FString>() == Params[1].GetValue<FString>());
         }
     });
 
     AddStdFunction({
-        TEXT("String.NotEqualTo"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("String.NotEqualTo"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
-            if (Params.Num() != 2 || Params[0].GetType() != Yarn::Value::ValueType::STRING || Params[1].GetType() != Yarn::Value::ValueType::STRING)
+            if (Params.Num() != 2 || Params[0].GetType() != Yarn::FValue::EValueType::String || Params[1].GetType() != Yarn::FValue::EValueType::String)
             {
                 YS_WARN("String.NotEqualTo called with incorrect number of parameters (expected 2) or incorrect parameter types (expected STRING, STRING).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].GetStringValue() != Params[1].GetStringValue());
+            return Yarn::FValue(Params[0].GetValue<FString>() != Params[1].GetValue<FString>());
         }
     });
 
     AddStdFunction({
-        TEXT("String.Add"), 2, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("String.Add"), 2, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
-            if (Params.Num() != 2 || Params[0].GetType() != Yarn::Value::ValueType::STRING || Params[1].GetType() != Yarn::Value::ValueType::STRING)
+            if (Params.Num() != 2 || Params[0].GetType() != Yarn::FValue::EValueType::String || Params[1].GetType() != Yarn::FValue::EValueType::String)
             {
                 YS_WARN("String.Add called with incorrect number of parameters (expected 2) or incorrect parameter types (expected STRING, STRING).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].GetStringValue() + Params[1].GetStringValue());
+            return Yarn::FValue(Params[0].GetValue<FString>() + Params[1].GetValue<FString>());
         }
     });
 
     AddStdFunction({
-        TEXT("string"), 1, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("string"), 1, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
             if (Params.Num() != 1)
             {
                 YS_WARN("string called with incorrect number of parameters (expected 1).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].ConvertToString());
+            return Yarn::FValue(Params[0].ConvertToString());
         }
     });
 
     AddStdFunction({
-        TEXT("number"), 1, [](TArray<Yarn::Value> Params) -> Yarn::Value
+        TEXT("number"), 1, [](TArray<Yarn::FValue> Params) -> Yarn::FValue
         {
             if (Params.Num() != 1)
             {
                 YS_WARN("number called with incorrect number of parameters (expected 1).")
-                return Yarn::Value();
+                return Yarn::FValue();
             }
-            return Yarn::Value(Params[0].ConvertToNumber());
+            return Yarn::FValue(Params[0].ConvertToNumber());
         }
     });
 

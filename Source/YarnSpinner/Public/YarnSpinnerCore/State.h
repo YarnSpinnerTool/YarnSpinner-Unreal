@@ -12,7 +12,7 @@ namespace Yarn
     class YARNSPINNER_API State
     {
     public:
-        std::vector<Value> stack;
+        std::vector<FValue> stack;
         std::vector<Option> currentOptions;
 
         std::string currentNodeName;
@@ -30,10 +30,10 @@ namespace Yarn
         void PushValue(int number);
         void PushValue(bool boolean);
 
-        void PushValue(Value value);
+        void PushValue(FValue value);
 
-        Value PopValue();
-        Value PeekValue();
+        FValue PopValue();
+        FValue PeekValue();
 
         void ClearStack();
     };

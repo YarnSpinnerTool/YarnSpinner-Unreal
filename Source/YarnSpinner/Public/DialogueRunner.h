@@ -80,7 +80,7 @@ private:
     virtual void SetValue(std::string Name, std::string Value) override;
 
     virtual bool HasValue(std::string Name) override;
-    virtual Yarn::Value GetValue(std::string Name) override;
+    virtual Yarn::FValue GetValue(std::string Name) override;
 
     virtual void ClearValue(std::string Name) override;
 

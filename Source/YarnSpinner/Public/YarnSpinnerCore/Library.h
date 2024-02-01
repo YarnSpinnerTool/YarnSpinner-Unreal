@@ -10,7 +10,7 @@ namespace Yarn
 {
 
     template <typename T>
-    using YarnFunction = std::function<T(std::vector<Value>)>;
+    using YarnFunction = std::function<T(std::vector<FValue>)>;
 
     template <typename T>
     class YARNSPINNER_API FunctionInfo
@@ -20,7 +20,7 @@ namespace Yarn
         YarnFunction<T> Function;
 
         FunctionInfo();
-        FunctionInfo(int paramCount, T (*f)(std::vector<Value>));
+        FunctionInfo(int paramCount, T (*f)(std::vector<FValue>));
     };
 
     class YARNSPINNER_API Library

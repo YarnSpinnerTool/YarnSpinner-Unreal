@@ -23,13 +23,13 @@ namespace Yarn
         // storage for information about how many times a node has been visited.
         library.AddFunction<bool>(
             "visited",
-            [&variableStorage](std::vector<Value> values)
+            [&variableStorage](std::vector<FValue> values)
             {
-                std::string nodeName = values.at(0).GetStringValue();
+                std::string nodeName = TCHAR_TO_UTF8(*values.at(0).GetValue<FString>());
                 std::string visitTrackingVariable = Library::GenerateUniqueVisitedVariableForNode(nodeName);
                 if (variableStorage.HasValue(visitTrackingVariable))
                 {
-                    int visitCount = variableStorage.GetValue(visitTrackingVariable).GetNumberValue();
+                    int visitCount = variableStorage.GetValue(visitTrackingVariable).GetValue<double>();
                     return visitCount > 0;
                 }
                 else
@@ -41,13 +41,13 @@ namespace Yarn
 
         library.AddFunction<float>(
             "visited_count",
-            [&variableStorage](std::vector<Value> values)
+            [&variableStorage](std::vector<FValue> values)
             {
-                std::string nodeName = values.at(0).GetStringValue();
+                std::string nodeName = TCHAR_TO_UTF8(*values.at(0).GetValue<FString>());
                 std::string visitTrackingVariable = Library::GenerateUniqueVisitedVariableForNode(nodeName);
                 if (variableStorage.HasValue(visitTrackingVariable))
                 {
-                    int visitCount = (int)variableStorage.GetValue(visitTrackingVariable).GetNumberValue();
+                    int visitCount = (int)variableStorage.GetValue(visitTrackingVariable).GetValue<double>();
                     return visitCount;
                 }
                 else
@@ -224,7 +224,7 @@ namespace Yarn
                     for (int expressionIndex = expressionCount - 1; expressionIndex >= 0; expressionIndex--)
                     {
                         auto top = state.PopValue();
-                        std::string topAsString = top.ConvertToString();
+                        std::string topAsString = TCHAR_TO_UTF8(*top.ConvertToString());
                         substitutions.push_back(topAsString);
                     }
 
@@ -264,7 +264,7 @@ namespace Yarn
                     for (int expressionIndex = expressionCount - 1; expressionIndex >= 0; expressionIndex--)
                     {
                         auto top = state.PopValue();
-                        std::string topAsString = top.ConvertToString();
+                        std::string topAsString = TCHAR_TO_UTF8(*top.ConvertToString());
 
                         // std::string placeholder("\\{" << expressionIndex << "\\}");
                         commandText = std::regex_replace(commandText, std::regex("\\{" + std::to_string(expressionIndex) + "\\}"), topAsString);
@@ -313,7 +313,7 @@ namespace Yarn
             }
         case Yarn::Instruction_OpCode_JUMP_IF_FALSE:
             {
-                bool topOfStack = state.PeekValue().GetBooleanValue();
+                bool topOfStack = state.PeekValue().GetValue<bool>();
                 if (topOfStack == false)
                 {
                     auto label = instruction.operands(0).string_value();
@@ -330,7 +330,7 @@ namespace Yarn
         case Yarn::Instruction_OpCode_JUMP:
             {
                 // Jumps to a label whose name is on the stack.
-                auto jumpDestination = state.PeekValue().GetStringValue();
+                std::string jumpDestination = TCHAR_TO_UTF8(*state.PeekValue().GetValue<FString>());
                 state.programCounter = FindInstructionPointForLabel(jumpDestination) - 1;
                 break;
             }
@@ -355,7 +355,7 @@ namespace Yarn
                     for (int expressionIndex = expressionCount - 1; expressionIndex >= 0; expressionIndex--)
                     {
                         auto top = state.PopValue();
-                        std::string topAsString = top.ConvertToString();
+                        std::string topAsString = TCHAR_TO_UTF8(*top.ConvertToString());
                         substitutions.push_back(topAsString);
                     }
 
@@ -380,7 +380,7 @@ namespace Yarn
                     if (hasLineCondition)
                     {
                         // This option has a condition. Get it from the stack.
-                        lineConditionPassed = state.PopValue().GetBooleanValue();
+                        lineConditionPassed = state.PopValue().GetValue<bool>();
                     }
                 }
 
@@ -445,7 +445,7 @@ namespace Yarn
                 // the resulting value onto the stack.
                 auto functionName = instruction.operands(0).string_value();
 
-                auto actualParamCount = (int)state.PopValue().GetNumberValue();
+                auto actualParamCount = (int)state.PopValue().GetValue<double>();
 
                 if (!DoesFunctionExist(functionName))
                 {
@@ -462,7 +462,7 @@ namespace Yarn
                     return false;
                 }
 
-                std::vector<Value> parameters;
+                std::vector<FValue> parameters;
 
                 for (int param = actualParamCount - 1; param >= 0; param--)
                 {
@@ -498,7 +498,7 @@ namespace Yarn
                 //     return false;
                 // }
 
-                logger.Log(string_format("Function call returned \"%s\" (type: %d)", state.PeekValue().ConvertToString().c_str(), state.PeekValue().GetType()));
+                logger.Log(string_format("Function call returned \"%s\" (type: %d)", *state.PeekValue().ConvertToString(), state.PeekValue().GetType()));
 
                 break;
             }
@@ -510,7 +510,7 @@ namespace Yarn
                 if (variableStorage.HasValue(variableName))
                 {
                     // We found a value for this variable in the storage.
-                    Value v = variableStorage.GetValue(variableName);
+                    FValue v = variableStorage.GetValue(variableName);
                     state.PushValue(v);
                 }
                 else if (program.initial_values().count(variableName) > 0)
@@ -551,18 +551,18 @@ namespace Yarn
                 auto topValue = state.PeekValue();
                 auto destinationVariableName = instruction.operands(0).string_value();
 
-                logger.Log(string_format("Set %s to %s", destinationVariableName.c_str(), topValue.ConvertToString().c_str()));
+                logger.Log(string_format("Set %s to %s", destinationVariableName.c_str(), *topValue.ConvertToString()));
 
                 switch (topValue.GetType())
                 {
-                case Value::ValueType::STRING:
-                    variableStorage.SetValue(destinationVariableName, topValue.GetStringValue());
+                case FValue::EValueType::String:
+                    variableStorage.SetValue(destinationVariableName, TCHAR_TO_UTF8(*topValue.GetValue<FString>()));
                     break;
-                case Value::ValueType::NUMBER:
-                    variableStorage.SetValue(destinationVariableName, topValue.GetNumberValue());
+                case FValue::EValueType::Number:
+                    variableStorage.SetValue(destinationVariableName, static_cast<float>(topValue.GetValue<double>()));
                     break;
-                case Value::ValueType::BOOL:
-                    variableStorage.SetValue(destinationVariableName, topValue.GetBooleanValue());
+                case FValue::EValueType::Bool:
+                    variableStorage.SetValue(destinationVariableName, topValue.GetValue<bool>());
                     break;
                 default:
                     logger.Log(string_format("Invalid Yarn value type %i for variable %s", topValue.GetType(), destinationVariableName.c_str()), ILogger::ERROR);
@@ -573,7 +573,7 @@ namespace Yarn
         case Yarn::Instruction_OpCode_RUN_NODE:
             {
                 // Pop a string from the stack, and jump to a node with that name.
-                auto nodeName = state.PopValue().GetStringValue();
+                const std::string nodeName = TCHAR_TO_UTF8(*state.PopValue().GetValue<FString>());
 
                 NodeCompleteHandler(currentNode.name());
 

@@ -22,7 +22,7 @@ public:
 
     static UYarnFunctionLibrary* FromBlueprint(const UBlueprint* Blueprint);
 
-    TOptional<Yarn::Value> CallFunction(FName FunctionName, TArray<FYarnBlueprintParam> Args, TOptional<FYarnBlueprintParam> ReturnValue);
+    TOptional<Yarn::FValue> CallFunction(FName FunctionName, TArray<FYarnBlueprintParam> Args, TOptional<FYarnBlueprintParam> ReturnValue);
 
 protected:
     // Called when the game starts or when spawned

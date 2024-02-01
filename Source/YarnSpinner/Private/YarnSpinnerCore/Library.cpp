@@ -18,7 +18,7 @@ namespace Yarn
     {
     }
     template <typename T>
-    FunctionInfo<T>::FunctionInfo(int paramCount, T (*f)(std::vector<Value>))
+    FunctionInfo<T>::FunctionInfo(int paramCount, T (*f)(std::vector<FValue>))
     {
         Function = f;
         ExpectedParameterCount = paramCount;
@@ -242,146 +242,146 @@ namespace Yarn
         // Number methods
         AddFunction<bool>(
             "Number.EqualTo",
-            [](std::vector<Value> values)
+            [](std::vector<FValue> values)
             {
-                return values.at(0).GetNumberValue() == values.at(1).GetNumberValue();
+                return values.at(0).GetValue<double>() == values.at(1).GetValue<double>();
             },
             2);
 
         AddFunction<bool>(
             "Number.NotEqualTo",
-            [](std::vector<Value> values)
+            [](std::vector<FValue> values)
             {
-                return values.at(0).GetNumberValue() != values.at(1).GetNumberValue();
+                return values.at(0).GetValue<double>() != values.at(1).GetValue<double>();
             },
             2);
 
         AddFunction<float>(
             "Number.Add",
-            [](std::vector<Value> values)
+            [](std::vector<FValue> values)
             {
-                return values.at(0).GetNumberValue() + values.at(1).GetNumberValue();
+                return values.at(0).GetValue<double>() + values.at(1).GetValue<double>();
             },
             2);
 
         AddFunction<float>(
             "Number.Minus",
-            [](std::vector<Value> values)
+            [](std::vector<FValue> values)
             {
-                return values.at(0).GetNumberValue() - values.at(1).GetNumberValue();
+                return values.at(0).GetValue<double>() - values.at(1).GetValue<double>();
             },
             2);
 
         AddFunction<float>(
             "Number.Divide",
-            [](std::vector<Value> values)
+            [](std::vector<FValue> values)
             {
-                return values.at(0).GetNumberValue() / values.at(1).GetNumberValue();
+                return values.at(0).GetValue<double>() / values.at(1).GetValue<double>();
             },
             2);
 
         AddFunction<float>(
             "Number.Multiply",
-            [](std::vector<Value> values)
+            [](std::vector<FValue> values)
             {
-                return values.at(0).GetNumberValue() * values.at(1).GetNumberValue();
+                return values.at(0).GetValue<double>() * values.at(1).GetValue<double>();
             },
             2);
 
         AddFunction<float>(
             "Number.Modulo",
-            [](std::vector<Value> values)
+            [](std::vector<FValue> values)
             {
-                return (int)(values.at(0).GetNumberValue()) % (int)(values.at(1).GetNumberValue());
+                return (int)(values.at(0).GetValue<double>()) % (int)(values.at(1).GetValue<double>());
             },
             2);
 
         AddFunction<float>(
             "Number.UnaryMinus",
-            [](std::vector<Value> values)
+            [](std::vector<FValue> values)
             {
-                return -(values.at(0).GetNumberValue());
+                return -(values.at(0).GetValue<double>());
             },
             1);
 
         AddFunction<bool>(
             "Number.GreaterThan",
-            [](std::vector<Value> values)
+            [](std::vector<FValue> values)
             {
-                return values.at(0).GetNumberValue() > values.at(1).GetNumberValue();
+                return values.at(0).GetValue<double>() > values.at(1).GetValue<double>();
             },
             2);
 
         AddFunction<bool>(
             "Number.GreaterThanOrEqualTo",
-            [](std::vector<Value> values)
+            [](std::vector<FValue> values)
             {
-                return values.at(0).GetNumberValue() >= values.at(1).GetNumberValue();
+                return values.at(0).GetValue<double>() >= values.at(1).GetValue<double>();
             },
             2);
 
         AddFunction<bool>(
             "Number.LessThan",
-            [](std::vector<Value> values)
+            [](std::vector<FValue> values)
             {
-                return values.at(0).GetNumberValue() < values.at(1).GetNumberValue();
+                return values.at(0).GetValue<double>() < values.at(1).GetValue<double>();
             },
             2);
 
         AddFunction<bool>(
             "Number.LessThanOrEqualTo",
-            [](std::vector<Value> values)
+            [](std::vector<FValue> values)
             {
-                return values.at(0).GetNumberValue() <= values.at(1).GetNumberValue();
+                return values.at(0).GetValue<double>() <= values.at(1).GetValue<double>();
             },
             2);
 
         // Boolean methods
         AddFunction<bool>(
-            "Bool.EqualTo", [](std::vector<Value> values)
-            { return values.at(0).GetBooleanValue() == values.at(1).GetBooleanValue(); },
+            "Bool.EqualTo", [](std::vector<FValue> values)
+            { return values.at(0).GetValue<bool>() == values.at(1).GetValue<bool>(); },
             2);
 
         AddFunction<bool>(
-            "Bool.NotEqualTo", [](std::vector<Value> values)
-            { return values.at(0).GetBooleanValue() != values.at(1).GetBooleanValue(); },
+            "Bool.NotEqualTo", [](std::vector<FValue> values)
+            { return values.at(0).GetValue<bool>() != values.at(1).GetValue<bool>(); },
             2);
 
         AddFunction<bool>(
-            "Bool.And", [](std::vector<Value> values)
-            { return values.at(0).GetBooleanValue() && values.at(1).GetBooleanValue(); },
+            "Bool.And", [](std::vector<FValue> values)
+            { return values.at(0).GetValue<bool>() && values.at(1).GetValue<bool>(); },
             2);
 
         AddFunction<bool>(
-            "Bool.Or", [](std::vector<Value> values)
-            { return values.at(0).GetBooleanValue() || values.at(1).GetBooleanValue(); },
+            "Bool.Or", [](std::vector<FValue> values)
+            { return values.at(0).GetValue<bool>() || values.at(1).GetValue<bool>(); },
             2);
 
         AddFunction<bool>(
-            "Bool.Xor", [](std::vector<Value> values)
-            { return values.at(0).GetBooleanValue() ^ values.at(1).GetBooleanValue(); },
+            "Bool.Xor", [](std::vector<FValue> values)
+            { return values.at(0).GetValue<bool>() ^ values.at(1).GetValue<bool>(); },
             2);
 
         AddFunction<bool>(
-            "Bool.Not", [](std::vector<Value> values)
-            { return !values.at(0).GetBooleanValue(); },
+            "Bool.Not", [](std::vector<FValue> values)
+            { return !values.at(0).GetValue<bool>(); },
             1);
 
         // String functions
 
         AddFunction<bool>(
-            "String.EqualTo", [](std::vector<Value> values)
-            { return values.at(0).GetStringValue() == values.at(1).GetStringValue(); },
+            "String.EqualTo", [](std::vector<FValue> values)
+            { return values.at(0).GetValue<FString>() == values.at(1).GetValue<FString>(); },
             2);
 
         AddFunction<bool>(
-            "String.NotEqualTo", [](std::vector<Value> values)
-            { return values.at(0).GetStringValue() != values.at(1).GetStringValue(); },
+            "String.NotEqualTo", [](std::vector<FValue> values)
+            { return values.at(0).GetValue<FString>() != values.at(1).GetValue<FString>(); },
             2);
 
         AddFunction<std::string>(
-            "String.Add", [](std::vector<Value> values)
-            { return values.at(0).GetStringValue() + values.at(1).GetStringValue(); },
+            "String.Add", [](std::vector<FValue> values)
+            { return TCHAR_TO_UTF8(*(values.at(0).GetValue<FString>() + values.at(1).GetValue<FString>())); },
             2);
     }
 

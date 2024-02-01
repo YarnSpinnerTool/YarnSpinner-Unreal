@@ -19,7 +19,7 @@ struct YARNSPINNER_API FYarnBlueprintParam
 
     FName Name;
     
-    Yarn::Value Value;
+    Yarn::FValue Value;
 };
 
 
@@ -58,7 +58,7 @@ struct YARNSPINNER_API FYarnStdLibFunction
 
     FName Name;
     int32 ExpectedParamCount = 0;
-    TFunction<Yarn::Value(TArray<Yarn::Value> Params)> Function;
+    TFunction<Yarn::FValue(TArray<Yarn::FValue> Params)> Function;
 };
 
 
@@ -88,7 +88,7 @@ public:
     bool HasFunction(const FName& Name) const;
     bool HasCommand(const FName& Name) const;
     int32 GetExpectedFunctionParamCount(const FName& Name) const;
-    Yarn::Value CallFunction(const FName& Name, TArray<Yarn::Value> Parameters) const;
+    Yarn::FValue CallFunction(const FName& Name, TArray<Yarn::FValue> Parameters) const;
     void CallCommand(const FName& Name, TSoftObjectPtr<class ADialogueRunner> DialogueRunner, TArray<FString> UnprocessedParamStrings) const;
 
 private:
