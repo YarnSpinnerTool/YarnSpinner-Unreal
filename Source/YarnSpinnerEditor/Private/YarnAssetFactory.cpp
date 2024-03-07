@@ -357,7 +357,16 @@ void UYarnAssetFactory::BuildLocalizationTarget(const UYarnProject* YarnProject,
         FString LineText = FString(Pair.second.text().c_str());
         FManifestContext ManifestContext{FLocKey(LineID)};
         ManifestContext.SourceLocation = YarnProject->GetPathName();
-        LocTextHelper.AddSourceText(NamespaceKey, FLocItem(LineText), ManifestContext);
+        
+        if (LocTextHelper.AddSourceText(NamespaceKey, FLocItem(LineText), ManifestContext) != true) {
+            // An entry with this key already exists and had different text. We need to relace it.
+            TSharedRef<FManifestEntry> existingEntry = LocTextHelper.FindSourceText(NamespaceKey, ManifestContext).ToSharedRef();
+            TSharedRef<FManifestEntry> newEntry = MakeShared<FManifestEntry>(FManifestEntry(NamespaceKey, FLocItem(LineText)));
+            
+            LocTextHelper.UpdateSourceText(
+                existingEntry, newEntry
+            );
+        }
     }
 
     // Add translations to archives
@@ -412,7 +421,15 @@ void UYarnAssetFactory::BuildLocalizationTarget(const UYarnProject* YarnProject,
 
             const auto LocEntry = MakeShared<FArchiveEntry>(NamespaceKey, FLocKey(LineID), SourceText, Translation, nullptr, false);
 
-            LocTextHelper.AddTranslation(Culture, LocEntry);
+            if (LocTextHelper.AddTranslation(Culture, LocEntry) != true) {
+                // An entry with this key already exists and had different text. We need to relace it.
+                TSharedRef<FArchiveEntry> existingEntry = LocTextHelper.FindTranslation(Culture, NamespaceKey, FLocKey(LineID), nullptr).ToSharedRef();
+                
+
+                LocTextHelper.UpdateTranslation(
+                    Culture, existingEntry, LocEntry
+                );
+            }
         }
     }
 
