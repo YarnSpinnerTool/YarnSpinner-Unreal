@@ -522,10 +522,11 @@ void UYarnAssetFactory::SetLoadingPolicy(const TWeakObjectPtr<ULocalizationTarge
         FConfigFile IniFile;
         FConfigCacheIni::LoadLocalIniFile(IniFile, *LoadingPolicyConfig.DefaultConfigName, /*bIsBaseIniName*/false);
 
+        // TODO: Find function is deprecated, we should use FindSection to maintain compatibility if possible
         FConfigSection* IniSection = IniFile.Find(*LoadingPolicyConfig.SectionName);
         if (!IniSection)
         {
-            IniSection = &IniFile.Add(*LoadingPolicyConfig.SectionName);
+            IniSection = &IniFile.Add(*LoadingPolicyConfig.SectionName, FConfigSection());
         }
 
         switch (OperationToPerform)
