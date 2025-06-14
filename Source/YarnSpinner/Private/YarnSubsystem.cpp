@@ -101,7 +101,7 @@ void UYarnSubsystem::Deinitialize()
 
 void UYarnSubsystem::SetValue(std::string name, bool value)
 {
-    YS_LOG("Setting variable '%s' to '%s'", UTF8_TO_TCHAR(name.c_str()), value ? "true" : "false")
+    YS_LOG("Setting variable '%hs' to '%s'", name.c_str(), value ? TEXT("true") : TEXT("false"))
     Variables.FindOrAdd(FString(UTF8_TO_TCHAR(name.c_str()))) = Yarn::Value(value);
     LogVariables();
 }
@@ -109,7 +109,7 @@ void UYarnSubsystem::SetValue(std::string name, bool value)
 
 void UYarnSubsystem::SetValue(std::string name, float value)
 {
-    YS_LOG("Setting variable '%s' to '%f'", UTF8_TO_TCHAR(name.c_str()), value)
+    YS_LOG("Setting variable '%hs' to '%f'", name.c_str(), value)
     Variables.FindOrAdd(FString(UTF8_TO_TCHAR(name.c_str()))) = Yarn::Value(value);
     LogVariables();
 }
@@ -117,7 +117,7 @@ void UYarnSubsystem::SetValue(std::string name, float value)
 
 void UYarnSubsystem::SetValue(std::string name, std::string value)
 {
-    YS_LOG("Setting variable '%s' to '%s'", UTF8_TO_TCHAR(name.c_str()), UTF8_TO_TCHAR(value.c_str()))
+    YS_LOG("Setting variable '%hs' to '%hs'", name.c_str(), value.c_str())
     Variables.FindOrAdd(FString(UTF8_TO_TCHAR(name.c_str()))) = Yarn::Value(value);
     LogVariables();
 }

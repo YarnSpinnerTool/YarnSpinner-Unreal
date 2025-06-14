@@ -280,7 +280,7 @@ void ADialogueRunner::SelectOption(UOption* Option)
 
     VirtualMachine->SetSelectedOption(Option->OptionID);
 
-    if (bRunLinesForSelectedOptions)
+    if (bRunSelectedOptionsAsLines)
     {
         const TArray<TSoftObjectPtr<UObject>> LineAssets = YarnProject->GetLineAssets(Option->Line->LineID);
         YS_LOG_FUNC("Got %d line assets for line '%s'", LineAssets.Num(), *Option->Line->LineID.ToString())
@@ -315,21 +315,21 @@ void ADialogueRunner::Log(std::string Message, Type Severity)
 
 void ADialogueRunner::SetValue(std::string Name, bool bValue)
 {
-    YS_LOG("Setting variable %s to bool %i", UTF8_TO_TCHAR(Name.c_str()), bValue)
+    YS_LOG("Setting variable %hs to bool %i", Name.c_str(), bValue)
     YarnSubsystem()->SetValue(Name, bValue);
 }
 
 
 void ADialogueRunner::SetValue(std::string Name, float Value)
 {
-    YS_LOG("Setting variable %s to float %f", UTF8_TO_TCHAR(Name.c_str()), Value)
+    YS_LOG("Setting variable %hs to float %f", Name.c_str(), Value)
     YarnSubsystem()->SetValue(Name, Value);
 }
 
 
 void ADialogueRunner::SetValue(std::string Name, std::string Value)
 {
-    YS_LOG("Setting variable %s to string %s", UTF8_TO_TCHAR(Name.c_str()), UTF8_TO_TCHAR(Value.c_str()))
+    YS_LOG("Setting variable '%hs' to string '%hs'", Name.c_str(), Value.c_str())
     YarnSubsystem()->SetValue(Name, Value);
 }
 
@@ -377,7 +377,8 @@ void ADialogueRunner::GetDisplayTextForLine(ULine* Line, const Yarn::Line& YarnL
         return;
     }
 
-    const FText LocalisedDisplayText = FText::FromString(FTextLocalizationManager::Get().GetDisplayString({YarnProject->GetName()}, {LineID.ToString()}, nullptr).Get());
+    const FString* LocalisedString = FTextLocalizationManager::Get().GetDisplayString({YarnProject->GetName()}, {LineID.ToString()}, nullptr).Get();
+    const FText LocalisedDisplayText = (LocalisedString) ? FText::FromString(*LocalisedString) : FText::GetEmpty();
 
     const FText NonLocalisedDisplayText = FText::FromString(YarnProject->Lines[LineID]);
 
